@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import Button from "./Thumb";
 import Track from "./Track";
 import { clamp, createThumbHandler } from "./utils";
@@ -11,8 +11,7 @@ interface Props {
 const Slider: React.FC<Props> = () => {
   const [thumbPos, setThumbPos] = useState(0);
 
-  const trackRef = useRef<HTMLDivElement>(null);
-  const { current: element } = trackRef;
+  const [element, setElement] = useState<HTMLDivElement>();
 
   const handleCapture: React.MouseEventHandler = useCallback(
     element
@@ -24,7 +23,7 @@ const Slider: React.FC<Props> = () => {
   );
 
   return (
-    <Track ref={trackRef}>
+    <Track setElement={setElement}>
       <Button pos={thumbPos} onCapture={handleCapture} />
     </Track>
   );
