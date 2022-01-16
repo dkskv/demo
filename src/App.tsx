@@ -1,10 +1,10 @@
-// import './App.css';
+import Slider from "./Slider";
 
 function App() {
   return (
     // Стоит ли использовать css in js?
     <div className="App">
-      Demo
+      <Slider min={0} max={100}/>
     </div>
   );
 }

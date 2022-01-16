@@ -1,0 +1,7 @@
+.Thumb {
+    background-color: blueviolet;
+    height: 40px;
+    width: 40px;
+    position: absolute;
+    transform: translateX(-50%)
+}
