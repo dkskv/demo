@@ -1,9 +1,19 @@
-// const getRatioPosition = (min: number, max: number, x: number) =>
-//   (x - min) / (max - min);
+import { clamp, update } from "ramda";
 
-export const createThumbHandler =
-  (track: HTMLElement, callback: (pos: number) => void) =>
-  (mouseDown: Pick<MouseEvent, "preventDefault" | "target" | "pageX">) => {
+const boundsAround = (i: number, xs: number[]) =>
+  [xs[i - 1] ?? 0, xs[i + 1] ?? 1] as const;
+
+export const normalizeValues = (xs: number[]) =>
+  xs.map((x, i) => clampPosition(i, x, xs));
+
+export const clampPosition = (i: number, x: number, positions: number[]) =>
+  clamp(...boundsAround(i, positions), x);
+
+export const updatePositions = (i: number, x: number, positions: number[]) =>
+  update(i, clampPosition(i, x, positions), positions);
+
+export const handleThumbCapture =
+  (mouseDown: Pick<MouseEvent, "preventDefault" | "target" | "pageX">, track: HTMLElement, callback: (pos: number) => void) => {
     mouseDown.preventDefault();
 
     const { target: thumb, pageX: mouseX0 } = mouseDown;
@@ -21,11 +31,12 @@ export const createThumbHandler =
     });
 
     function handleMoveThumb({ pageX: mouseX }: MouseEvent) {
-      const { left: trackX1, width: trackWidth } = track.getBoundingClientRect();
+      const { left: trackX1, width: trackWidth } =
+        track.getBoundingClientRect();
 
-      const fromTrackX1 = (mouseX - trackX1) + thumbShiftX;
+      const betweenMouseAndTrackX1 = mouseX - trackX1 + thumbShiftX;
 
-      callback(fromTrackX1 / trackWidth);
+      callback(betweenMouseAndTrackX1 / trackWidth);
     }
 
     function getThumbShiftX(element: HTMLElement, clickX: number) {

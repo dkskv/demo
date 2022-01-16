@@ -1,13 +1,27 @@
-import "./index.css"
+import React, { useCallback } from "react";
+import "./index.css";
 
 interface Props {
-    pos: number;
-    onCapture: React.MouseEventHandler;
+  pos: number;
+  index: number;
+  onCapture(index: number, event: React.MouseEvent<HTMLDivElement>): void;
 }
 
-const Thumb: React.FC<Props> = ({pos, onCapture}) => {
-    return <div onMouseDown={onCapture} className="Thumb" style={{left: `${pos * 100}%`}}/>
-}
+const Thumb: React.FC<Props> = ({ index, pos, onCapture }) => {
+  const handleCapture: React.MouseEventHandler<HTMLDivElement> = useCallback(
+    (e) => {
+      onCapture(index, e);
+    },
+    [index, onCapture]
+  );
 
+  return (
+    <div
+      onMouseDown={handleCapture}
+      className="Thumb"
+      style={{ left: `${pos * 100}%` }}
+    />
+  );
+};
 
 export default Thumb;
