@@ -1,9 +1,6 @@
 // const getRatioPosition = (min: number, max: number, x: number) =>
 //   (x - min) / (max - min);
 
-export const clamp = (min: number, max: number, x: number) =>
-  Math.max(min, Math.min(max, x));
-
 export const createThumbHandler =
   (track: HTMLElement, callback: (pos: number) => void) =>
   (mouseDown: Pick<MouseEvent, "preventDefault" | "target" | "pageX">) => {

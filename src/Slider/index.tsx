@@ -1,7 +1,8 @@
 import { useCallback, useState } from "react";
 import Button from "./Thumb";
 import Track from "./Track";
-import { clamp, createThumbHandler } from "./utils";
+import { createThumbHandler } from "./utils";
+import { clamp } from "ramda";
 
 interface Props {
   min: number;
@@ -18,7 +19,7 @@ const Slider: React.FC<Props> = () => {
       ? createThumbHandler(element, (pos: number) =>
           setThumbPos(clamp(0, 1, pos))
         )
-      : () => {},
+      : () => {}, 
     [element]
   );
 
