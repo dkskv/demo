@@ -1,7 +1,9 @@
 import React, { useCallback, useState } from "react";
+import DndItem from "../DndItem";
+import { dndHandler } from "../utils/dnd";
 import Thumb from "./Thumb";
 import Track from "./Track";
-import { normalizeValues, updatePositions, handleThumbCapture } from "./utils";
+import { normalizeValues, updatePositions } from "./utils";
 
 interface Props {
   min: number;
@@ -9,11 +11,14 @@ interface Props {
 }
 
 const Slider: React.FC<Props> = () => {
+  const minRange = 0;
+  const isOverflowDisabled = false;
+
   const initial = normalizeValues([0, 0.5]);
 
   const [positions, setPositions] = useState(initial);
 
-  const [trackElement, setTrackElement] = useState<HTMLDivElement>();
+  const [trackElement, setTrackElement] = useState<HTMLDivElement | null>();
 
   const handleCapture = useCallback(
     (i: number, event: React.MouseEvent<Element>) => {
@@ -21,21 +26,19 @@ const Slider: React.FC<Props> = () => {
         return;
       }
 
-      handleThumbCapture(
-        event,
-        trackElement,
-        (p) => {
-          setPositions((positions) => updatePositions(i, p, positions));
-        },
-      );
+      dndHandler(trackElement, event, ([x]) => {
+        setPositions((positions) => updatePositions(i, x, positions));
+      });
     },
     [trackElement]
   );
 
   return (
     <Track setElement={setTrackElement}>
-      {positions.map((p, i) => (
-        <Thumb key={i} index={i} pos={p} onCapture={handleCapture} />
+      {positions.map((x, i) => (
+        <DndItem key={i} index={i} x={x} y={0} onCapture={handleCapture}>
+          <Thumb />
+        </DndItem>
       ))}
     </Track>
   );
