@@ -1,7 +1,10 @@
 import { assoc } from "ramda";
 
 interface IMouseEvent
-  extends Pick<MouseEvent, "preventDefault" | "target" | "pageX" | "pageY"> {}
+  extends Pick<
+    MouseEvent,
+    "preventDefault" | "stopPropagation" | "target" | "pageX" | "pageY"
+  > {}
 
 interface IAreaCallback {
   (name: string, p: [number, number]): void;
@@ -39,6 +42,7 @@ function dndHandler(
   callback: IItemCallback
 ) {
   mouseDown.preventDefault();
+  mouseDown.stopPropagation();
 
   document.addEventListener("mousemove", handleMoveTarget);
 
@@ -52,12 +56,10 @@ function dndHandler(
     mouseDown.pageY
   );
 
+  
   function handleMoveTarget({ pageX: mouseX, pageY: mouseY }: MouseEvent) {
-    const {
-      left: areaX0,
-      top: areaY0,
-    } = area.getBoundingClientRect();
-
+    const { left: areaX0, top: areaY0 } = area.getBoundingClientRect();
+    
     const toAreaX1 = mouseX - shiftX - areaX0;
     const toAreaY1 = mouseY - shiftY - areaY0;
 

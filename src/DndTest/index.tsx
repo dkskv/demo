@@ -5,15 +5,15 @@ import "./index.css";
 
 interface Props {}
 
-const DndTest: React.FC<Props> = () => {
-  const [[x, y], setPosition] = useState([50, 50]);
+const DndTest: React.FC<Props> = ({ children }) => {
+  const [[x, y], setPosition] = useState([350, 350]);
 
   return (
     <DndArea
       className="DndTest"
-      onPositionChange={(_, pos) => setPosition(pos)}
+      onPositionChange={(name, pos) => name === "lol" && setPosition(pos)}
     >
-      <DndItem name={"lol"} x={x} y={y}>
+      <DndItem name="lol" x={x} y={y}>
         <div
           style={{
             backgroundColor: "blueviolet",
@@ -24,6 +24,7 @@ const DndTest: React.FC<Props> = () => {
           Lol
         </div>
       </DndItem>
+      {children}
     </DndArea>
   );
 };

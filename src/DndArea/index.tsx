@@ -1,6 +1,7 @@
 import React, { useCallback, useState } from "react";
 import DndItem from "../DndItem";
 import { createDndAreaHandler } from "./utils";
+import "./index.css";
 
 interface DivProps extends React.HTMLAttributes<HTMLDivElement> {}
 
@@ -11,6 +12,7 @@ interface Props extends Omit<DivProps, "ref" | "onMouseDown"> {
 const DndArea: React.FC<Props> = ({
   children,
   onPositionChange,
+  className,
   ...restProps
 }) => {
   const [element, setElement] = useState<HTMLDivElement | null>();
@@ -24,7 +26,7 @@ const DndArea: React.FC<Props> = ({
     <div
       onMouseDown={handleCapture}
       ref={setElement}
-      style={{ position: "relative" }}
+      className={`DndArea ${className ?? ""}`}
       {...restProps}
     >
       {children}
