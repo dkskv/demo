@@ -1,4 +1,5 @@
 .DndItem {
     position: absolute;
+    cursor: pointer;
     /* transform: translate(-50%, -25%) */
 }

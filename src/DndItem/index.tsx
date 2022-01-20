@@ -1,30 +1,30 @@
-import React, { useCallback } from "react";
+import React from "react";
 import "./index.css";
 
-interface Props {
+interface IProps {
   x: number;
   y: number;
-  index: number;
-  onCapture(index: number, event: React.MouseEvent<HTMLDivElement>): void;
+  name: string;
 }
 
-const DndItem: React.FC<Props> = ({ index, x, y, onCapture, children }) => {
-  const handleCapture: React.MouseEventHandler<HTMLDivElement> = useCallback(
-    (e) => {
-      onCapture(index, e);
-    },
-    [index, onCapture]
-  );
+interface IProperties {
+  className: string
+}
 
+interface IDndItem extends React.FC<IProps>, IProperties {}
+
+const DndItem: IDndItem = ({ name, x, y, children }) => {
   return (
     <div
-      onMouseDown={handleCapture}
-      className="DndItem"
-      style={{ left: `${x * 100}%`, top: `${y * 100}%` }}
+      data-name={name}
+      className={DndItem.className}
+      style={{ left: `${x}px`, top: `${y}px` }}
     >
       {children}
     </div>
   );
 };
+
+DndItem.className = "DndItem"
 
 export default DndItem;
