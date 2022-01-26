@@ -1,36 +1,28 @@
-import { compose } from "ramda";
-import React, { useCallback, useState } from "react";
-import DndArea from "../DndArea";
-import DndItem from "../DndItem";
-import "./index.css";
-import { IState } from "./index.types";
-import { createStateUpdater, getAreaStyle, getThumbs } from "./utils";
+import React from "react";
+import { useState } from "react";
+import { useCallbackRef } from "../hooks";
+import { IPosition } from "../utils";
+import { useResize } from "./hooks";
+import { resizableStyle } from "./utils";
 
-interface Props {}
+interface IProps {
+  initialPosition: IPosition;
+}
 
-const style = {
-  backgroundColor: "blueviolet",
-  height: "40px",
-  width: "40px",
-};
+const Resizable: React.FC<IProps> = ({ initialPosition, children }) => {
+  const [element, setRef] = useCallbackRef();
 
-const Resizable: React.FC<Props> = () => {
-  const [state, setState] = useState<IState>([50, 50, 150, 150]);
+  const [position, setPosition] = useState(initialPosition);
 
-  const handleResize = useCallback(compose(setState, createStateUpdater), []);
+  const { thumbs } = useResize({ element, position, onChange: setPosition });
+
+  const child = React.Children.only(children);
 
   return (
-    <DndArea
-      className="Resizable"
-      onPositionChange={handleResize}
-      style={getAreaStyle(state)}
-    >
-      {getThumbs(state).map(({ name, position: [x, y] }) => (
-        <DndItem key={name} name={name} x={x} y={y}>
-          <div style={style}>{name}</div>
-        </DndItem>
-      ))}
-    </DndArea>
+    <div ref={setRef} style={resizableStyle(position)}>
+      {child}
+      {thumbs}
+    </div>
   );
 };
 

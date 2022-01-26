@@ -1,31 +1,23 @@
-import React, { useState } from "react";
-import DndArea from "../DndArea";
-import DndItem from "../DndItem";
+import React from "react";
 import "./index.css";
+import "../index.css";
+import Draggable from "../Draggable";
+import Resizable from "../Resizable";
 
 interface Props {}
 
-const DndTest: React.FC<Props> = ({ children }) => {
-  const [[x, y], setPosition] = useState([350, 350]);
-
+const DndTest: React.FC<Props> = () => {
   return (
-    <DndArea
-      className="DndTest"
-      onPositionChange={(name, pos) => name === "lol" && setPosition(pos)}
-    >
-      <DndItem name="lol" x={x} y={y}>
-        <div
-          style={{
-            backgroundColor: "blueviolet",
-            height: "40px",
-            width: "40px",
-          }}
-        >
-          Lol
-        </div>
-      </DndItem>
-      {children}
-    </DndArea>
+    <div className="DndTest">
+      <Draggable initialPoint={{ left: 300, top: 300 }}>
+        <div className="Thumb" />
+      </Draggable>
+      <Resizable
+        initialPosition={{ left: 50, top: 60, width: 150, height: 150 }}
+      >
+        <div className="Resizable" />
+      </Resizable>
+    </div>
   );
 };
 

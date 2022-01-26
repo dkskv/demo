@@ -5,3 +5,9 @@
     top: 50px;
     background-color: cornflowerblue;
 }
+
+.Resizable {
+    background-color: rgb(237, 100, 180);
+    height: 100%;
+    width: 100%;
+}

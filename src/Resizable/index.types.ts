@@ -1,1 +1,0 @@
-export type IState = readonly [number, number, number, number];

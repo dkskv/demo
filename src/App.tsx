@@ -1,5 +1,4 @@
 import DndTest from "./DndTest";
-import Resizable from "./Resizable";
 import Slider from "./Slider";
 
 function App() {
@@ -8,9 +7,7 @@ function App() {
     <div className="App">
       <Slider min={0} max={100} />
       <div style={{ display: "flex", gap: "20px" }}>
-        <DndTest>
-          <Resizable />
-        </DndTest>
+        <DndTest/>
       </div>
     </div>
   );
