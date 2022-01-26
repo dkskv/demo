@@ -9,11 +9,11 @@ interface Props {}
 const DndTest: React.FC<Props> = () => {
   return (
     <div className="DndTest">
-      <Draggable initialPoint={{ left: 300, top: 300 }}>
+      <Draggable initialPoint={{ x: 300, y: 300 }}>
         <div className="Thumb" />
       </Draggable>
       <Resizable
-        initialPosition={{ left: 50, top: 60, width: 150, height: 150 }}
+        initialPosition={{ x: 50, y: 60, width: 150, height: 150 }}
       >
         <div className="Resizable" />
       </Resizable>

@@ -1,4 +1,4 @@
-import { mapObjIndexed } from "ramda";
+import { draggableStyle } from "../Draggable/utils";
 import {
   getOrigin,
   IDimensions,
@@ -32,10 +32,10 @@ export function getThumbs(elementPosition: IPosition): IThumb[] {
   const { width: w, height: h } = elementPosition;
 
   return [
-    { name: ERectangleCorners.topLeft, point: { left: 0, top: 0 } },
-    { name: ERectangleCorners.topRight, point: { left: w, top: 0 } },
-    { name: ERectangleCorners.bottomRight, point: { left: w, top: h } },
-    { name: ERectangleCorners.bottomLeft, point: { left: 0, top: h } },
+    { name: ERectangleCorners.topLeft, point: { x: 0, y: 0 } },
+    { name: ERectangleCorners.topRight, point: { x: w, y: 0 } },
+    { name: ERectangleCorners.bottomRight, point: { x: w, y: h } },
+    { name: ERectangleCorners.bottomLeft, point: { x: 0, y: h } },
   ];
 }
 
@@ -46,7 +46,7 @@ export function updatePosition(
   const origin = getOrigin(prevPosition);
 
   const absolutePoint = mergeWithAdd(point, origin);
-  const { left: px, top: py } = absolutePoint;
+  const { x: px, y: py } = absolutePoint;
 
   const updatedPart = mergeCornerSides(name, {
     left: { left: px },
@@ -84,13 +84,11 @@ function mergeCornerSides<T extends Object, U extends Object>(
   }
 }
 
-// function thumbFreedomLineSegment(name: IThumKey) {}
-
 export function cornerConstraints(
   cornerName: ERectangleCorners,
   resizableDimensions: IDimensions,
   { min, max }: IDimensionsConstraints
-) {
+): IRectanglePosition {
   const { width, height } = resizableDimensions;
 
   const { width: minWidth, height: minHeight } = min;
@@ -104,6 +102,23 @@ export function cornerConstraints(
   });
 }
 
+export function pointProjection(a: IPoint, b: IPoint, c: IPoint): IPoint {
+  const ac = toRadiusVector(a, c);
+  const ab = toRadiusVector(a, b);
+
+  const t = dot(ac, ab) / dot(ab, ab);
+
+  return { x: a.x + ab.x * t, y: a.y + ab.y * t };
+}
+
+function toRadiusVector(a: IPoint, b: IPoint): IPoint {
+  return { x: b.x - a.x, y: b.y - a.y };
+}
+
+function dot(a: IPoint, b: IPoint): number {
+  return a.x * b.x + a.y * b.y;
+}
+
 function fromRectanglePosition({
   left,
   right,
@@ -111,30 +126,31 @@ function fromRectanglePosition({
   bottom,
 }: IRectanglePosition): IPosition {
   return {
-    left,
-    top,
+    x: left,
+    y: top,
     width: right - left,
     height: bottom - top,
   };
 }
 
 function toRectanglePosition({
-  left,
-  top,
+  x,
+  y,
   width,
   height,
 }: IPosition): IRectanglePosition {
   return {
-    left,
-    top,
-    right: left + width,
-    bottom: top + height,
+    left: x,
+    top: y,
+    right: x + width,
+    bottom: y + height,
   };
 }
 
 export function resizableStyle(position: IPosition) {
   return {
-    position: "absolute",
-    ...mapObjIndexed((a) => `${a}px`, position),
+    ...draggableStyle(position),
+    width: position.width,
+    height: position.height,
   } as const;
 }

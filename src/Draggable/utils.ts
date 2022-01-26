@@ -40,21 +40,21 @@ function createMoveHandler(area: HTMLElement, callback: IMoveCallback) {
     document.removeEventListener("mousemove", handleMoveTarget);
   }
   
-  const { left: areaX0, top: areaY0 } = area.getBoundingClientRect();
+  const { x: areaX0, y: areaY0 } = area.getBoundingClientRect();
 
   function handleMoveTarget({ pageX: mouseX, pageY: mouseY }: MouseEvent) {
 
-    callback({ left: mouseX - areaX0, top: mouseY - areaY0 });
+    callback({ x: mouseX - areaX0, y: mouseY - areaY0 });
   }
 }
 
 function getShift(target: HTMLElement, clickX: number, clickY: number) {
-  const { left: x, top: y } = target.getBoundingClientRect();
+  const { x, y } = target.getBoundingClientRect();
 
-  return { left: x - clickX, top: y - clickY };
+  return { x: x - clickX, y: y - clickY };
 }
 
 //
-export function draggableStyle({ left, top }: IPoint) {
-  return { position: "absolute", left: `${left}px`, top: `${top}px` } as const;
+export function draggableStyle({ x, y }: IPoint) {
+  return { position: "absolute", left: `${x}px`, top: `${y}px` } as const;
 }

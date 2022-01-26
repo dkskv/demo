@@ -14,6 +14,7 @@ import {
   getThumbs,
   IDimensionsConstraints,
   cornerConstraints,
+  pointProjection,
 } from "./utils";
 
 interface IProps<T> {
@@ -31,7 +32,7 @@ export function useResize<T extends HTMLElement>({
   onChange,
   isDrag = true,
   dimensionsConstraints = {},
-  isRateably = false,
+  isRateably = true,
 }: IProps<T>) {
   const onThumbChange = useCallback(
     (name: IThumKey, point: IPoint) => {
@@ -48,18 +49,27 @@ export function useResize<T extends HTMLElement>({
       });
 
       const clampedPoint = {
-        left: clamp(left, right, point.left),
-        top: clamp(top, bottom, point.top),
+        x: clamp(left, right, point.x),
+        y: clamp(top, bottom, point.y),
       };
 
       const nextPosition = updatePosition(
-        { name, point: clampedPoint },
+        {
+          name,
+          point: isRateably
+            ? pointProjection(
+                { x: 0, y: position.height },
+                { x: position.width, y: 0 },
+                clampedPoint
+              )
+            : clampedPoint,
+        },
         position
       );
 
       onChange(nextPosition);
     },
-    [onChange, position, dimensionsConstraints]
+    [onChange, position, dimensionsConstraints, isRateably]
   );
 
   const thumbs = useMemo(() => {

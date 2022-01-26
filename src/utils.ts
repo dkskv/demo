@@ -1,8 +1,8 @@
 import { is, mergeWith } from "ramda";
 
 export interface IPoint {
-  left: number;
-  top: number;
+  x: number;
+  y: number;
 }
 
 export interface IDimensions {
@@ -30,8 +30,8 @@ export function getDimensions({ width, height }: IPosition): IDimensions {
   return { width, height };
 }
 
-export function getOrigin({ left, top }: IPosition): IPoint {
-  return { left, top };
+export function getOrigin({ x, y }: IPosition): IPoint {
+  return { x, y };
 }
 
 export function elementPosition(element: HTMLElement): IPosition {
