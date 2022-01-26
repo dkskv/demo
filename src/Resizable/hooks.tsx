@@ -32,7 +32,7 @@ export function useResize<T extends HTMLElement>({
   onChange,
   isDrag = true,
   dimensionsConstraints = {},
-  isRateably = true,
+  isRateably = false,
 }: IProps<T>) {
   const onThumbChange = useCallback(
     (name: IThumKey, point: IPoint) => {

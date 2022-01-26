@@ -106,6 +106,7 @@ export function pointProjection(a: IPoint, b: IPoint, c: IPoint): IPoint {
   const ac = toRadiusVector(a, c);
   const ab = toRadiusVector(a, b);
 
+  // Коэффициент между [расстоянием от А до точки проекции] и [длиной вектора AB]
   const t = dot(ac, ab) / dot(ab, ab);
 
   return { x: a.x + ab.x * t, y: a.y + ab.y * t };

@@ -2,6 +2,7 @@ import { useDrag } from "../../Draggable/hooks";
 import { draggableStyle } from "../../Draggable/utils";
 import { useCallbackRef, useNamedCallback } from "../../hooks";
 import { IPoint } from "../../utils";
+import "./index.css"
 
 interface Props<T = string> {
   name: T;
@@ -17,7 +18,7 @@ const Thumb: React.FC<Props> = ({ name, onChange, point }) => {
   useDrag({ element, onChange: handleChange });
 
   return (
-    <div ref={setRef} style={draggableStyle(point)} className="Thumb"/>
+    <div ref={setRef} style={draggableStyle(point)} className="Thumb Centered"/>
   );
 };
 

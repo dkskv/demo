@@ -5,11 +5,11 @@ import { useDrag } from "./hooks";
 import "./index.css";
 import { draggableStyle } from "./utils";
 
-interface IProps {
+interface IProps extends React.HTMLAttributes<HTMLDivElement> {
   initialPoint: IPoint;
 }
 
-const Draggable: React.FC<IProps> = ({ initialPoint, children }) => {
+const Draggable: React.FC<IProps> = ({ initialPoint, children, ...restProps }) => {
   const [element, setRef] = useCallbackRef();
 
   const [point, setPoint] = useState(initialPoint);
@@ -19,7 +19,7 @@ const Draggable: React.FC<IProps> = ({ initialPoint, children }) => {
   const child = React.Children.only(children);
 
   return (
-    <div ref={setRef} style={draggableStyle(point)}>
+    <div {...restProps} ref={setRef} style={draggableStyle(point)} >
       {child}
     </div>
   );

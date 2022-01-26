@@ -5,11 +5,11 @@ import { IPosition } from "../utils";
 import { useResize } from "./hooks";
 import { resizableStyle } from "./utils";
 
-interface IProps {
+interface IProps extends React.HTMLAttributes<HTMLDivElement> {
   initialPosition: IPosition;
 }
 
-const Resizable: React.FC<IProps> = ({ initialPosition, children }) => {
+const Resizable: React.FC<IProps> = ({ initialPosition, children, ...restProps }) => {
   const [element, setRef] = useCallbackRef();
 
   const [position, setPosition] = useState(initialPosition);
@@ -19,7 +19,7 @@ const Resizable: React.FC<IProps> = ({ initialPosition, children }) => {
   const child = React.Children.only(children);
 
   return (
-    <div ref={setRef} style={resizableStyle(position)}>
+    <div {...restProps} ref={setRef} style={resizableStyle(position)}>
       {child}
       {thumbs}
     </div>
