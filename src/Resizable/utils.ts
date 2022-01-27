@@ -8,11 +8,6 @@ import {
   mergeWithAdd,
 } from "../utils";
 
-interface IThumb {
-  name: IThumKey;
-  point: IPoint;
-}
-
 const enum ERectangleSides {
   top = "top",
   bottom = "bottom",
@@ -26,48 +21,25 @@ const enum ERectangleCorners {
   bottomRight = "bottomRight",
   bottomLeft = "bottomLeft",
 }
+interface IThumb {
+  name: IThumKey;
+  point: IPoint;
+}
+
+type ILineSegment = [IPoint, IPoint];
+
+interface IRectangleSides extends Record<ERectangleSides, number> {}
 
 export type IThumKey = ERectangleCorners;
-
-export function getThumbs(elementPosition: IPosition): IThumb[] {
-  const { width: w, height: h } = elementPosition;
-
-  return [
-    { name: ERectangleCorners.topLeft, point: { x: 0, y: 0 } },
-    { name: ERectangleCorners.topRight, point: { x: w, y: 0 } },
-    { name: ERectangleCorners.bottomRight, point: { x: w, y: h } },
-    { name: ERectangleCorners.bottomLeft, point: { x: 0, y: h } },
-  ];
-}
-
-export function updatePosition(
-  { name, point }: IThumb,
-  prevPosition: IPosition
-): IPosition {
-  const origin = getOrigin(prevPosition);
-
-  const absolutePoint = mergeWithAdd(point, origin);
-  const { x: px, y: py } = absolutePoint;
-
-  const updatedPart = mergeCornerSides(name, {
-    left: { left: px },
-    right: { right: px },
-    top: { top: py },
-    bottom: { bottom: py },
-  });
-
-  return fromRectanglePosition({
-    ...toRectanglePosition(prevPosition),
-    ...updatedPart,
-  });
-}
-
 export interface IDimensionsConstraints {
   min: IDimensions;
   max: IDimensions;
 }
 
-interface IRectangleSides extends Record<ERectangleSides, number> {}
+export const defaultDimensionsConstraints = {
+  min: { width: 0, height: 0 },
+  max: { width: Infinity, height: Infinity },
+};
 
 function mergeCornerSides<T extends Object, U extends Object>(
   name: ERectangleCorners,
@@ -103,6 +75,14 @@ function cornerConstraints(
   });
 }
 
+function toRadiusVector(a: IPoint, b: IPoint): IPoint {
+  return { x: b.x - a.x, y: b.y - a.y };
+}
+
+function dot(a: IPoint, b: IPoint): number {
+  return a.x * b.x + a.y * b.y;
+}
+
 function pointProjection([a, b]: ILineSegment, c: IPoint): IPoint {
   const ac = toRadiusVector(a, c);
   const ab = toRadiusVector(a, b);
@@ -113,38 +93,7 @@ function pointProjection([a, b]: ILineSegment, c: IPoint): IPoint {
   return { x: a.x + ab.x * t, y: a.y + ab.y * t };
 }
 
-function toRadiusVector(a: IPoint, b: IPoint): IPoint {
-  return { x: b.x - a.x, y: b.y - a.y };
-}
-
-function dot(a: IPoint, b: IPoint): number {
-  return a.x * b.x + a.y * b.y;
-}
-
 const clampPointWithLine = pointProjection;
-
-export function clampCornerThumb(
-  resizableDimensions: IDimensions,
-  dimensionsConstraints: IDimensionsConstraints,
-  isRateably: boolean,
-  { name, point }: IThumb
-): IPoint {
-  const constraints = cornerConstraints(
-    name,
-    resizableDimensions,
-    dimensionsConstraints
-  );
-
-  const clampedPoint = clampPointWithRectangle(constraints, point);
-
-  if (isRateably) {
-    const diagonal = getCornerDiagonal(name, resizableDimensions);
-
-    return clampPointWithLine(diagonal, clampedPoint);
-  } else {
-    return clampedPoint;
-  }
-}
 
 function clampPointWithRectangle(
   constraints: IRectangleSides,
@@ -154,9 +103,6 @@ function clampPointWithRectangle(
 
   return { x: clamp(left, right, x), y: clamp(top, bottom, y) };
 }
-
-
-type ILineSegment = [IPoint, IPoint];
 
 function getCornerDiagonal(
   cornerName: ERectangleCorners,
@@ -206,6 +152,62 @@ function toRectanglePosition({
     right: x + width,
     bottom: y + height,
   };
+}
+
+export function getThumbs(elementPosition: IPosition): IThumb[] {
+  const { width: w, height: h } = elementPosition;
+
+  return [
+    { name: ERectangleCorners.topLeft, point: { x: 0, y: 0 } },
+    { name: ERectangleCorners.topRight, point: { x: w, y: 0 } },
+    { name: ERectangleCorners.bottomRight, point: { x: w, y: h } },
+    { name: ERectangleCorners.bottomLeft, point: { x: 0, y: h } },
+  ];
+}
+
+export function clampCornerThumb(
+  resizableDimensions: IDimensions,
+  dimensionsConstraints: IDimensionsConstraints,
+  isRateably: boolean,
+  { name, point }: IThumb
+): IPoint {
+  const constraints = cornerConstraints(
+    name,
+    resizableDimensions,
+    dimensionsConstraints
+  );
+
+  const clampedPoint = clampPointWithRectangle(constraints, point);
+
+  if (isRateably) {
+    const diagonal = getCornerDiagonal(name, resizableDimensions);
+
+    return clampPointWithLine(diagonal, clampedPoint);
+  } else {
+    return clampedPoint;
+  }
+}
+
+export function updatePosition(
+  { name, point }: IThumb,
+  prevPosition: IPosition
+): IPosition {
+  const origin = getOrigin(prevPosition);
+
+  const absolutePoint = mergeWithAdd(point, origin);
+  const { x: px, y: py } = absolutePoint;
+
+  const updatedPart = mergeCornerSides(name, {
+    left: { left: px },
+    right: { right: px },
+    top: { top: py },
+    bottom: { bottom: py },
+  });
+
+  return fromRectanglePosition({
+    ...toRectanglePosition(prevPosition),
+    ...updatedPart,
+  });
 }
 
 export function resizableStyle(position: IPosition) {

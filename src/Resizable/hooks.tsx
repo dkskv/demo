@@ -14,6 +14,7 @@ import {
   getThumbs,
   IDimensionsConstraints,
   clampCornerThumb,
+  defaultDimensionsConstraints,
 } from "./utils";
 
 interface IProps<T> {
@@ -31,18 +32,13 @@ export function useResize<T extends HTMLElement>({
   onChange,
   isDrag = true,
   dimensionsConstraints = {},
-  isRateably = true,
+  isRateably = false,
 }: IProps<T>) {
   const onThumbChange = useCallback(
     (name: IThumKey, point: IPoint /* forceRateably ? */) => {
-      const {
-        min = { width: 0, height: 0 },
-        max = { width: Infinity, height: Infinity },
-      } = dimensionsConstraints;
-
       const clampedPoint = clampCornerThumb(
         getDimensions(position),
-        { min, max },
+        { ...defaultDimensionsConstraints, ...dimensionsConstraints },
         isRateably,
         { name, point }
       );
