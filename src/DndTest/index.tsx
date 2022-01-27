@@ -13,7 +13,7 @@ const DndTest: React.FC<Props> = () => {
         <div className="Thumb" />
       </Draggable>
       <Resizable
-        initialPosition={{ x: 50, y: 60, width: 150, height: 150 }}
+        initialPosition={{ x: 50, y: 60, width: 200, height: 150 }}
       >
         <div className="Resizable" />
       </Resizable>

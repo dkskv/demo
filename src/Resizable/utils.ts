@@ -1,3 +1,4 @@
+import { clamp } from "ramda";
 import { draggableStyle } from "../Draggable/utils";
 import {
   getOrigin,
@@ -66,7 +67,7 @@ export interface IDimensionsConstraints {
   max: IDimensions;
 }
 
-interface IRectanglePosition extends Record<ERectangleSides, number> {}
+interface IRectangleSides extends Record<ERectangleSides, number> {}
 
 function mergeCornerSides<T extends Object, U extends Object>(
   name: ERectangleCorners,
@@ -84,11 +85,11 @@ function mergeCornerSides<T extends Object, U extends Object>(
   }
 }
 
-export function cornerConstraints(
+function cornerConstraints(
   cornerName: ERectangleCorners,
   resizableDimensions: IDimensions,
   { min, max }: IDimensionsConstraints
-): IRectanglePosition {
+): IRectangleSides {
   const { width, height } = resizableDimensions;
 
   const { width: minWidth, height: minHeight } = min;
@@ -102,7 +103,7 @@ export function cornerConstraints(
   });
 }
 
-export function pointProjection(a: IPoint, b: IPoint, c: IPoint): IPoint {
+function pointProjection([a, b]: ILineSegment, c: IPoint): IPoint {
   const ac = toRadiusVector(a, c);
   const ab = toRadiusVector(a, b);
 
@@ -120,12 +121,71 @@ function dot(a: IPoint, b: IPoint): number {
   return a.x * b.x + a.y * b.y;
 }
 
+const clampPointWithLine = pointProjection;
+
+export function clampCornerThumb(
+  resizableDimensions: IDimensions,
+  dimensionsConstraints: IDimensionsConstraints,
+  isRateably: boolean,
+  { name, point }: IThumb
+): IPoint {
+  const constraints = cornerConstraints(
+    name,
+    resizableDimensions,
+    dimensionsConstraints
+  );
+
+  const clampedPoint = clampPointWithRectangle(constraints, point);
+
+  if (isRateably) {
+    const diagonal = getCornerDiagonal(name, resizableDimensions);
+
+    return clampPointWithLine(diagonal, clampedPoint);
+  } else {
+    return clampedPoint;
+  }
+}
+
+function clampPointWithRectangle(
+  constraints: IRectangleSides,
+  { x, y }: IPoint
+): IPoint {
+  const { left, right, top, bottom } = constraints;
+
+  return { x: clamp(left, right, x), y: clamp(top, bottom, y) };
+}
+
+
+type ILineSegment = [IPoint, IPoint];
+
+function getCornerDiagonal(
+  cornerName: ERectangleCorners,
+  rectangleDimensions: IDimensions
+): ILineSegment {
+  const { height, width } = rectangleDimensions;
+
+  switch (cornerName) {
+    case ERectangleCorners.topLeft:
+    case ERectangleCorners.bottomRight:
+      return [
+        { x: 0, y: 0 },
+        { x: width, y: height },
+      ];
+    case ERectangleCorners.topRight:
+    case ERectangleCorners.bottomLeft:
+      return [
+        { x: 0, y: height },
+        { x: width, y: 0 },
+      ];
+  }
+}
+
 function fromRectanglePosition({
   left,
   right,
   top,
   bottom,
-}: IRectanglePosition): IPosition {
+}: IRectangleSides): IPosition {
   return {
     x: left,
     y: top,
@@ -139,7 +199,7 @@ function toRectanglePosition({
   y,
   width,
   height,
-}: IPosition): IRectanglePosition {
+}: IPosition): IRectangleSides {
   return {
     left: x,
     top: y,
