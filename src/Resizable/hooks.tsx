@@ -10,7 +10,7 @@ import {
 import Thumb from "./Thumb";
 import {
   getThumbs,
-  IDimensionsConstraints,
+  IDimensionsBounds,
   defaultDimensionsConstraints,
   type CornerThumb,
 } from "./utils";
@@ -20,7 +20,7 @@ interface IProps<T> {
   position: IPosition;
   onChange: IPositionChangeCallback;
   isDrag?: boolean;
-  dimensionsConstraints?: Partial<IDimensionsConstraints>;
+  dimensionsConstraints?: Partial<IDimensionsBounds>;
   onlyRateably?: boolean;
 }
 
@@ -34,7 +34,7 @@ export function useResize<T extends HTMLElement>({
 }: IProps<T>) {
   const onThumbChange = useCallback(
     (thumb: CornerThumb, point: IPoint, pressedKeys: IPressedKeys) => {
-      const clampedPoint = thumb.clamp(
+      const clampedPoint = thumb.clampPoint(
         getDimensions(position),
         { ...defaultDimensionsConstraints, ...dimensionsConstraints },
         onlyRateably || pressedKeys.shiftKey,
