@@ -4,14 +4,15 @@ export function useCallbackRef<T extends HTMLElement>() {
   return useState<T | null>(null);
 }
 
-export function useNamedCallback<T, U>(
-  callback: (name: T, ...args: U[]) => void,
-  name: T
-) {
+export function useBindCallbackProp<
+  P,
+  A extends any[],
+  C extends (p: P, ...args: A) => void
+>(callback: C, callbackProp: P) {
   return useCallback(
-    (...args: U[]) => {
-      callback(name, ...args);
+    (...args: A) => {
+      callback(callbackProp, ...args);
     },
-    [name, callback]
+    [callbackProp, callback]
   );
 }

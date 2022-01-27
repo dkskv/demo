@@ -5,6 +5,7 @@ import {
   IPoint,
   IPosition,
   IPositionChangeCallback,
+  IPressedKeys,
 } from "../utils";
 import Thumb from "./Thumb";
 import {
@@ -20,7 +21,7 @@ interface IProps<T> {
   onChange: IPositionChangeCallback;
   isDrag?: boolean;
   dimensionsConstraints?: Partial<IDimensionsConstraints>;
-  isRateably?: boolean;
+  onlyRateably?: boolean;
 }
 
 export function useResize<T extends HTMLElement>({
@@ -29,14 +30,14 @@ export function useResize<T extends HTMLElement>({
   onChange,
   isDrag = true,
   dimensionsConstraints = {},
-  isRateably = false,
+  onlyRateably = false,
 }: IProps<T>) {
   const onThumbChange = useCallback(
-    (thumb: CornerThumb, point: IPoint /* forceRateably ? */) => {
+    (thumb: CornerThumb, point: IPoint, pressedKeys: IPressedKeys) => {
       const clampedPoint = thumb.clamp(
         getDimensions(position),
         { ...defaultDimensionsConstraints, ...dimensionsConstraints },
-        isRateably,
+        onlyRateably || pressedKeys.shiftKey,
         point
       );
 
@@ -45,9 +46,9 @@ export function useResize<T extends HTMLElement>({
         position
       );
 
-      onChange(nextPosition);
+      onChange(nextPosition, pressedKeys);
     },
-    [onChange, position, dimensionsConstraints, isRateably]
+    [onChange, position, dimensionsConstraints, onlyRateably]
   );
 
   const thumbs = useMemo(() => {
@@ -57,7 +58,7 @@ export function useResize<T extends HTMLElement>({
       return getThumbs().map((thumb) => (
         <Thumb
           key={thumb.constructor.name}
-          callbackProps={thumb}
+          callbackProp={thumb}
           point={thumb.getInitialPoint(dimensions)}
           onChange={onThumbChange}
         />

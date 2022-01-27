@@ -21,10 +21,6 @@ const enum ERectangleCorners {
   bottomRight = "bottomRight",
   bottomLeft = "bottomLeft",
 }
-interface IThumb {
-  name: IThumKey;
-  point: IPoint;
-}
 
 type ILineSegment = [IPoint, IPoint];
 

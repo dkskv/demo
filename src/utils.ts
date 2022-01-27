@@ -12,8 +12,13 @@ export interface IDimensions {
 
 export interface IPosition extends IPoint, IDimensions {}
 
+export interface IPressedKeys {
+  shiftKey: boolean;
+  altKey: boolean;
+  ctrlKey: boolean;
+}
 export interface IPositionChangeCallback {
-  (a: IPosition): void;
+  (a: IPosition, keys: IPressedKeys): void;
 }
 
 export function mergeWithAdd<A, B>(a: A, b: B) {

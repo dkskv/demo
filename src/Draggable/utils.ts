@@ -1,18 +1,26 @@
 import {
   getDimensions,
-  IPoint,
-  IPositionChangeCallback,
   mergeWithAdd,
+  type IPoint,
+  type IPositionChangeCallback,
+  type IPressedKeys,
 } from "../utils";
 
 interface IMouseEvent
   extends Pick<
     MouseEvent,
-    "preventDefault" | "stopPropagation" | "target" | "pageX" | "pageY"
+    | "preventDefault"
+    | "stopPropagation"
+    | "target"
+    | "pageX"
+    | "pageY"
+    | "altKey"
+    | "shiftKey"
+    | "ctrlKey"
   > {}
 
 export interface IMoveCallback {
-  (a: IPoint): void;
+  (a: IPoint, keys: IPressedKeys): void;
 }
 
 export function createDragHandler(
@@ -28,10 +36,10 @@ export function createDragHandler(
 
     const shifts = getShift(element, mouseDown.pageX, mouseDown.pageY);
 
-    createMoveHandler(area, (point) => {
+    createMoveHandler(area, (point, pressedKeys) => {
       const elementOrigin = mergeWithAdd(point, shifts);
 
-      return callback({ ...elementOrigin, ...dimensions });
+      return callback({ ...elementOrigin, ...dimensions }, pressedKeys);
     });
   };
 }
@@ -47,8 +55,14 @@ function createMoveHandler(area: HTMLElement, callback: IMoveCallback) {
 
   const { x: areaX0, y: areaY0 } = area.getBoundingClientRect();
 
-  function handleMoveTarget({ pageX: mouseX, pageY: mouseY }: MouseEvent) {
-    callback({ x: mouseX - areaX0, y: mouseY - areaY0 });
+  function handleMoveTarget(event: MouseEvent) {
+    const { pageX: mouseX, pageY: mouseY } = event;
+    const { altKey, shiftKey, ctrlKey } = event;
+
+    callback(
+      { x: mouseX - areaX0, y: mouseY - areaY0 },
+      { altKey, shiftKey, ctrlKey }
+    );
   }
 }
 
