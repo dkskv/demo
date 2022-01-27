@@ -1,4 +1,3 @@
-import { clamp } from "ramda";
 import { useCallback, useMemo } from "react";
 import { useDrag } from "../Draggable/hooks";
 import {
@@ -9,12 +8,10 @@ import {
 } from "../utils";
 import Thumb from "./Thumb";
 import {
-  updatePosition,
-  IThumKey,
   getThumbs,
   IDimensionsConstraints,
-  clampCornerThumb,
   defaultDimensionsConstraints,
+  type CornerThumb,
 } from "./utils";
 
 interface IProps<T> {
@@ -35,16 +32,16 @@ export function useResize<T extends HTMLElement>({
   isRateably = false,
 }: IProps<T>) {
   const onThumbChange = useCallback(
-    (name: IThumKey, point: IPoint /* forceRateably ? */) => {
-      const clampedPoint = clampCornerThumb(
+    (thumb: CornerThumb, point: IPoint /* forceRateably ? */) => {
+      const clampedPoint = thumb.clamp(
         getDimensions(position),
         { ...defaultDimensionsConstraints, ...dimensionsConstraints },
         isRateably,
-        { name, point }
+        point
       );
 
-      const nextPosition = updatePosition(
-        { name, point: clampedPoint },
+      const nextPosition = thumb.updateRectanglePosition(
+        clampedPoint,
         position
       );
 
@@ -55,8 +52,15 @@ export function useResize<T extends HTMLElement>({
 
   const thumbs = useMemo(() => {
     if (element) {
-      return getThumbs(position).map(({ name, point }) => (
-        <Thumb key={name} name={name} point={point} onChange={onThumbChange} />
+      const dimensions = getDimensions(position);
+
+      return getThumbs().map((thumb) => (
+        <Thumb
+          key={thumb.constructor.name}
+          callbackProps={thumb}
+          point={thumb.getInitialPoint(dimensions)}
+          onChange={onThumbChange}
+        />
       ));
     }
   }, [element, position, onThumbChange]);

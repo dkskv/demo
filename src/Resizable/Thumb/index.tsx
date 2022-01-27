@@ -4,14 +4,15 @@ import { useCallbackRef, useNamedCallback } from "../../hooks";
 import { IPoint } from "../../utils";
 import "./index.css"
 
-interface Props<T = string> {
-  name: T;
+interface Props<T = unknown> {
+  callbackProps: T;
   onChange(name: T, origin: IPoint): void;
   point: IPoint;
 }
 
-const Thumb: React.FC<Props> = ({ name, onChange, point }) => {
-  const handleChange = useNamedCallback(onChange, name);
+const Thumb: React.FC<Props> = ({ callbackProps, onChange, point }) => {
+  // todo: переименовать хук
+  const handleChange = useNamedCallback(onChange, callbackProps);
 
   const [element, setRef] = useCallbackRef();
 

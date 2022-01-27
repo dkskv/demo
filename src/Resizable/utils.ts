@@ -41,38 +41,179 @@ export const defaultDimensionsConstraints = {
   max: { width: Infinity, height: Infinity },
 };
 
-function mergeCornerSides<T extends Object, U extends Object>(
-  name: ERectangleCorners,
-  { top, bottom, right, left }: { top: T; bottom: T; right: U; left: U }
-) {
-  switch (name) {
-    case ERectangleCorners.topLeft:
-      return { ...top, ...left };
-    case ERectangleCorners.topRight:
-      return { ...top, ...right };
-    case ERectangleCorners.bottomRight:
-      return { ...bottom, ...right };
-    case ERectangleCorners.bottomLeft:
-      return { ...bottom, ...left };
+export abstract class CornerThumb {
+  public abstract getInitialPoint(dimensions: IDimensions): IPoint;
+
+  private getConstraints(
+    resizableDimensions: IDimensions,
+    { min, max }: IDimensionsConstraints
+  ): IRectangleSides {
+    const { width, height } = resizableDimensions;
+
+    const { width: minWidth, height: minHeight } = min;
+    const { width: maxWidth, height: maxHeight } = max;
+
+    // Думаю создать функцию...
+    return this.mergeSides({
+      left: { left: width - maxWidth, right: width - minWidth },
+      right: { left: minWidth, right: maxWidth },
+      top: { top: height - maxHeight, bottom: height - minHeight },
+      bottom: { top: minHeight, bottom: maxHeight },
+    });
+  }
+
+  protected abstract mergeSides<T extends Object, U extends Object>({
+    top,
+    bottom,
+    right,
+    left,
+  }: {
+    top: T;
+    bottom: T;
+    right: U;
+    left: U;
+  }): T & U;
+
+  protected abstract getCrossingDiagonal(
+    rectangleDimensions: IDimensions
+  ): ILineSegment;
+
+  public clamp(
+    currentDimensions: IDimensions,
+    dimensionsConstraints: IDimensionsConstraints,
+    isRateably: boolean,
+    point: IPoint
+  ): IPoint {
+    const constraints = this.getConstraints(
+      currentDimensions,
+      dimensionsConstraints
+    );
+
+    const clampedPoint = clampPointWithRectangle(constraints, point);
+
+    if (isRateably) {
+      const diagonal = this.getCrossingDiagonal(currentDimensions);
+
+      return clampPointWithLine(diagonal, clampedPoint);
+    } else {
+      return clampedPoint;
+    }
+  }
+
+  public updateRectanglePosition(
+    point: IPoint,
+    prevPosition: IPosition
+  ): IPosition {
+    const origin = getOrigin(prevPosition);
+
+    const absolutePoint = mergeWithAdd(point, origin);
+    const { x: px, y: py } = absolutePoint;
+
+    const updatedPart = this.mergeSides({
+      left: { left: px },
+      right: { right: px },
+      top: { top: py },
+      bottom: { bottom: py },
+    });
+
+    return fromRectanglePosition({
+      ...toRectanglePosition(prevPosition),
+      ...updatedPart,
+    });
   }
 }
 
-function cornerConstraints(
-  cornerName: ERectangleCorners,
-  resizableDimensions: IDimensions,
-  { min, max }: IDimensionsConstraints
-): IRectangleSides {
-  const { width, height } = resizableDimensions;
+class LeftTopThumb extends CornerThumb {
+  public getInitialPoint() {
+    return { x: 0, y: 0 };
+  }
 
-  const { width: minWidth, height: minHeight } = min;
-  const { width: maxWidth, height: maxHeight } = max;
+  protected getCrossingDiagonal(dimensions: IDimensions) {
+    return rectangleDiagonals(dimensions).descent;
+  }
 
-  return mergeCornerSides(cornerName, {
-    left: { left: width - maxWidth, right: width - minWidth },
-    right: { left: minWidth, right: maxWidth },
-    top: { top: height - maxHeight, bottom: height - minHeight },
-    bottom: { top: minHeight, bottom: maxHeight },
-  });
+  protected mergeSides<T extends Object, U extends Object>({
+    top,
+    left,
+  }: {
+    top: T;
+    left: U;
+  }) {
+    return { ...left, ...top };
+  }
+}
+
+class RightTopThumb extends CornerThumb {
+  public getInitialPoint({ width }: IDimensions) {
+    return { x: width, y: 0 };
+  }
+
+  protected getCrossingDiagonal(dimensions: IDimensions) {
+    return rectangleDiagonals(dimensions).ascent;
+  }
+
+  protected mergeSides<T extends Object, U extends Object>({
+    top,
+    right,
+  }: {
+    top: T;
+    right: U;
+  }) {
+    return { ...right, ...top };
+  }
+}
+
+class RightBottomThumb extends CornerThumb {
+  public getInitialPoint({ width, height }: IDimensions) {
+    return { x: width, y: height };
+  }
+
+  protected getCrossingDiagonal(dimensions: IDimensions) {
+    return rectangleDiagonals(dimensions).descent;
+  }
+
+  protected mergeSides<T extends Object, U extends Object>({
+    bottom,
+    right,
+  }: {
+    bottom: T;
+    right: U;
+  }) {
+    return { ...right, ...bottom };
+  }
+}
+
+class LeftBottomThumb extends CornerThumb {
+  public getInitialPoint({ height }: IDimensions) {
+    return { x: 0, y: height };
+  }
+
+  protected getCrossingDiagonal(dimensions: IDimensions) {
+    return rectangleDiagonals(dimensions).ascent;
+  }
+
+  protected mergeSides<T extends Object, U extends Object>({
+    bottom,
+    left,
+  }: {
+    bottom: T;
+    left: U;
+  }) {
+    return { ...left, ...bottom };
+  }
+}
+
+function rectangleDiagonals({ width, height }: IDimensions) {
+  return {
+    ascent: [
+      { x: 0, y: height },
+      { x: width, y: 0 },
+    ] as ILineSegment,
+    descent: [
+      { x: 0, y: 0 },
+      { x: width, y: height },
+    ] as ILineSegment,
+  };
 }
 
 function toRadiusVector(a: IPoint, b: IPoint): IPoint {
@@ -104,28 +245,6 @@ function clampPointWithRectangle(
   return { x: clamp(left, right, x), y: clamp(top, bottom, y) };
 }
 
-function getCornerDiagonal(
-  cornerName: ERectangleCorners,
-  rectangleDimensions: IDimensions
-): ILineSegment {
-  const { height, width } = rectangleDimensions;
-
-  switch (cornerName) {
-    case ERectangleCorners.topLeft:
-    case ERectangleCorners.bottomRight:
-      return [
-        { x: 0, y: 0 },
-        { x: width, y: height },
-      ];
-    case ERectangleCorners.topRight:
-    case ERectangleCorners.bottomLeft:
-      return [
-        { x: 0, y: height },
-        { x: width, y: 0 },
-      ];
-  }
-}
-
 function fromRectanglePosition({
   left,
   right,
@@ -154,60 +273,13 @@ function toRectanglePosition({
   };
 }
 
-export function getThumbs(elementPosition: IPosition): IThumb[] {
-  const { width: w, height: h } = elementPosition;
-
+export function getThumbs(): CornerThumb[] {
   return [
-    { name: ERectangleCorners.topLeft, point: { x: 0, y: 0 } },
-    { name: ERectangleCorners.topRight, point: { x: w, y: 0 } },
-    { name: ERectangleCorners.bottomRight, point: { x: w, y: h } },
-    { name: ERectangleCorners.bottomLeft, point: { x: 0, y: h } },
+    new LeftTopThumb(),
+    new RightTopThumb(),
+    new RightBottomThumb(),
+    new LeftBottomThumb(),
   ];
-}
-
-export function clampCornerThumb(
-  resizableDimensions: IDimensions,
-  dimensionsConstraints: IDimensionsConstraints,
-  isRateably: boolean,
-  { name, point }: IThumb
-): IPoint {
-  const constraints = cornerConstraints(
-    name,
-    resizableDimensions,
-    dimensionsConstraints
-  );
-
-  const clampedPoint = clampPointWithRectangle(constraints, point);
-
-  if (isRateably) {
-    const diagonal = getCornerDiagonal(name, resizableDimensions);
-
-    return clampPointWithLine(diagonal, clampedPoint);
-  } else {
-    return clampedPoint;
-  }
-}
-
-export function updatePosition(
-  { name, point }: IThumb,
-  prevPosition: IPosition
-): IPosition {
-  const origin = getOrigin(prevPosition);
-
-  const absolutePoint = mergeWithAdd(point, origin);
-  const { x: px, y: py } = absolutePoint;
-
-  const updatedPart = mergeCornerSides(name, {
-    left: { left: px },
-    right: { right: px },
-    top: { top: py },
-    bottom: { bottom: py },
-  });
-
-  return fromRectanglePosition({
-    ...toRectanglePosition(prevPosition),
-    ...updatedPart,
-  });
 }
 
 export function resizableStyle(position: IPosition) {
