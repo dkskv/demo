@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useCallbackRef } from "../hooks";
-import { IPoint } from "../utils";
+import { type IPoint } from "../utils/geometry";
 import { useDrag } from "./hooks";
 import "./index.css";
 import { draggableStyle } from "./utils";

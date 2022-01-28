@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { IPositionChangeCallback } from "../utils";
+import { IPositionChangeCallback } from "../utils/common";
 import { createDragHandler } from "./utils";
 
 interface IProps<T> {

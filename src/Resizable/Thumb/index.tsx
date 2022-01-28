@@ -1,7 +1,8 @@
 import { useDrag } from "../../Draggable/hooks";
 import { draggableStyle } from "../../Draggable/utils";
 import { useCallbackRef, useBindCallbackProp } from "../../hooks";
-import { IPoint, IPressedKeys } from "../../utils";
+import { type IPressedKeys } from "../../utils/common";
+import { type IPoint } from "../../utils/geometry";
 import "./index.css";
 
 interface Props<T = unknown> {

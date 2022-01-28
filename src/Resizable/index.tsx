@@ -1,7 +1,7 @@
 import React from "react";
 import { useState } from "react";
 import { useCallbackRef } from "../hooks";
-import { IPosition } from "../utils";
+import { IPosition } from "../utils/geometry";
 import { useResize } from "./hooks";
 import { resizableStyle } from "./utils";
 

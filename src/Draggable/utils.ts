@@ -1,10 +1,9 @@
 import {
-  getDimensions,
   mergeWithAdd,
-  type IPoint,
   type IPositionChangeCallback,
   type IPressedKeys,
-} from "../utils";
+} from "../utils/common";
+import { getDimensions, type IPoint } from "../utils/geometry";
 
 interface IMouseEvent
   extends Pick<

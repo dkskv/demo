@@ -1,26 +1,21 @@
 import { useCallback, useMemo } from "react";
 import { useDrag } from "../Draggable/hooks";
 import {
-  getDimensions,
-  IPoint,
-  IPosition,
-  IPositionChangeCallback,
-  IPressedKeys,
-} from "../utils";
-import Thumb from "./Thumb";
-import {
-  getThumbs,
-  IDimensionsBounds,
-  defaultDimensionsConstraints,
-  type CornerThumb,
-} from "./utils";
+  type IPositionChangeCallback,
+  type IPressedKeys,
+} from "../utils/common";
+import { getDimensions, IPoint, IPosition } from "../utils/geometry";
+import ThumbComponent from "./Thumb";
+import { defaultDimensionsBounds, getThumbs } from "./utils";
+import { type IDimensionsBounds } from "./utils/geometry";
+import { type Thumb } from "./utils/Thumb";
 
 interface IProps<T> {
   element: T | null;
   position: IPosition;
   onChange: IPositionChangeCallback;
   isDrag?: boolean;
-  dimensionsConstraints?: Partial<IDimensionsBounds>;
+  dimensionsBounds?: Partial<IDimensionsBounds>;
   onlyRateably?: boolean;
 }
 
@@ -29,26 +24,26 @@ export function useResize<T extends HTMLElement>({
   position,
   onChange,
   isDrag = true,
-  dimensionsConstraints = {},
+  dimensionsBounds,
   onlyRateably = false,
 }: IProps<T>) {
   const onThumbChange = useCallback(
-    (thumb: CornerThumb, point: IPoint, pressedKeys: IPressedKeys) => {
-      const clampedPoint = thumb.clampPoint(
-        getDimensions(position),
-        { ...defaultDimensionsConstraints, ...dimensionsConstraints },
-        onlyRateably || pressedKeys.shiftKey,
+    (thumb: Thumb, point: IPoint, pressedKeys: IPressedKeys) => {
+      const nextPosition = thumb.updateBoxPosition(
+        {
+          boxPosition: position,
+          dimensionsBounds: {
+            ...defaultDimensionsBounds,
+            ...(dimensionsBounds ?? {}),
+          },
+          isRateably: onlyRateably || pressedKeys.shiftKey,
+        },
         point
-      );
-
-      const nextPosition = thumb.updateRectanglePosition(
-        clampedPoint,
-        position
       );
 
       onChange(nextPosition, pressedKeys);
     },
-    [onChange, position, dimensionsConstraints, onlyRateably]
+    [onChange, position, dimensionsBounds, onlyRateably]
   );
 
   const thumbs = useMemo(() => {
@@ -56,8 +51,8 @@ export function useResize<T extends HTMLElement>({
       const dimensions = getDimensions(position);
 
       return getThumbs().map((thumb) => (
-        <Thumb
-          key={thumb.constructor.name}
+        <ThumbComponent
+          key={thumb.key}
           callbackProp={thumb}
           point={thumb.getInitialPoint(dimensions)}
           onChange={onThumbChange}
