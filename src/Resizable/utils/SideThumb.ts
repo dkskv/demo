@@ -3,9 +3,8 @@ import {
   getAdjacentSides,
   getNormalAxisBySide,
   getBoxBounds,
-  getSidesBounds,
 } from "./geometry";
-import { type IClampParams, Thumb } from "./Thumb";
+import { Thumb } from "./Thumb";
 
 export class SideThumb extends Thumb {
   private readonly dependentSide: EBoxSides;
@@ -15,22 +14,14 @@ export class SideThumb extends Thumb {
     this.dependentSide = dependentSide;
   }
 
-  public getInitialPoint(dimensions: IDimensions): IPoint {
+  public getRelativePoint(dimensions: IDimensions): IPoint {
     const boxBounds = getBoxBounds(dimensions);
     const [s1, s2] = getAdjacentSides(this.dependentSide);
 
     return {
+      ...{ x: 0, y: 0 }, // для типизации
       [getNormalAxisBySide(this.dependentSide)]: boxBounds[this.dependentSide],
       [getNormalAxisBySide(s1)]: (boxBounds[s1] + boxBounds[s2]) / 2,
-    } as unknown as IPoint;
-  }
-
-  protected clampPoint(
-    { boxDimensions, dimensionsBounds }: IClampParams,
-    point: IPoint
-  ): IPoint {
-    const sidesBounds = getSidesBounds(boxDimensions, dimensionsBounds);
-
-    return point;
+    } as IPoint;
   }
 }

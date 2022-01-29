@@ -1,4 +1,3 @@
-import { mergeAll } from "ramda";
 import {
   EBoxSides,
   type ILineSegment,
@@ -7,12 +6,8 @@ import {
 } from "../../utils/geometry";
 import {
   clampPointWithLine,
-  clampPointWithBox,
   getOppositeSide,
   getBoxBounds,
-  getSidesBounds,
-  type IDimensionsBounds,
-  type IBoxBounds,
 } from "./geometry";
 import { type IClampParams, Thumb } from "./Thumb";
 
@@ -22,7 +17,7 @@ type ISides = [
 ];
 
 export class CornerThumb extends Thumb<ISides> {
-  private static getInitialPoint(
+  private static getRelativePoint(
     [xSide, ySide]: Readonly<ISides>,
     dimensions: IDimensions
   ): IPoint {
@@ -31,19 +26,8 @@ export class CornerThumb extends Thumb<ISides> {
     return { x: bounds[xSide], y: bounds[ySide] } as IPoint;
   }
 
-  public getInitialPoint(dimensions: IDimensions): IPoint {
-    return CornerThumb.getInitialPoint(this.dependentSides, dimensions);
-  }
-
-  private getBoundingBox(
-    sidesDimensions: IDimensions,
-    dimensionsBounds: IDimensionsBounds
-  ) {
-    const sidesBounds = getSidesBounds(sidesDimensions, dimensionsBounds);
-
-    return mergeAll(
-      this.dependentSides.map((side) => sidesBounds[side])
-    ) as IBoxBounds;
+  public getRelativePoint(dimensions: IDimensions): IPoint {
+    return CornerThumb.getRelativePoint(this.dependentSides, dimensions);
   }
 
   private getCrossingDiagonal(dimensions: IDimensions) {
@@ -51,24 +35,22 @@ export class CornerThumb extends Thumb<ISides> {
     const oppositeSides = [getOppositeSide(a), getOppositeSide(b)] as const;
 
     return [
-      this.getInitialPoint(dimensions),
-      CornerThumb.getInitialPoint(oppositeSides, dimensions),
+      this.getRelativePoint(dimensions),
+      CornerThumb.getRelativePoint(oppositeSides, dimensions),
     ] as ILineSegment;
   }
 
-  protected clampPoint(
-    { boxDimensions, dimensionsBounds, isRateably }: IClampParams,
-    point: IPoint
-  ): IPoint {
-    const boundingBox = this.getBoundingBox(boxDimensions, dimensionsBounds);
-    const boxedPoint = clampPointWithBox(boundingBox, point);
+  protected clampPoint(params: IClampParams, point: IPoint): IPoint {
+    const clampedPoint = super.clampPoint(params, point);
+
+    const { isRateably, boxDimensions } = params;
 
     if (isRateably) {
       const diagonal = this.getCrossingDiagonal(boxDimensions);
 
-      return clampPointWithLine(diagonal, boxedPoint);
+      return clampPointWithLine(diagonal, clampedPoint);
     } else {
-      return boxedPoint;
+      return clampedPoint;
     }
   }
 }

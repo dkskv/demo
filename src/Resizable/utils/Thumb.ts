@@ -1,4 +1,4 @@
-import { mergeAll } from "ramda";
+import { clamp, mergeAll } from "ramda";
 import { mergeWithAdd } from "../../utils/common";
 import {
   EBoxSides,
@@ -12,6 +12,7 @@ import {
   getNormalAxisBySide,
   BoxBoundsConverter,
   type IDimensionsBounds,
+  getSidesBounds,
 } from "./geometry";
 
 export interface IClampParams {
@@ -27,9 +28,26 @@ interface IUpdateParams extends Omit<IClampParams, "boxDimensions"> {
 export abstract class Thumb<S extends EBoxSides[] = EBoxSides[]> {
   constructor(protected readonly dependentSides: Readonly<S>) {}
 
-  protected abstract clampPoint(params: IClampParams, point: IPoint): IPoint;
+  protected clampPoint(
+    { boxDimensions, dimensionsBounds }: IClampParams,
+    point: IPoint
+  ): IPoint {
+    const sidesBounds = getSidesBounds(boxDimensions, dimensionsBounds);
 
-  public abstract getInitialPoint(dimensions: IDimensions): IPoint;
+    return {
+      ...point, 
+      ...mergeAll(
+        this.dependentSides.map((side) => {
+          const { min, max } = sidesBounds[side];
+          const axis = getNormalAxisBySide(side);
+
+          return { [axis]: clamp(min, max, point[axis]) };
+        })
+      ),
+    };
+  }
+
+  public abstract getRelativePoint(dimensions: IDimensions): IPoint;
 
   public get key() {
     return this.dependentSides.join("-");
@@ -46,9 +64,6 @@ export abstract class Thumb<S extends EBoxSides[] = EBoxSides[]> {
       point
     );
     const absoluteUpdatedPoint = mergeWithAdd(updatedPoint, origin);
-
-    // const { x: px, y: py } = absolutePoint;
-    // const updatedPart = pick(this.dependentSides, {left: px, right: px, top: py, bottom: py, });
 
     const updatedPart = mergeAll(
       this.dependentSides.map((side) => ({

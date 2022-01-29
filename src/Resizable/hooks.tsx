@@ -54,7 +54,7 @@ export function useResize<T extends HTMLElement>({
         <ThumbComponent
           key={thumb.key}
           callbackProp={thumb}
-          point={thumb.getInitialPoint(dimensions)}
+          point={thumb.getRelativePoint(dimensions)}
           onChange={onThumbChange}
         />
       ));

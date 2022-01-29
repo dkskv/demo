@@ -1,5 +1,10 @@
-import { clamp, nth } from "ramda";
-import { EBoxSides, IDimensions, IPoint, IPosition, pointProjection } from "../../utils/geometry";
+import { nth } from "ramda";
+import {
+  EBoxSides,
+  type IDimensions,
+  type IPosition,
+  pointProjection,
+} from "../../utils/geometry";
 
 export interface IBoxBounds extends Record<EBoxSides, number> {}
 
@@ -43,21 +48,20 @@ export const getNormalAxisBySide = (() => {
 })();
 
 export function getSidesBounds(
-  sidesDimensions: IDimensions,
+  boxDimensions: IDimensions,
   dimensionsBounds: IDimensionsBounds
 ) {
-  const { width: w, height: h } = sidesDimensions;
-
+  const { width: w, height: h } = boxDimensions;
   const {
     min: { width: minW, height: minH },
     max: { width: maxW, height: maxH },
   } = dimensionsBounds;
 
   return {
-    left: { left: w - maxW, right: w - minW },
-    right: { left: minW, right: maxW },
-    top: { top: h - maxH, bottom: h - minH },
-    bottom: { top: minH, bottom: maxH },
+    left: { min: w - maxW, max: w - minW },
+    right: { min: minW, max: maxW },
+    top: { min: h - maxH, max: h - minH },
+    bottom: { min: minH, max: maxH },
   };
 }
 
@@ -75,15 +79,6 @@ export function getBoxBounds({ width, height }: IDimensions) {
 }
 
 export const clampPointWithLine = pointProjection;
-
-export function clampPointWithBox(
-  constraints: IBoxBounds,
-  { x, y }: IPoint
-): IPoint {
-  const { left, right, top, bottom } = constraints;
-
-  return { x: clamp(left, right, x), y: clamp(top, bottom, y) };
-}
 
 export const BoxBoundsConverter = {
   from({ left, right, top, bottom }: IBoxBounds): IPosition {
