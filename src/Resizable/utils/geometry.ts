@@ -1,50 +1,40 @@
-import { nth } from "ramda";
+import { CircularList } from "../../utils/collections";
 import {
-  EBoxSides,
+  EBoxSide,
   type IDimensions,
   type IPosition,
   pointProjection,
 } from "../../utils/geometry";
 
-export interface IBoxBounds extends Record<EBoxSides, number> {}
+export interface IBoxBounds extends Record<EBoxSide, number> {}
 
 export interface IDimensionsBounds {
   min: IDimensions;
   max: IDimensions;
 }
 
-class CircularList<T> {
-  constructor(private elements: T[]) {}
-
-  public getByOffset(from: T, offset: number) {
-    const i = this.elements.indexOf(from);
-
-    if (~i) {
-      return nth((i + offset) % this.elements.length, this.elements)!;
-    }
-
-    return from;
-  }
-}
-
-const sidesCircularList = new CircularList([
-  EBoxSides.left,
-  EBoxSides.top,
-  EBoxSides.right,
-  EBoxSides.bottom,
+const sides = new CircularList([
+  EBoxSide.left,
+  EBoxSide.top,
+  EBoxSide.right,
+  EBoxSide.bottom,
 ]);
 
-export function getAdjacentSides(side: EBoxSides) {
+export function getAdjacentSides(side: EBoxSide) {
   return [
-    sidesCircularList.getByOffset(side, -1),
-    sidesCircularList.getByOffset(side, 1),
-  ];
+    sides.nIndexesFrom(-1, side),
+    sides.nIndexesFrom(1, side),
+  ] as const;
+}
+
+export function getOppositeSide<T extends EBoxSide>(side: T) {
+  return sides.nIndexesFrom(2, side) as T;
 }
 
 export const getNormalAxisBySide = (() => {
   const axises = { left: "x", right: "x", top: "y", bottom: "y" } as const;
 
-  return (side: EBoxSides) => axises[side];
+  return (side: EBoxSide) => axises[side];
 })();
 
 export function getSidesBounds(
@@ -63,10 +53,6 @@ export function getSidesBounds(
     top: { min: h - maxH, max: h - minH },
     bottom: { min: minH, max: maxH },
   };
-}
-
-export function getOppositeSide<T extends EBoxSides>(side: T) {
-  return sidesCircularList.getByOffset(side, 2) as T;
 }
 
 export function getBoxBounds({ width, height }: IDimensions) {

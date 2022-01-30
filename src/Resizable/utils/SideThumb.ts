@@ -1,4 +1,4 @@
-import { EBoxSides, type IDimensions, type IPoint } from "../../utils/geometry";
+import { EBoxSide, type IDimensions, type IPoint } from "../../utils/geometry";
 import {
   getAdjacentSides,
   getNormalAxisBySide,
@@ -7,9 +7,9 @@ import {
 import { Thumb } from "./Thumb";
 
 export class SideThumb extends Thumb {
-  private readonly dependentSide: EBoxSides;
+  private readonly dependentSide: EBoxSide;
 
-  constructor(dependentSide: EBoxSides) {
+  constructor(dependentSide: EBoxSide) {
     super([dependentSide]);
     this.dependentSide = dependentSide;
   }

@@ -1,37 +1,42 @@
+import { is, xprod } from "ramda";
 import { draggableStyle } from "../../Draggable/utils";
-import { EBoxSides, type IPosition } from "../../utils/geometry";
-import { CornerThumb } from "./CornerThumb";
+import { EBoxSide, type IPosition } from "../../utils/geometry";
+import { CornerThumb, ICornerSides } from "./CornerThumb";
+import { IDimensionsBounds } from "./geometry";
 import { SideThumb } from "./SideThumb";
 import { type Thumb } from "./Thumb";
 
-export function getThumbs(): Thumb[] {
-    const l = EBoxSides.left;
-    const r = EBoxSides.right;
-    const t = EBoxSides.top;
-    const b = EBoxSides.bottom;
-  
-    return [
-      new CornerThumb([l, t]),
-      new CornerThumb([r, t]),
-      new CornerThumb([r, b]),
-      new CornerThumb([l, b]),
-      new SideThumb(l),
-      new SideThumb(t),
-      new SideThumb(r),
-      new SideThumb(b),
-    ];
-  }
+export type IThumbKey = EBoxSide | ICornerSides;
 
-  export const defaultDimensionsBounds = {
+const l = EBoxSide.left;
+const r = EBoxSide.right;
+const t = EBoxSide.top;
+const b = EBoxSide.bottom;
+
+export const cornerThumbKeys = xprod([l, r] as const, [t, b] as const);
+export const sideThumbKeys = [l, t, r, b];
+export const allThumbKeys = [...cornerThumbKeys, ...sideThumbKeys];
+
+export function getThumbs(includedKeys: IThumbKey[] = []): Thumb[] {
+  return includedKeys.map((key) =>
+    is(String, key) ? new SideThumb(key) : new CornerThumb(key)
+  );
+}
+
+export function withDefaultDimensionsBounds(
+  dimensionsBounds: Partial<IDimensionsBounds> = {}
+) {
+  return {
     min: { width: 0, height: 0 },
     max: { width: Infinity, height: Infinity },
+    ...dimensionsBounds,
   };
-  
-  export function resizableStyle(position: IPosition) {
-    return {
-      ...draggableStyle(position),
-      width: position.width,
-      height: position.height,
-    } as const;
-  }
-  
+}
+
+export function resizableStyle(position: IPosition) {
+  return {
+    ...draggableStyle(position),
+    width: position.width,
+    height: position.height,
+  } as const;
+}

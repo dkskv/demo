@@ -1,7 +1,7 @@
 import { clamp, mergeAll } from "ramda";
 import { mergeWithAdd } from "../../utils/common";
 import {
-  EBoxSides,
+  EBoxSide,
   getDimensions,
   getOrigin,
   type IDimensions,
@@ -25,7 +25,7 @@ interface IUpdateParams extends Omit<IClampParams, "boxDimensions"> {
   boxPosition: IPosition;
 }
 
-export abstract class Thumb<S extends EBoxSides[] = EBoxSides[]> {
+export abstract class Thumb<S extends EBoxSide[] = EBoxSide[]> {
   constructor(protected readonly dependentSides: Readonly<S>) {}
 
   protected clampPoint(
@@ -49,7 +49,7 @@ export abstract class Thumb<S extends EBoxSides[] = EBoxSides[]> {
 
   public abstract getRelativePoint(dimensions: IDimensions): IPoint;
 
-  public get key() {
+  public get stringKey() {
     return this.dependentSides.join("-");
   }
 

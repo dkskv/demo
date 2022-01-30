@@ -9,7 +9,7 @@ export interface IDimensions {
 
 export type ILineSegment = [IPoint, IPoint];
 
-export const enum EBoxSides {
+export const enum EBoxSide {
   top = "top",
   bottom = "bottom",
   left = "left",

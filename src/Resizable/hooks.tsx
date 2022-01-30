@@ -6,7 +6,7 @@ import {
 } from "../utils/common";
 import { getDimensions, IPoint, IPosition } from "../utils/geometry";
 import ThumbComponent from "./Thumb";
-import { defaultDimensionsBounds, getThumbs } from "./utils";
+import { allThumbKeys, getThumbs, type IThumbKey, withDefaultDimensionsBounds } from "./utils";
 import { type IDimensionsBounds } from "./utils/geometry";
 import { type Thumb } from "./utils/Thumb";
 
@@ -17,6 +17,7 @@ interface IProps<T> {
   isDrag?: boolean;
   dimensionsBounds?: Partial<IDimensionsBounds>;
   onlyRateably?: boolean;
+  thumbKeys?: IThumbKey[];
 }
 
 export function useResize<T extends HTMLElement>({
@@ -26,16 +27,14 @@ export function useResize<T extends HTMLElement>({
   isDrag = true,
   dimensionsBounds,
   onlyRateably = false,
+  thumbKeys = allThumbKeys,
 }: IProps<T>) {
   const onThumbChange = useCallback(
     (thumb: Thumb, point: IPoint, pressedKeys: IPressedKeys) => {
       const nextPosition = thumb.updateBoxPosition(
         {
           boxPosition: position,
-          dimensionsBounds: {
-            ...defaultDimensionsBounds,
-            ...(dimensionsBounds ?? {}),
-          },
+          dimensionsBounds: withDefaultDimensionsBounds(dimensionsBounds),
           isRateably: onlyRateably || pressedKeys.shiftKey,
         },
         point
@@ -50,16 +49,16 @@ export function useResize<T extends HTMLElement>({
     if (element) {
       const dimensions = getDimensions(position);
 
-      return getThumbs().map((thumb) => (
+      return getThumbs(thumbKeys).map((thumb) => (
         <ThumbComponent
-          key={thumb.key}
+          key={thumb.stringKey}
           callbackProp={thumb}
           point={thumb.getRelativePoint(dimensions)}
           onChange={onThumbChange}
         />
       ));
     }
-  }, [element, position, onThumbChange]);
+  }, [element, position, onThumbChange, thumbKeys]);
 
   useDrag({ element: isDrag ? element : null, onChange });
 

@@ -1,5 +1,5 @@
 import {
-  EBoxSides,
+  EBoxSide,
   type ILineSegment,
   type IDimensions,
   type IPoint,
@@ -11,14 +11,14 @@ import {
 } from "./geometry";
 import { type IClampParams, Thumb } from "./Thumb";
 
-type ISides = [
-  EBoxSides.left | EBoxSides.right,
-  EBoxSides.top | EBoxSides.bottom
+export type ICornerSides = [
+  EBoxSide.left | EBoxSide.right,
+  EBoxSide.top | EBoxSide.bottom
 ];
 
-export class CornerThumb extends Thumb<ISides> {
+export class CornerThumb extends Thumb<ICornerSides> {
   private static getRelativePoint(
-    [xSide, ySide]: Readonly<ISides>,
+    [xSide, ySide]: Readonly<ICornerSides>,
     dimensions: IDimensions
   ): IPoint {
     const bounds = getBoxBounds(dimensions);
