@@ -1,9 +1,12 @@
-import { clamp } from "ramda";
 import React, { useCallback, useMemo, useState } from "react";
 import { useCallbackRef } from "../hooks";
 import { useResize } from "../Resizable/hooks";
 import { resizableStyle } from "../Resizable/utils";
-import { EBoxSide, IPosition } from "../utils/geometry";
+import {
+  clampPositionInDimensions,
+  EBoxSide,
+  IPosition,
+} from "../utils/geometry";
 import "./index.css";
 
 interface Props {
@@ -26,23 +29,24 @@ const Slider: React.VFC<Props> = ({ min, max, minRange = 0 }) => {
 
   const thumbKeys = useMemo(() => [EBoxSide.left, EBoxSide.right], []);
 
-  const [container, setContainerRef] = useCallbackRef();
   const [track, setTrackRef] = useCallbackRef();
 
   const handleSlide = useCallback(
-    ({ x, width }: IPosition) => {
-      if (!container) {
+    (position: IPosition) => {
+      const parent = track?.parentElement;
+
+      if (!parent) {
         return;
       }
 
-      const { width: containerWidth } = container.getBoundingClientRect();
+      const { x, width } = clampPositionInDimensions(
+        position,
+        parent.getBoundingClientRect()
+      );
 
-      setRange({
-        begin: clamp(0, containerWidth, x),
-        end: clamp(0, containerWidth, x + width),
-      });
+      setRange({ begin: x, end: x + width });
     },
-    [container]
+    [track]
   );
 
   const { thumbs } = useResize({
@@ -55,7 +59,7 @@ const Slider: React.VFC<Props> = ({ min, max, minRange = 0 }) => {
   const { top, ...style } = resizableStyle(position);
 
   return (
-    <div ref={setContainerRef} className="Container">
+    <div className="Container">
       <div ref={setTrackRef} className="Track" style={style}>
         {thumbs}
       </div>

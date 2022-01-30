@@ -1,3 +1,5 @@
+import { clamp } from "ramda";
+
 export interface IPoint {
   x: number;
   y: number;
@@ -24,6 +26,19 @@ export function getDimensions({ width, height }: IPosition): IDimensions {
 
 export function getOrigin({ x, y }: IPosition): IPoint {
   return { x, y };
+}
+
+export function clampPositionInDimensions(
+  position: IPosition,
+  { width, height }: IDimensions
+) {
+  return {
+    ...position,
+    ...{
+      x: clamp(0, width - position.width, position.x),
+      y: clamp(0, height - position.height, position.y),
+    },
+  };
 }
 
 function toRadiusVector(a: IPoint, b: IPoint): IPoint {

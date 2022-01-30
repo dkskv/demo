@@ -1,10 +1,10 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { useDrag } from "../Draggable/hooks";
 import {
   type IPositionChangeCallback,
   type IPressedKeys,
 } from "../utils/common";
-import { getDimensions, IPoint, IPosition } from "../utils/geometry";
+import { getDimensions, type IPoint, type IPosition } from "../utils/geometry";
 import ThumbComponent from "./Thumb";
 import {
   allThumbKeys,
