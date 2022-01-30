@@ -16,11 +16,9 @@ const Resizable: React.FC<IProps> = ({ initialPosition, children, ...restProps }
 
   const { thumbs } = useResize({ element, position, onChange: setPosition });
 
-  const child = React.Children.only(children);
-
   return (
     <div {...restProps} ref={setRef} style={resizableStyle(position)}>
-      {child}
+      {React.Children.only(children)}
       {thumbs}
     </div>
   );

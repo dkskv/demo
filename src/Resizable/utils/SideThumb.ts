@@ -16,12 +16,12 @@ export class SideThumb<T extends EBoxSide> extends Thumb {
 
   public getRelativePoint(dimensions: IDimensions): IPoint {
     const boxBounds = getBoxBounds(dimensions);
-    const sides = getAdjacentSides(this.dependentSide);
+    const [s1, s2] = getAdjacentSides(this.dependentSide);
 
     return {
-      ...{ x: 0, y: 0 }, // для типизации
+      ...{ x: 0, y: 0 }, // для типизации :(
       [getNormalAxisBySide(this.dependentSide)]: boxBounds[this.dependentSide],
-      [getNormalAxisBySide(sides[0])]: (boxBounds[sides[0]] + boxBounds[sides[1]]) / 2,
+      [getNormalAxisBySide(s1)]: (boxBounds[s1] + boxBounds[s2]) / 2,
     } as IPoint;
   }
 }

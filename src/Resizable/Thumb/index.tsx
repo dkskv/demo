@@ -1,3 +1,4 @@
+import React from "react";
 import { useDrag } from "../../Draggable/hooks";
 import { draggableStyle } from "../../Draggable/utils";
 import { useCallbackRef, useBindCallbackProp } from "../../hooks";
@@ -11,7 +12,12 @@ interface Props<T = unknown> {
   point: IPoint;
 }
 
-const Thumb: React.FC<Props> = ({ callbackProp, onChange, point }) => {
+const Thumb: React.FC<Props> = ({
+  callbackProp,
+  onChange,
+  point,
+  children,
+}) => {
   const handleChange = useBindCallbackProp(onChange, callbackProp);
 
   const [element, setRef] = useCallbackRef();
@@ -19,11 +25,9 @@ const Thumb: React.FC<Props> = ({ callbackProp, onChange, point }) => {
   useDrag({ element, onChange: handleChange });
 
   return (
-    <div
-      ref={setRef}
-      style={draggableStyle(point)}
-      className="Thumb Centered"
-    />
+    <div ref={setRef} style={draggableStyle(point)} className="Centered">
+      {React.Children.only(children)}
+    </div>
   );
 };
 

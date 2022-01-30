@@ -6,7 +6,12 @@ import {
 } from "../utils/common";
 import { getDimensions, IPoint, IPosition } from "../utils/geometry";
 import ThumbComponent from "./Thumb";
-import { allThumbKeys, getThumbs, type IThumbKey, withDefaultDimensionsBounds } from "./utils";
+import {
+  allThumbKeys,
+  getThumbs,
+  type IThumbKey,
+  withDefaultDimensionsBounds,
+} from "./utils";
 import { type IDimensionsBounds } from "./utils/geometry";
 import { type Thumb } from "./utils/Thumb";
 
@@ -14,6 +19,7 @@ interface IProps<T> {
   element: T | null;
   position: IPosition;
   onChange: IPositionChangeCallback;
+  renderThumb?(key: IThumbKey): React.ReactElement;
   isDrag?: boolean;
   dimensionsBounds?: Partial<IDimensionsBounds>;
   onlyRateably?: boolean;
@@ -24,11 +30,14 @@ export function useResize<T extends HTMLElement>({
   element,
   position,
   onChange,
+  renderThumb = () => <div className="Thumb" />,
   isDrag = true,
   dimensionsBounds,
   onlyRateably = false,
   thumbKeys = allThumbKeys,
 }: IProps<T>) {
+  useDrag({ element: isDrag ? element : null, onChange });
+
   const onThumbChange = useCallback(
     (thumb: Thumb, point: IPoint, pressedKeys: IPressedKeys) => {
       const nextPosition = thumb.updateBoxPosition(
@@ -45,22 +54,22 @@ export function useResize<T extends HTMLElement>({
     [onChange, position, dimensionsBounds, onlyRateably]
   );
 
-  const thumbs = useMemo(() => {
+  const thumbs = (() => {
     if (element) {
       const dimensions = getDimensions(position);
 
-      return getThumbs(thumbKeys).map((thumb) => (
+      return getThumbs(thumbKeys).map((thumb, i) => (
         <ThumbComponent
           key={thumb.stringKey}
           callbackProp={thumb}
           point={thumb.getRelativePoint(dimensions)}
           onChange={onThumbChange}
-        />
+        >
+          {renderThumb(thumbKeys[i])}
+        </ThumbComponent>
       ));
     }
-  }, [element, position, onThumbChange, thumbKeys]);
-
-  useDrag({ element: isDrag ? element : null, onChange });
+  })();
 
   return { thumbs };
 }

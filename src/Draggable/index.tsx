@@ -16,11 +16,9 @@ const Draggable: React.FC<IProps> = ({ initialPoint, children, ...restProps }) =
 
   useDrag({ element, onChange: setPoint });
 
-  const child = React.Children.only(children);
-
   return (
     <div {...restProps} ref={setRef} style={draggableStyle(point)} >
-      {child}
+      {React.Children.only(children)}
     </div>
   );
 };
