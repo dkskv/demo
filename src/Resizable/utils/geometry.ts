@@ -6,6 +6,9 @@ import {
   pointProjection,
 } from "../../utils/geometry";
 
+export type IVerticalSide = EBoxSide.left | EBoxSide.right;
+export type IHorizontalSide = EBoxSide.top | EBoxSide.bottom;
+
 export interface IBoxBounds extends Record<EBoxSide, number> {}
 
 export interface IDimensionsBounds {
@@ -20,21 +23,26 @@ const sides = new CircularList([
   EBoxSide.bottom,
 ]);
 
-export function getAdjacentSides(side: EBoxSide) {
+export function getAdjacentSides<T extends EBoxSide>(side: T) {
   return [
     sides.nIndexesFrom(-1, side),
     sides.nIndexesFrom(1, side),
-  ] as const;
+  ] as T extends IVerticalSide
+    ? [IHorizontalSide, IHorizontalSide]
+    : [IVerticalSide, IVerticalSide];
 }
 
 export function getOppositeSide<T extends EBoxSide>(side: T) {
-  return sides.nIndexesFrom(2, side) as T;
+  return sides.nIndexesFrom(2, side) as T extends IVerticalSide
+    ? IVerticalSide
+    : IHorizontalSide;
 }
 
 export const getNormalAxisBySide = (() => {
   const axises = { left: "x", right: "x", top: "y", bottom: "y" } as const;
 
-  return (side: EBoxSide) => axises[side];
+  return <T extends EBoxSide>(side: T) =>
+    axises[side] as T extends IVerticalSide ? "x" : "y";
 })();
 
 export function getSidesBounds(

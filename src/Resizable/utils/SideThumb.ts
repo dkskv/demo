@@ -6,22 +6,22 @@ import {
 } from "./geometry";
 import { Thumb } from "./Thumb";
 
-export class SideThumb extends Thumb {
-  private readonly dependentSide: EBoxSide;
+export class SideThumb<T extends EBoxSide> extends Thumb {
+  private readonly dependentSide: T;
 
-  constructor(dependentSide: EBoxSide) {
+  constructor(dependentSide: T) {
     super([dependentSide]);
     this.dependentSide = dependentSide;
   }
 
   public getRelativePoint(dimensions: IDimensions): IPoint {
     const boxBounds = getBoxBounds(dimensions);
-    const [s1, s2] = getAdjacentSides(this.dependentSide);
+    const sides = getAdjacentSides(this.dependentSide);
 
     return {
       ...{ x: 0, y: 0 }, // для типизации
       [getNormalAxisBySide(this.dependentSide)]: boxBounds[this.dependentSide],
-      [getNormalAxisBySide(s1)]: (boxBounds[s1] + boxBounds[s2]) / 2,
+      [getNormalAxisBySide(sides[0])]: (boxBounds[sides[0]] + boxBounds[sides[1]]) / 2,
     } as IPoint;
   }
 }

@@ -1,5 +1,4 @@
 import {
-  EBoxSide,
   type ILineSegment,
   type IDimensions,
   type IPoint,
@@ -8,13 +7,12 @@ import {
   clampPointWithLine,
   getOppositeSide,
   getBoxBounds,
+  type IVerticalSide,
+  type IHorizontalSide,
 } from "./geometry";
 import { type IClampParams, Thumb } from "./Thumb";
 
-export type ICornerSides = [
-  EBoxSide.left | EBoxSide.right,
-  EBoxSide.top | EBoxSide.bottom
-];
+export type ICornerSides = [IVerticalSide, IHorizontalSide];
 
 export class CornerThumb extends Thumb<ICornerSides> {
   private static getRelativePoint(

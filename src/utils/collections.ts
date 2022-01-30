@@ -1,7 +1,7 @@
 import { nth } from "ramda";
 
 export class CircularList<T> {
-  constructor(private items: T[]) {}
+  constructor(private items: Readonly<T[]>) {}
 
   public nIndexesFrom(offset: number, from: T) {
     const i = this.items.indexOf(from);
