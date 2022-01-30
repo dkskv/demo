@@ -7,9 +7,9 @@ export class CircularList<T> {
     const i = this.items.indexOf(from);
 
     if (~i) {
-      throw new Error("The list does not contain the passed element");
+      return nth((i + offset) % this.items.length, this.items)!;
     }
 
-    return nth((i + offset) % this.items.length, this.items)!;
+    throw new Error("The list does not contain the passed element");
   }
 }
