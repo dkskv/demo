@@ -1,5 +1,3 @@
-import { clamp } from "ramda";
-
 export interface IPoint {
   x: number;
   y: number;
@@ -18,6 +16,8 @@ export const enum EBoxSide {
   right = "right",
 }
 
+export interface IBoxBounds extends Record<EBoxSide, number> {}
+
 export interface IPosition extends IPoint, IDimensions {}
 
 export function getDimensions({ width, height }: IPosition): IDimensions {
@@ -26,19 +26,6 @@ export function getDimensions({ width, height }: IPosition): IDimensions {
 
 export function getOrigin({ x, y }: IPosition): IPoint {
   return { x, y };
-}
-
-export function clampPositionInDimensions(
-  position: IPosition,
-  { width, height }: IDimensions
-) {
-  return {
-    ...position,
-    ...{
-      x: clamp(0, width - position.width, position.x),
-      y: clamp(0, height - position.height, position.y),
-    },
-  };
 }
 
 function toRadiusVector(a: IPoint, b: IPoint): IPoint {
@@ -58,3 +45,22 @@ export function pointProjection([a, b]: ILineSegment, c: IPoint): IPoint {
 
   return { x: a.x + ab.x * t, y: a.y + ab.y * t };
 }
+
+export const BoxBoundsConverter = {
+  from({ left, right, top, bottom }: IBoxBounds): IPosition {
+    return {
+      x: left,
+      y: top,
+      width: right - left,
+      height: bottom - top,
+    };
+  },
+  to({ x, y, width, height }: IPosition): IBoxBounds {
+    return {
+      left: x,
+      top: y,
+      right: x + width,
+      bottom: y + height,
+    };
+  },
+};

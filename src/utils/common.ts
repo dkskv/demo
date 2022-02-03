@@ -1,13 +1,8 @@
 import { is, mergeWith } from "ramda";
-import { IPosition } from "./geometry";
-
 export interface IPressedKeys {
   shiftKey: boolean;
   altKey: boolean;
   ctrlKey: boolean;
-}
-export interface IPositionChangeCallback {
-  (a: IPosition, keys: IPressedKeys): void;
 }
 
 export function mergeWithAdd<A, B>(a: A, b: B) {

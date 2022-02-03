@@ -1,10 +1,11 @@
 import { useEffect } from "react";
-import { IPositionChangeCallback } from "../utils/common";
+import { IPressedKeys } from "../utils/common";
+import { IPosition } from "../utils/geometry";
 import { createDragHandler } from "./utils";
 
 interface IProps<T> {
   element: T | null;
-  onChange: IPositionChangeCallback;
+  onChange(position: IPosition, options: { pressedKeys: IPressedKeys }): void;
 }
 
 export function useDrag<T extends HTMLElement>({

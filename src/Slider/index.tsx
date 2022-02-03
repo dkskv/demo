@@ -1,9 +1,10 @@
 import React, { useCallback, useMemo, useState } from "react";
+import { clampDragInBox } from "../Draggable/utils/geometry";
 import { useCallbackRef } from "../hooks";
 import { useResize } from "../Resizable/hooks";
-import { resizableStyle } from "../Resizable/utils";
+import { IThumbKey, resizableStyle } from "../Resizable/utils";
+import { clampResizeInBox } from "../Resizable/utils/geometry";
 import {
-  clampPositionInDimensions,
   EBoxSide,
   IPosition,
 } from "../utils/geometry";
@@ -32,17 +33,16 @@ const Slider: React.VFC<Props> = ({ min, max, minRange = 0 }) => {
   const [track, setTrackRef] = useCallbackRef();
 
   const handleSlide = useCallback(
-    (position: IPosition) => {
+    (position: IPosition, { thumbKey }: { thumbKey: IThumbKey }) => {
       const parent = track?.parentElement;
 
       if (!parent) {
         return;
       }
 
-      const { x, width } = clampPositionInDimensions(
-        position,
-        parent.getBoundingClientRect()
-      );
+      const isDrag = !thumbKey;
+      const clamper = isDrag ? clampDragInBox : clampResizeInBox;
+      const { x, width } = clamper(parent.getBoundingClientRect(), position);
 
       setRange({ begin: x, end: x + width });
     },

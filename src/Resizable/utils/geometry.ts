@@ -1,15 +1,15 @@
+import { clamp } from "ramda";
 import { CircularList } from "../../utils/collections";
 import {
   EBoxSide,
   type IDimensions,
-  type IPosition,
   pointProjection,
+  IPosition,
+  BoxBoundsConverter,
 } from "../../utils/geometry";
 
 export type IVerticalSide = EBoxSide.left | EBoxSide.right;
 export type IHorizontalSide = EBoxSide.top | EBoxSide.bottom;
-
-export interface IBoxBounds extends Record<EBoxSide, number> {}
 
 export interface IDimensionsBounds {
   min: IDimensions;
@@ -74,21 +74,19 @@ export function getBoxBounds({ width, height }: IDimensions) {
 
 export const clampPointWithLine = pointProjection;
 
-export const BoxBoundsConverter = {
-  from({ left, right, top, bottom }: IBoxBounds): IPosition {
-    return {
-      x: left,
-      y: top,
-      width: right - left,
-      height: bottom - top,
-    };
-  },
-  to({ x, y, width, height }: IPosition): IBoxBounds {
-    return {
-      left: x,
-      top: y,
-      right: x + width,
-      bottom: y + height,
-    };
-  },
-};
+export function clampResizeInBox(
+  boxDimensions: IDimensions,
+  position: IPosition
+) {
+  const { width, height } = boxDimensions;
+
+  const { from, to } = BoxBoundsConverter;
+  const { left, right, top, bottom } = to(position);
+
+  return from({
+    left: clamp(0, width, left),
+    right: clamp(0, width, right),
+    top: clamp(0, height, top),
+    bottom: clamp(0, height, bottom),
+  });
+}

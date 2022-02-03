@@ -1,9 +1,6 @@
 import { useCallback } from "react";
 import { useDrag } from "../Draggable/hooks";
-import {
-  type IPositionChangeCallback,
-  type IPressedKeys,
-} from "../utils/common";
+import { type IPressedKeys } from "../utils/common";
 import { getDimensions, type IPoint, type IPosition } from "../utils/geometry";
 import ThumbComponent from "./Thumb";
 import {
@@ -18,7 +15,10 @@ import { type Thumb } from "./utils/Thumb";
 interface IProps<T> {
   element: T | null;
   position: IPosition;
-  onChange: IPositionChangeCallback;
+  onChange(
+    a: IPosition,
+    options: { pressedKeys: IPressedKeys; thumbKey: IThumbKey }
+  ): void;
   renderThumb?(key: IThumbKey): React.ReactElement;
   isDrag?: boolean;
   dimensionsBounds?: Partial<IDimensionsBounds>;
@@ -49,7 +49,7 @@ export function useResize<T extends HTMLElement>({
         point
       );
 
-      onChange(nextPosition, pressedKeys);
+      onChange(nextPosition, { pressedKeys, thumbKey: thumb.key as IThumbKey });
     },
     [onChange, position, dimensionsBounds, onlyRateably]
   );

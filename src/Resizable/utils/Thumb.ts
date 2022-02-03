@@ -4,15 +4,15 @@ import {
   EBoxSide,
   getDimensions,
   getOrigin,
+  BoxBoundsConverter,
   type IDimensions,
   type IPoint,
   type IPosition,
 } from "../../utils/geometry";
 import {
   getNormalAxisBySide,
-  BoxBoundsConverter,
-  type IDimensionsBounds,
   getSidesBounds,
+  type IDimensionsBounds,
 } from "./geometry";
 
 export interface IClampParams {
@@ -48,6 +48,10 @@ export abstract class Thumb<S extends EBoxSide[] = EBoxSide[]> {
   }
 
   public abstract getRelativePoint(dimensions: IDimensions): IPoint;
+
+  public get key() {
+    return this.dependentSides;
+  }
 
   public get stringKey() {
     return this.dependentSides.join("-");

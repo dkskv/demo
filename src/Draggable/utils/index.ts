@@ -1,9 +1,5 @@
-import {
-  mergeWithAdd,
-  type IPositionChangeCallback,
-  type IPressedKeys,
-} from "../utils/common";
-import { getDimensions, type IPoint } from "../utils/geometry";
+import { mergeWithAdd, type IPressedKeys } from "../../utils/common";
+import { getDimensions, IPosition, type IPoint } from "../../utils/geometry";
 
 interface IMouseEvent
   extends Pick<
@@ -25,7 +21,10 @@ export interface IMoveCallback {
 export function createDragHandler(
   area: HTMLElement,
   element: HTMLElement,
-  callback: IPositionChangeCallback
+  callback: (
+    position: IPosition,
+    options: { pressedKeys: IPressedKeys }
+  ) => void
 ) {
   return function (mouseDown: IMouseEvent) {
     mouseDown.preventDefault();
@@ -38,7 +37,7 @@ export function createDragHandler(
     createMoveHandler(area, (point, pressedKeys) => {
       const elementOrigin = mergeWithAdd(point, shifts);
 
-      return callback({ ...elementOrigin, ...dimensions }, pressedKeys);
+      return callback({ ...elementOrigin, ...dimensions }, { pressedKeys });
     });
   };
 }
