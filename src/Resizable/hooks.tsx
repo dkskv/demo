@@ -39,7 +39,11 @@ export function useResize<T extends HTMLElement>({
   useDrag({ element: isDrag ? element : null, onChange });
 
   const onThumbChange = useCallback(
-    (thumb: Thumb, point: IPoint, pressedKeys: IPressedKeys) => {
+    (
+      thumb: Thumb,
+      point: IPoint,
+      { pressedKeys }: { pressedKeys: IPressedKeys }
+    ) => {
       const nextPosition = thumb.updateBoxPosition(
         {
           boxPosition: position,

@@ -1,32 +1,37 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { clampDragInBox } from "../Draggable/utils/geometry";
 import { useCallbackRef } from "../hooks";
 import { useResize } from "../Resizable/hooks";
 import { IThumbKey, resizableStyle } from "../Resizable/utils";
-import { clampResizeInBox } from "../Resizable/utils/geometry";
-import {
-  EBoxSide,
-  IPosition,
-} from "../utils/geometry";
+import { EBoxSide, IPosition } from "../utils/geometry";
 import "./index.css";
+import {
+  EOrientation,
+  IRange,
+  TrackRangeConverter,
+  updatePosition,
+} from "./utils";
 
 interface Props {
-  min: number;
-  max: number;
-  minRange?: number;
+  trackRange?: IRange;
+  minRangeWidth?: number;
+  trackThickness?: number;
+  orientation?: EOrientation;
 }
 
-const Slider: React.VFC<Props> = ({ min, max, minRange = 0 }) => {
+const Slider: React.VFC<Props> = ({
+  trackRange,
+  minRangeWidth = 0,
+  trackThickness = 10,
+  orientation = EOrientation.horizontal,
+}) => {
+  const { from, to } = TrackRangeConverter;
+
   const [range, setRange] = useState({ begin: 0, end: 100 });
 
-  const position = useMemo(() => {
-    return {
-      x: range.begin,
-      width: range.end - range.begin,
-      y: 0,
-      height: 10,
-    };
-  }, [range]);
+  const position = useMemo(
+    () => from(range, orientation, trackThickness),
+    [from, range, orientation, trackThickness]
+  );
 
   const thumbKeys = useMemo(() => [EBoxSide.left, EBoxSide.right], []);
 
@@ -41,12 +46,15 @@ const Slider: React.VFC<Props> = ({ min, max, minRange = 0 }) => {
       }
 
       const isDrag = !thumbKey;
-      const clamper = isDrag ? clampDragInBox : clampResizeInBox;
-      const { x, width } = clamper(parent.getBoundingClientRect(), position);
+      const newPosition = updatePosition(
+        parent.getBoundingClientRect(),
+        isDrag,
+        position
+      );
 
-      setRange({ begin: x, end: x + width });
+      setRange(to(newPosition, orientation));
     },
-    [track]
+    [to, orientation, track]
   );
 
   const { thumbs } = useResize({

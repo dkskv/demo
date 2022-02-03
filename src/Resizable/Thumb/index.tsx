@@ -8,7 +8,11 @@ import "./index.css";
 
 interface Props<T = unknown> {
   callbackProp: T;
-  onChange(callbackProp: T, origin: IPoint, pressedKeys: IPressedKeys): void;
+  onChange(
+    callbackProp: T,
+    origin: IPoint,
+    pressedKeys: { pressedKeys: IPressedKeys }
+  ): void;
   point: IPoint;
 }
 

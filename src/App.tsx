@@ -4,7 +4,7 @@ import Slider from "./Slider";
 function App() {
   return (
     <div className="App">
-      <Slider min={0} max={100} />
+      <Slider />
       <DndTest />
     </div>
   );
