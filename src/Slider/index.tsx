@@ -25,7 +25,7 @@ const Slider: React.VFC<Props> = ({
 
   const { thumbs } = useSlide({
     element: track,
-    value,
+    range: value,
     onChange,
     thickness: trackThickness,
     orientation,

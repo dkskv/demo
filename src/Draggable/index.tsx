@@ -1,23 +1,32 @@
-import React, { useState } from "react";
+import React from "react";
 import { useCallbackRef } from "../hooks";
 import { type IPoint } from "../utils/geometry";
 import { useDrag } from "./hooks";
 import "./index.css";
 import { draggableStyle } from "./utils";
 
-interface IProps extends React.HTMLAttributes<HTMLDivElement> {
-  initialPoint: IPoint;
-}
+type IProps = React.HTMLAttributes<HTMLDivElement> & {
+  value: IPoint;
+  onChange(value: IPoint): void;
+};
 
-const Draggable: React.FC<IProps> = ({ initialPoint, children, ...restProps }) => {
+const Draggable: React.FC<IProps> = ({
+  value,
+  onChange,
+  children,
+  style,
+  ...restProps
+}) => {
   const [element, setRef] = useCallbackRef();
 
-  const [point, setPoint] = useState(initialPoint);
-
-  useDrag({ element, onChange: setPoint });
+  useDrag({ element, onChange });
 
   return (
-    <div {...restProps} ref={setRef} style={draggableStyle(point)} >
+    <div
+      {...restProps}
+      ref={setRef}
+      style={{ ...draggableStyle(value), ...style }}
+    >
       {React.Children.only(children)}
     </div>
   );

@@ -1,23 +1,35 @@
 import React from "react";
-import { useState } from "react";
 import { useCallbackRef } from "../hooks";
+import { IPressedKeys } from "../utils/common";
 import { IPosition } from "../utils/geometry";
 import { useResize } from "./hooks";
-import { resizableStyle } from "./utils";
+import { IThumbKey, resizableStyle } from "./utils";
 
-interface IProps extends React.HTMLAttributes<HTMLDivElement> {
-  initialPosition: IPosition;
-}
+type IProps = React.HTMLAttributes<HTMLDivElement> & {
+  value: IPosition;
+  onChange(
+    value: IPosition,
+    options: { pressedKeys: IPressedKeys; thumbKey: IThumbKey }
+  ): void;
+};
 
-const Resizable: React.FC<IProps> = ({ initialPosition, children, ...restProps }) => {
+const Resizable: React.FC<IProps> = ({
+  value,
+  onChange,
+  children,
+  style,
+  ...restProps
+}) => {
   const [element, setRef] = useCallbackRef();
 
-  const [position, setPosition] = useState(initialPosition);
-
-  const { thumbs } = useResize({ element, position, onChange: setPosition });
+  const { thumbs } = useResize({ element, position: value, onChange });
 
   return (
-    <div {...restProps} ref={setRef} style={resizableStyle(position)}>
+    <div
+      {...restProps}
+      ref={setRef}
+      style={{ ...resizableStyle(value), ...style }}
+    >
       {React.Children.only(children)}
       {thumbs}
     </div>

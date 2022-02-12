@@ -3,20 +3,22 @@ import "./index.css";
 import "../index.css";
 import Draggable from "../Draggable";
 import Resizable from "../Resizable";
+import makeStateful from "../decorators/makeStateful";
 
 interface Props {}
 
 const DndTest: React.FC<Props> = () => {
+  const StatefulDraggable = makeStateful(Draggable);
+  const StatefulResizable = makeStateful(Resizable);
+
   return (
     <div className="DndTest">
-      <Draggable initialPoint={{ x: 300, y: 300 }}>
+      <StatefulDraggable initialValue={{ x: 300, y: 300 }}>
         <div className="Thumb" />
-      </Draggable>
-      <Resizable
-        initialPosition={{ x: 50, y: 60, width: 200, height: 150 }}
-      >
+      </StatefulDraggable>
+      <StatefulResizable initialValue={{ x: 50, y: 60, width: 200, height: 150 }}>
         <div className="Resizable" />
-      </Resizable>
+      </StatefulResizable>
     </div>
   );
 };

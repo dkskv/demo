@@ -12,8 +12,8 @@ import {
 
 interface IProps<T> {
   element: T | null;
-  value: ISliderRange;
-  onChange(value: ISliderRange): void;
+  range: ISliderRange;
+  onChange(range: ISliderRange): void;
   thickness?: number;
   orientation?: EOrientation;
   /**
@@ -25,12 +25,12 @@ interface IProps<T> {
 
 export function useSlide<T extends HTMLElement>({
   element,
-  value,
+  range,
   thickness = 10,
   orientation = EOrientation.horizontal,
   onChange,
 }: IProps<T>) {
-  validateSliderRange(value);
+  validateSliderRange(range);
 
   const parentElement = element?.parentElement;
 
@@ -65,7 +65,7 @@ export function useSlide<T extends HTMLElement>({
 
   const position = parentElement
     ? Converter.toResizablePosition(
-        value,
+        range,
         parentElement.getBoundingClientRect(),
         orientation,
         thickness
