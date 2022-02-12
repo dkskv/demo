@@ -1,56 +1,100 @@
-import { clampDragInBox } from "../Draggable/utils/geometry";
-import { clampResizeInBox } from "../Resizable/utils/geometry";
-import { type IDimensions, type IPosition } from "../utils/geometry";
+import { clamp, mapObjIndexed } from "ramda";
+import { IDimensions, type IPosition } from "../utils/geometry";
 
 export const enum EOrientation {
   vertical,
   horizontal,
 }
 
-export interface IRange {
-  begin: number;
-  end: number;
+export interface ISliderRange {
+  start: number; // [0, 1]
+  end: number; // [0, 1]
 }
 
-export function updatePosition(
-  containerDimensions: IDimensions,
-  isDrag: boolean,
-  position: IPosition
-): IPosition {
-  const clamper = isDrag ? clampDragInBox : clampResizeInBox;
-  
-  return clamper(containerDimensions, position);
+function getContainerLength(
+  { width, height }: IDimensions,
+  orientation: EOrientation
+) {
+  switch (orientation) {
+    case EOrientation.horizontal:
+      return width;
+    case EOrientation.vertical:
+      return height;
+  }
 }
 
-export const TrackRangeConverter = {
-  to(position: IPosition, orientation: EOrientation) {
-    const { x, width, y, height } = position;
+export const Converter = {
+  toSliderRange(
+    { x, width, y, height }: IPosition,
+    containerDimensions: IDimensions,
+    orientation: EOrientation
+  ): ISliderRange {
+    const containerLength = getContainerLength(
+      containerDimensions,
+      orientation
+    );
+
+    function normalize<T extends Record<string, number>>(obj: T) {
+      return mapObjIndexed((a) => a / containerLength, obj) as T;
+    }
 
     switch (orientation) {
       case EOrientation.horizontal:
-        return { begin: x, end: x + width };
+        return normalize({ start: x, end: x + width});
       case EOrientation.vertical:
-        return { begin: y, end: y + height };
+        return normalize({ start: y, end: y + height });
     }
   },
-  from(range: IRange, orientation: EOrientation, trackThickness: number) {
-    const { begin, end } = range;
+  toResizablePosition(
+    range: ISliderRange,
+    containerDimensions: IDimensions,
+    orientation: EOrientation,
+    thickness: number
+  ): IPosition {
+    const containerLength = getContainerLength(
+      containerDimensions,
+      orientation
+    );
+
+    const { start, end } = mapObjIndexed((a) => a * containerLength, range);
+    const length = end - start;
 
     switch (orientation) {
       case EOrientation.horizontal:
-        return {
-          x: begin,
-          width: end - begin,
-          y: 0,
-          height: trackThickness,
-        };
+        return { x: start, width: length, y: 0, height: thickness };
       case EOrientation.vertical:
-        return {
-          x: 0,
-          width: trackThickness,
-          y: begin,
-          height: end - begin,
-        };
+        return { x: 0, width: thickness, y: start, height: length };
     }
   },
 };
+
+export const sliderTrackStyle = (
+  { start, end }: ISliderRange,
+  orientation: EOrientation,
+  thickness: number
+) => ({
+  position: "absolute" as const,
+  ...(orientation === EOrientation.horizontal
+    ? {
+        left: `${start * 100}%`,
+        width: `${(end - start) * 100}%`,
+        height: `${thickness}px`,
+      } as const
+    : {
+        top: `${start * 100}%`,
+        height: `${(end - start) * 100}%`,
+        width: `${thickness}px`,
+      } as const),
+});
+
+export function validateSliderRange(range: ISliderRange) {
+  if (Object.entries(range).every(([, value]) => value === clamp(0, 1, value))) {
+    return;
+  }
+
+  if (range.end > range.start) {
+    return;
+  }
+
+  console.error(`Incorrect arg 'range': ${JSON.stringify(range)}`);
+}

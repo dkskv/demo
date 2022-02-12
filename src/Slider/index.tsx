@@ -1,74 +1,43 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React from "react";
 import { useCallbackRef } from "../hooks";
-import { useResize } from "../Resizable/hooks";
-import { IThumbKey, resizableStyle } from "../Resizable/utils";
-import { EBoxSide, IPosition } from "../utils/geometry";
+import { useSlide } from "./hooks";
 import "./index.css";
-import {
-  EOrientation,
-  IRange,
-  TrackRangeConverter,
-  updatePosition,
-} from "./utils";
+import { EOrientation, ISliderRange, sliderTrackStyle } from "./utils";
+
+// Мне нужен удобный способ превращать stateless в stateful
 
 interface Props {
-  trackRange?: IRange;
-  minRangeWidth?: number;
+  value: ISliderRange;
+  onChange(value: ISliderRange): void;
+  // minRangeLength?: number;
   trackThickness?: number;
   orientation?: EOrientation;
 }
 
+// Снаружи вообще не должны знать о пикселях
 const Slider: React.VFC<Props> = ({
-  trackRange,
-  minRangeWidth = 0,
+  value,
+  onChange,
   trackThickness = 10,
   orientation = EOrientation.horizontal,
 }) => {
-  const { from, to } = TrackRangeConverter;
-
-  const [range, setRange] = useState({ begin: 0, end: 100 });
-
-  const position = useMemo(
-    () => from(range, orientation, trackThickness),
-    [from, range, orientation, trackThickness]
-  );
-
-  const thumbKeys = useMemo(() => [EBoxSide.left, EBoxSide.right], []);
-
   const [track, setTrackRef] = useCallbackRef();
 
-  const handleSlide = useCallback(
-    (position: IPosition, { thumbKey }: { thumbKey: IThumbKey }) => {
-      const parent = track?.parentElement;
-
-      if (!parent) {
-        return;
-      }
-
-      const isDrag = !thumbKey;
-      const newPosition = updatePosition(
-        parent.getBoundingClientRect(),
-        isDrag,
-        position
-      );
-
-      setRange(to(newPosition, orientation));
-    },
-    [to, orientation, track]
-  );
-
-  const { thumbs } = useResize({
+  const { thumbs } = useSlide({
     element: track,
-    position,
-    onChange: handleSlide,
-    thumbKeys,
+    value,
+    onChange,
+    thickness: trackThickness,
+    orientation,
   });
-
-  const { top, ...style } = resizableStyle(position);
 
   return (
     <div className="Container">
-      <div ref={setTrackRef} className="Track" style={style}>
+      <div
+        ref={setTrackRef}
+        className="Track"
+        style={sliderTrackStyle(value, orientation, trackThickness)}
+      >
         {thumbs}
       </div>
     </div>

@@ -14,7 +14,7 @@ import { type Thumb } from "./utils/Thumb";
 
 interface IProps<T> {
   element: T | null;
-  position: IPosition;
+  position: IPosition | null;
   onChange(
     a: IPosition,
     options: { pressedKeys: IPressedKeys; thumbKey: IThumbKey }
@@ -44,22 +44,27 @@ export function useResize<T extends HTMLElement>({
       point: IPoint,
       { pressedKeys }: { pressedKeys: IPressedKeys }
     ) => {
-      const nextPosition = thumb.updateBoxPosition(
-        {
-          boxPosition: position,
-          dimensionsBounds: withDefaultDimensionsBounds(dimensionsBounds),
-          isRateably: onlyRateably || pressedKeys.shiftKey,
-        },
-        point
-      );
+      if (position) {
+        const nextPosition = thumb.updateBoxPosition(
+          {
+            boxPosition: position,
+            dimensionsBounds: withDefaultDimensionsBounds(dimensionsBounds),
+            isRateably: onlyRateably || pressedKeys.shiftKey,
+          },
+          point
+        );
 
-      onChange(nextPosition, { pressedKeys, thumbKey: thumb.key as IThumbKey });
+        onChange(nextPosition, {
+          pressedKeys,
+          thumbKey: thumb.key as IThumbKey,
+        });
+      }
     },
     [onChange, position, dimensionsBounds, onlyRateably]
   );
 
   const thumbs = (() => {
-    if (element) {
+    if (element && position) {
       const dimensions = getDimensions(position);
 
       return getThumbs(thumbKeys).map((thumb, i) => (

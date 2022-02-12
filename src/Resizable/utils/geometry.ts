@@ -1,4 +1,5 @@
 import { clamp } from "ramda";
+import { clampDragInBox } from "../../Draggable/utils/geometry";
 import { CircularList } from "../../utils/collections";
 import {
   EBoxSide,
@@ -89,4 +90,14 @@ export function clampResizeInBox(
     top: clamp(0, height, top),
     bottom: clamp(0, height, bottom),
   });
+}
+
+export function clampInBox(
+  boxDimensions: IDimensions,
+  position: IPosition,
+  isDrag: boolean,
+): IPosition {
+  const clamper = isDrag ? clampDragInBox : clampResizeInBox;
+
+  return clamper(boxDimensions, position);
 }
