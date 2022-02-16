@@ -8,7 +8,7 @@ import { EOrientation, sliderTrackStyle } from "./utils";
 interface Props {
   value: IRange;
   onChange(value: IRange): void;
-  // minRangeLength?: number;
+  minRangeLength?: number;
   trackThickness?: number;
   orientation?: EOrientation;
 }
@@ -16,6 +16,7 @@ interface Props {
 const Slider: React.VFC<Props> = ({
   value,
   onChange,
+  minRangeLength = 0.2,
   trackThickness = 10,
   orientation = EOrientation.horizontal,
 }) => {
@@ -27,6 +28,7 @@ const Slider: React.VFC<Props> = ({
     onChange,
     thickness: trackThickness,
     orientation,
+    lengthBounds: { min: minRangeLength, max: Infinity },
   });
 
   return (

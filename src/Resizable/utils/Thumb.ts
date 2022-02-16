@@ -33,7 +33,7 @@ export abstract class Thumb<S extends EBoxSide[] = EBoxSide[]> {
     point: IPoint
   ): IPoint {
     const sidesBounds = getSidesBounds(boxDimensions, dimensionsBounds);
-
+    
     return {
       ...point, 
       ...mergeAll(

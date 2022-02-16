@@ -1,14 +1,11 @@
+import { mapObjIndexed } from "ramda";
 import { useCallback, useMemo } from "react";
 import { useResize } from "../Resizable/hooks";
 import { IThumbKey } from "../Resizable/utils";
 import { clampInBox } from "../Resizable/utils/geometry";
-import { IRange } from "../utils/common";
+import { IBounds, IRange } from "../utils/common";
 import { EBoxSide, IPosition } from "../utils/geometry";
-import {
-  Converter,
-  EOrientation,
-  validateSliderRange,
-} from "./utils";
+import { Converter, EOrientation, validateSliderRange } from "./utils";
 
 interface IProps<T> {
   element: T | null;
@@ -20,7 +17,7 @@ interface IProps<T> {
    * Подумать на счет возврата конфига вместо thumbs. И предоставить дефолтный рендерер из утилит.
    */
   renderThumb?(key: IThumbKey): React.ReactElement;
-  lengthBounds?: { minLength: number; maxLength: number };
+  lengthBounds?: IBounds;
 }
 
 export function useSlide<T extends HTMLElement>({
@@ -28,6 +25,7 @@ export function useSlide<T extends HTMLElement>({
   range,
   thickness = 10,
   orientation = EOrientation.horizontal,
+  lengthBounds,
   onChange,
 }: IProps<T>) {
   validateSliderRange(range);
@@ -72,11 +70,25 @@ export function useSlide<T extends HTMLElement>({
       )
     : null;
 
+  const dimensionsBounds = (() => {
+    if (parentElement && lengthBounds) {
+      const key = orientation === EOrientation.horizontal ? "width" : "height";
+
+      return {
+        [key]: mapObjIndexed(
+          (a) => a * parentElement.getBoundingClientRect()[key],
+          lengthBounds
+        ),
+      };
+    }
+  })();
+
   const { thumbs } = useResize({
     element,
     position,
     onChange: handleResize,
     thumbKeys,
+    dimensionsBounds,
   });
 
   return { thumbs };
