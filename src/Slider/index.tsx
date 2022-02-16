@@ -1,20 +1,18 @@
 import React from "react";
 import { useCallbackRef } from "../hooks";
+import { IRange } from "../utils/common";
 import { useSlide } from "./hooks";
 import "./index.css";
-import { EOrientation, ISliderRange, sliderTrackStyle } from "./utils";
-
-// Мне нужен удобный способ превращать stateless в stateful
+import { EOrientation, sliderTrackStyle } from "./utils";
 
 interface Props {
-  value: ISliderRange;
-  onChange(value: ISliderRange): void;
+  value: IRange;
+  onChange(value: IRange): void;
   // minRangeLength?: number;
   trackThickness?: number;
   orientation?: EOrientation;
 }
 
-// Снаружи вообще не должны знать о пикселях
 const Slider: React.VFC<Props> = ({
   value,
   onChange,

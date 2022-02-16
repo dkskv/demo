@@ -25,10 +25,10 @@ export function getThumbs(includedKeys: IThumbKey[] = []): Thumb[] {
 
 export function withDefaultDimensionsBounds(
   dimensionsBounds: Partial<IDimensionsBounds> = {}
-) {
+): IDimensionsBounds {
   return {
-    min: { width: 0, height: 0 },
-    max: { width: Infinity, height: Infinity },
+    width: { min: 0, max: Infinity },
+    height: { min: 0, max: Infinity },
     ...dimensionsBounds,
   };
 }

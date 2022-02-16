@@ -1,14 +1,10 @@
 import { clamp, mapObjIndexed } from "ramda";
+import { IRange } from "../utils/common";
 import { IDimensions, type IPosition } from "../utils/geometry";
 
 export const enum EOrientation {
   vertical,
   horizontal,
-}
-
-export interface ISliderRange {
-  start: number; // [0, 1]
-  end: number; // [0, 1]
 }
 
 function getContainerLength(
@@ -28,7 +24,7 @@ export const Converter = {
     { x, width, y, height }: IPosition,
     containerDimensions: IDimensions,
     orientation: EOrientation
-  ): ISliderRange {
+  ): IRange {
     const containerLength = getContainerLength(
       containerDimensions,
       orientation
@@ -46,7 +42,7 @@ export const Converter = {
     }
   },
   toResizablePosition(
-    range: ISliderRange,
+    range: IRange,
     containerDimensions: IDimensions,
     orientation: EOrientation,
     thickness: number
@@ -69,7 +65,7 @@ export const Converter = {
 };
 
 export const sliderTrackStyle = (
-  { start, end }: ISliderRange,
+  { start, end }: IRange,
   orientation: EOrientation,
   thickness: number
 ) => ({
@@ -87,7 +83,7 @@ export const sliderTrackStyle = (
       } as const),
 });
 
-export function validateSliderRange(range: ISliderRange) {
+export function validateSliderRange(range: IRange) {
   if (Object.entries(range).every(([, value]) => value === clamp(0, 1, value))) {
     return;
   }

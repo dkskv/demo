@@ -2,18 +2,18 @@ import { useCallback, useMemo } from "react";
 import { useResize } from "../Resizable/hooks";
 import { IThumbKey } from "../Resizable/utils";
 import { clampInBox } from "../Resizable/utils/geometry";
+import { IRange } from "../utils/common";
 import { EBoxSide, IPosition } from "../utils/geometry";
 import {
   Converter,
   EOrientation,
-  ISliderRange,
   validateSliderRange,
 } from "./utils";
 
 interface IProps<T> {
   element: T | null;
-  range: ISliderRange;
-  onChange(range: ISliderRange): void;
+  range: IRange;
+  onChange(range: IRange): void;
   thickness?: number;
   orientation?: EOrientation;
   /**

@@ -1,6 +1,7 @@
 import { clamp } from "ramda";
 import { clampDragInBox } from "../../Draggable/utils/geometry";
 import { CircularList } from "../../utils/collections";
+import { getRangeLengthBounds, IBounds } from "../../utils/common";
 import {
   EBoxSide,
   type IDimensions,
@@ -12,10 +13,7 @@ import {
 export type IVerticalSide = EBoxSide.left | EBoxSide.right;
 export type IHorizontalSide = EBoxSide.top | EBoxSide.bottom;
 
-export interface IDimensionsBounds {
-  min: IDimensions;
-  max: IDimensions;
-}
+export type IDimensionsBounds = Record<keyof IDimensions, IBounds>;
 
 const sides = new CircularList([
   EBoxSide.left,
@@ -50,18 +48,17 @@ export function getSidesBounds(
   boxDimensions: IDimensions,
   dimensionsBounds: IDimensionsBounds
 ) {
-  const { width: w, height: h } = boxDimensions;
-  const {
-    min: { width: minW, height: minH },
-    max: { width: maxW, height: maxH },
-  } = dimensionsBounds;
+  // мб функцию, переводящую диапазон в зависимости от ориентации оси
+  const { start: left, end: right } = getRangeLengthBounds(
+    { start: 0, end: boxDimensions.width },
+    dimensionsBounds.width
+  );
+  const { start: top, end: bottom } = getRangeLengthBounds(
+    { start: 0, end: boxDimensions.height },
+    dimensionsBounds.height
+  );
 
-  return {
-    left: { min: w - maxW, max: w - minW },
-    right: { min: minW, max: maxW },
-    top: { min: h - maxH, max: h - minH },
-    bottom: { min: minH, max: maxH },
-  };
+  return { left, right, top, bottom };
 }
 
 export function getBoxBounds({ width, height }: IDimensions) {
@@ -95,7 +92,7 @@ export function clampResizeInBox(
 export function clampInBox(
   boxDimensions: IDimensions,
   position: IPosition,
-  isDrag: boolean,
+  isDrag: boolean
 ): IPosition {
   const clamper = isDrag ? clampDragInBox : clampResizeInBox;
 
