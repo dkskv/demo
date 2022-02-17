@@ -1,13 +1,13 @@
 import makeStateful from "./decorators/makeStateful";
 import DndTest from "./DndTest";
-import Slider from "./Slider";
+import { SliderWithInputs } from "./SliderWithInputs";
 
 function App() {
-  const StatefulSlider = makeStateful(Slider);
+  const SSliderWithInputs = makeStateful(SliderWithInputs);
 
   return (
     <div className="App">
-      <StatefulSlider initialValue={{ start: 0.2, end: 0.5 }} trackThickness={15}/>
+      <SSliderWithInputs initialValue={{ start: 1, end: 5 }} />
       <DndTest />
     </div>
   );

@@ -1,6 +1,6 @@
 import React from "react";
 import { useCallbackRef } from "../hooks";
-import { IRange } from "../utils/common";
+import { IBounds, IRange } from "../utils/common";
 import { useSlide } from "./hooks";
 import "./index.css";
 import { EOrientation, sliderTrackStyle } from "./utils";
@@ -8,7 +8,7 @@ import { EOrientation, sliderTrackStyle } from "./utils";
 interface Props {
   value: IRange;
   onChange(value: IRange): void;
-  minRangeLength?: number;
+  lengthBounds?: IBounds;
   trackThickness?: number;
   orientation?: EOrientation;
 }
@@ -16,7 +16,7 @@ interface Props {
 const Slider: React.VFC<Props> = ({
   value,
   onChange,
-  minRangeLength = 0.2,
+  lengthBounds,
   trackThickness = 10,
   orientation = EOrientation.horizontal,
 }) => {
@@ -28,7 +28,7 @@ const Slider: React.VFC<Props> = ({
     onChange,
     thickness: trackThickness,
     orientation,
-    lengthBounds: { min: minRangeLength, max: Infinity },
+    lengthBounds,
   });
 
   return (
