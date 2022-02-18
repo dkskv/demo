@@ -1,20 +1,19 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { IConverter } from "./utils";
 
 export function useTwoWayBinding<A, B, U>(
-  initialUniversalValue: U,
+  universalValue: U,
+  onChange: (v: U) => void,
   [converterA, converterB]: [IConverter<A, U>, IConverter<B, U>]
 ) {
-  const [universalValue, setUniversalValue] = useState(initialUniversalValue);
-
   const handleAChange = useCallback(
-    (value: A) => setUniversalValue(converterA.toUni(value)),
-    [converterA]
+    (value: A) => onChange(converterA.toUni(value)),
+    [converterA, onChange]
   );
 
   const handleBChange = useCallback(
-    (value: B) => setUniversalValue(converterB.toUni(value)),
-    [converterB]
+    (value: B) => onChange(converterB.toUni(value)),
+    [converterB, onChange]
   );
 
   const aValue = converterA.toSrc(universalValue);

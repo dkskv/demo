@@ -36,3 +36,7 @@ export const getInputsRangeConverter = (
     },
   };
 };
+
+export function toSliderLengthBounds(bounds: IBounds, lengthBounds: IBounds) {
+  return mapObjIndexed((x) => x / (bounds.max - bounds.min), lengthBounds);
+}

@@ -43,3 +43,7 @@ export function getRangeLengthBounds(
     },
   };
 }
+
+export function getDefaultBounds(bounds: Partial<IBounds> = {}) {
+  return { min: -Infinity, max: Infinity, ...bounds };
+}

@@ -1,21 +1,20 @@
 import { is } from "ramda";
 import { useCallback } from "react";
-import { IBounds, IRange } from "../utils/common";
+import { getDefaultBounds, IBounds, IRange } from "../utils/common";
 import { getNextRange } from "./utils";
 
-interface IProps {
+export interface INumbersRangeInputProps {
   value: IRange;
   onChange(value: IRange): void;
-  bounds?: IBounds;
-  lengthBounds?: IBounds;
+  bounds?: Partial<IBounds>;
+  lengthBounds?: Partial<IBounds>;
 }
 
-const NumbersRangeInput: React.VFC<IProps> = ({
-  value: range,
-  onChange,
-  bounds = { min: -Infinity, max: Infinity }, // rerender
-  lengthBounds = { min: 0, max: Infinity }, // rerender
-}) => {
+const NumbersRangeInput: React.VFC<INumbersRangeInputProps> = (props) => {
+  const {value: range, onChange } = props;
+  const bounds = getDefaultBounds(props.bounds);
+  const lengthBounds = getDefaultBounds(props.lengthBounds);
+
   const handleChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const key = event.target.dataset.key as keyof IRange | undefined;

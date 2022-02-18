@@ -1,13 +1,18 @@
 import makeStateful from "./decorators/makeStateful";
 import DndTest from "./DndTest";
-import { SliderWithInputs } from "./SliderWithInputs";
+import NumberRangeInputWithSlider from "./NumberRangeInputWithSlider";
 
 function App() {
-  const SSliderWithInputs = makeStateful(SliderWithInputs);
+  const SNumberRangeInputWithSlider = makeStateful(NumberRangeInputWithSlider);
 
   return (
     <div className="App">
-      <SSliderWithInputs initialValue={{ start: 1, end: 5 }} />
+      <SNumberRangeInputWithSlider
+        initialValue={{ start: 1, end: 7 }}
+        bounds={{ min: -20, max: 11 }}
+        lengthBounds={{ min: 5 }}
+        independentSlider={true}
+      />
       <DndTest />
     </div>
   );
