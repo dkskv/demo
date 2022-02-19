@@ -18,7 +18,7 @@ const getInputConverter = ({
     return (x - min) / (max - min);
   },
   toSrc(x: number) {
-    return Math.floor(min + x * (max - min));
+    return Math.round(min + x * (max - min));
   },
 });
 
