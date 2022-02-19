@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import makeStateful from "../decorators/makeStateful";
 import NumbersRangeInput, {
   INumbersRangeInputProps,
 } from "../NumbersRangeInput";
@@ -70,4 +71,4 @@ const NumberRangeInputWithSlider: React.VFC<IProps> = (props) => {
   );
 };
 
-export default NumberRangeInputWithSlider;
+export default makeStateful(NumberRangeInputWithSlider);

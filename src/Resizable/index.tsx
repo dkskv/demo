@@ -1,4 +1,5 @@
 import React from "react";
+import makeStateful from "../decorators/makeStateful";
 import { useCallbackRef } from "../hooks";
 import { IPressedKeys } from "../utils/common";
 import { IPosition } from "../utils/geometry";
@@ -36,4 +37,4 @@ const Resizable: React.FC<IProps> = ({
   );
 };
 
-export default Resizable;
+export default makeStateful(Resizable);

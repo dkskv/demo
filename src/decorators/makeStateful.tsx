@@ -1,3 +1,4 @@
+import { has } from "ramda";
 import { useCallback, useState } from "react";
 
 interface IStatelessProps<T, U> {
@@ -5,32 +6,39 @@ interface IStatelessProps<T, U> {
   onChange(value: T, options?: U): void;
 }
 
-interface IStatefulProps<T, U> {
+interface IStatefulProps<T, U> extends Partial<IStatelessProps<T, U>> {
   initialValue: T;
-  onChange?: IStatelessProps<T, U>["onChange"];
 }
 
 export default function makeStateful<P extends IStatelessProps<T, U>, T, U>(
   Component: React.ComponentType<P>
 ) {
-  return function ({
-    initialValue,
-    onChange,
-    ...restProps
-  }: Omit<P, keyof IStatelessProps<T, U>> & IStatefulProps<T, U>) {
-    const [value, setValue] = useState(initialValue);
+  return function (
+    props: Omit<P, keyof IStatelessProps<T, U>> & IStatefulProps<T, U>
+  ) {
+    const { initialValue, onChange, value: propsValue, ...restProps } = props;
+    const isStateful = !has("value", props);
+
+    if (has("value", props) && has("initialValue", props)) {
+      console.error(
+        "both arguments 'value' and 'initialValue' cannot be passed at the same time"
+      );
+    }
+
+    const [stateValue, setStateValue] = useState(props.initialValue);
 
     const handleChange = useCallback(
-      (value: T, options: U) => {
-        setValue(value);
-        onChange?.(value, options);
+      (nextValue: T, options: U) => {
+        isStateful && setStateValue(nextValue);
+
+        onChange?.(nextValue, options);
       },
-      [onChange]
+      [isStateful, onChange]
     );
 
     const newProps = {
       ...restProps,
-      value,
+      value: isStateful ? stateValue : propsValue,
       onChange: handleChange,
     } as unknown as P;
 

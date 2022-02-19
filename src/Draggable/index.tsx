@@ -1,4 +1,5 @@
 import React from "react";
+import makeStateful from "../decorators/makeStateful";
 import { useCallbackRef } from "../hooks";
 import { type IPoint } from "../utils/geometry";
 import { useDrag } from "./hooks";
@@ -32,4 +33,4 @@ const Draggable: React.FC<IProps> = ({
   );
 };
 
-export default Draggable;
+export default makeStateful(Draggable);
