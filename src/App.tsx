@@ -1,7 +1,13 @@
+import Carousel from "./Carousel";
 import DndTest from "./DndTest";
 import NumberRangeInputWithSlider from "./NumberRangeInputWithSlider";
 
 function App() {
+  const testItems = Array.from({ length: 10 }, (_, i) => ({
+    key: String(i + 1),
+    content: `${i + 1}-й`
+  }));
+
   return (
     <div className="App">
       <NumberRangeInputWithSlider
@@ -11,6 +17,13 @@ function App() {
         independentSlider={true}
       />
       <DndTest />
+      <Carousel
+        itemWidth={120}
+        gutter={20}
+        visibleCount={3}
+        defaultKey={"5"}
+        items={testItems}
+      />
     </div>
   );
 }

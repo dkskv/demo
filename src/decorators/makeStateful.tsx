@@ -10,6 +10,7 @@ interface IStatefulProps<T, U> extends Partial<IStatelessProps<T, U>> {
   initialValue: T;
 }
 
+// Добавляет возможность переместить управление состоянием внутрь компонента
 export default function makeStateful<P extends IStatelessProps<T, U>, T, U>(
   Component: React.ComponentType<P>
 ) {
