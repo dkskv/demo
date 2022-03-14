@@ -1,13 +1,4 @@
-export interface IPoint {
-  x: number;
-  y: number;
-}
-export interface IDimensions {
-  width: number;
-  height: number;
-}
-
-export type ILineSegment = [IPoint, IPoint];
+import { mapObjIndexed } from "ramda";
 
 export const enum EBoxSide {
   top = "top",
@@ -16,7 +7,23 @@ export const enum EBoxSide {
   right = "right",
 }
 
+export const enum EPointCoordinate {
+  x = "x",
+  y = "y"
+}
+
+export const enum EDimension {
+  width = "width",
+  height = "height"
+}
+
 export interface IBoxBounds extends Record<EBoxSide, number> {}
+
+export interface IPoint extends Record<EPointCoordinate, number> {}
+
+export interface IDimensions extends Record<EDimension, number> {}
+
+export type ILineSegment = [IPoint, IPoint];
 
 export interface IPosition extends IPoint, IDimensions {}
 
@@ -41,6 +48,7 @@ export function pointProjection([a, b]: ILineSegment, c: IPoint): IPoint {
   const ab = toRadiusVector(a, b);
 
   // Коэффициент между [расстоянием от А до точки проекции] и [длиной вектора AB]
+  // А где рисунок к комментарию?))
   const t = dot(ac, ab) / dot(ab, ab);
 
   return { x: a.x + ab.x * t, y: a.y + ab.y * t };
@@ -64,3 +72,11 @@ export const BoxBoundsConverter = {
     };
   },
 };
+
+export function normalize<T extends Record<string, number>>(obj: T, length: number) {
+  return mapObjIndexed((a) => a / length, obj) as T;
+}
+
+export function denormalize<T extends Record<string, number>>(obj: T, length: number) {
+  return mapObjIndexed((a) => a * length, obj) as T;
+}

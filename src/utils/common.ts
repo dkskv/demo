@@ -15,12 +15,12 @@ function joinClassNames(names: string[]) {
   return validNames.join(" ");
 }
 
-export interface IRange {
-  start: number; // [0, 1]
-  end: number; // [0, 1]
+export type IRange = {
+  start: number; 
+  end: number; 
 }
 
-export interface IBounds {
+export type IBounds = {
   min: number;
   max: number;
 }

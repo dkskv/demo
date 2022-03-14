@@ -1,16 +1,17 @@
 import React from "react";
 import { useCallbackRef } from "../hooks";
 import { IBounds, IRange } from "../utils/common";
+import { IOrientationAttrs, Orientations } from "../utils/orientation";
 import { useSlide } from "./hooks";
 import "./index.css";
-import { EOrientation, sliderTrackStyle } from "./utils";
+import { sliderTrackStyle } from "./utils";
 
 interface Props {
   value: IRange;
   onChange(value: IRange): void;
   lengthBounds?: IBounds;
   trackThickness?: number;
-  orientation?: EOrientation;
+  orientation?: IOrientationAttrs;
 }
 
 const Slider: React.VFC<Props> = ({
@@ -18,7 +19,7 @@ const Slider: React.VFC<Props> = ({
   onChange,
   lengthBounds,
   trackThickness = 10,
-  orientation = EOrientation.horizontal,
+  orientation = Orientations.horizontal,
 }) => {
   const [track, setTrackRef] = useCallbackRef();
 
@@ -36,7 +37,7 @@ const Slider: React.VFC<Props> = ({
       <div
         ref={setTrackRef}
         className="Track"
-        style={sliderTrackStyle(value, orientation, trackThickness)}
+        style={sliderTrackStyle(value, trackThickness, orientation)}
       >
         {thumbs}
       </div>

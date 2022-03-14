@@ -5,6 +5,7 @@ import NumbersRangeInput, {
 } from "../NumbersRangeInput";
 import Slider from "../Slider";
 import { getDefaultBounds, IRange } from "../utils/common";
+import { Orientations } from "../utils/orientation";
 import { useTwoWayBinding } from "./hooks";
 import "./index.css";
 import {
@@ -38,7 +39,7 @@ const NumberRangeInputWithSlider: React.VFC<IProps> = (props) => {
     inputsRangeConverter.toUni(value)
   );
 
-  const handleChange = useCallback(
+  const handleUniChange = useCallback(
     (value: IRange) => {
       setSliderValue(value);
       // событие, даже когда числовой ввод не изменился
@@ -49,7 +50,7 @@ const NumberRangeInputWithSlider: React.VFC<IProps> = (props) => {
 
   const { values, callbacks } = useTwoWayBinding(
     independentSlider ? sliderValue : inputsRangeConverter.toUni(value),
-    handleChange,
+    handleUniChange,
     [identityConverter as IConverter<IRange, IRange>, inputsRangeConverter]
   );
 
@@ -60,6 +61,7 @@ const NumberRangeInputWithSlider: React.VFC<IProps> = (props) => {
         onChange={callbacks[0]}
         trackThickness={15}
         lengthBounds={toSliderLengthBounds(bounds, lengthBounds)}
+        // orientation={Orientations.vertical}
       />
       <NumbersRangeInput
         value={values[1]}

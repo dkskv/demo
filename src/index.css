@@ -10,3 +10,7 @@
   flex-direction: column;
   row-gap: 30px;
 }
+
+body {
+  background-color: dimgrey;
+}

@@ -1,40 +1,24 @@
-.Carousel {
-  padding: 4px;
-  display: inline-flex;
-  background: grey;
-  user-select: none;
-  overflow: hidden;
-  /* временное решение */
-  width: max-content;
-}
-
 .ViewArea {
+  position: relative;
+  
   display: flex;
+  align-items: center;
+  
+  height: 60px;
+  
   overflow: hidden;
-  margin: 0 20px;
-}
+  user-select: none;
 
-.Strip {
-  display: flex;
-  flex-shrink: 0;
-  transition: margin 250ms;
+  background-color: pink;
 }
 
 .Item {
+  position: absolute;
+  
   display: flex;
   justify-content: center;
   align-items: center;
+
   background: Deepskyblue;
-}
-
-.Arrow {
-  display: flex;
-  justify-content: center;
-  color: white;
-  cursor: pointer;
-  width: 60px;
-}
-
-.Arrow_disabled {
-  color: black;
+  transition: left 250ms;
 }

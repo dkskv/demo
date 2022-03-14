@@ -1,90 +1,54 @@
-import { clamp, mapObjIndexed } from "ramda";
+import { clamp } from "ramda";
 import { IRange } from "../utils/common";
-import { IDimensions, type IPosition } from "../utils/geometry";
-
-export const enum EOrientation {
-  vertical,
-  horizontal,
-}
-
-function getContainerLength(
-  { width, height }: IDimensions,
-  orientation: EOrientation
-) {
-  switch (orientation) {
-    case EOrientation.horizontal:
-      return width;
-    case EOrientation.vertical:
-      return height;
-  }
-}
+import { denormalize, IDimensions, normalize, type IPosition } from "../utils/geometry";
+import { IOrientationAttrs } from "../utils/orientation";
 
 export const Converter = {
   toSliderRange(
-    { x, width, y, height }: IPosition,
+    position: IPosition,
     containerDimensions: IDimensions,
-    orientation: EOrientation
+    orientation: IOrientationAttrs
   ): IRange {
-    const containerLength = getContainerLength(
-      containerDimensions,
-      orientation
-    );
+    const containerLength = containerDimensions[orientation.length];
 
-    function normalize<T extends Record<string, number>>(obj: T) {
-      return mapObjIndexed((a) => a / containerLength, obj) as T;
-    }
+    const start = position[orientation.coordinate];
+    const length = position[orientation.length];
 
-    switch (orientation) {
-      case EOrientation.horizontal:
-        return normalize({ start: x, end: x + width});
-      case EOrientation.vertical:
-        return normalize({ start: y, end: y + height });
-    }
+    return normalize({ start, end: start + length }, containerLength);
   },
   toResizablePosition(
     range: IRange,
     containerDimensions: IDimensions,
-    orientation: EOrientation,
+    orientation: IOrientationAttrs,
     thickness: number
   ): IPosition {
-    const containerLength = getContainerLength(
-      containerDimensions,
-      orientation
-    );
+    const containerLength = containerDimensions[orientation.length];
+    const { start, end } = denormalize(range, containerLength);
 
-    const { start, end } = mapObjIndexed((a) => a * containerLength, range);
-    const length = end - start;
-
-    switch (orientation) {
-      case EOrientation.horizontal:
-        return { x: start, width: length, y: 0, height: thickness };
-      case EOrientation.vertical:
-        return { x: 0, width: thickness, y: start, height: length };
-    }
+    return {
+      [orientation.fixedCoordinate]: 0,
+      [orientation.coordinate]: start,
+      [orientation.thickness]: thickness,
+      [orientation.length]: end - start,
+    } as unknown as IPosition;
   },
 };
 
 export const sliderTrackStyle = (
   { start, end }: IRange,
-  orientation: EOrientation,
-  thickness: number
+  thickness: number,
+  orientation: IOrientationAttrs,
 ) => ({
   position: "absolute" as const,
-  ...(orientation === EOrientation.horizontal
-    ? {
-        left: `${start * 100}%`,
-        width: `${(end - start) * 100}%`,
-        height: `${thickness}px`,
-      } as const
-    : {
-        top: `${start * 100}%`,
-        height: `${(end - start) * 100}%`,
-        width: `${thickness}px`,
-      } as const),
-});
+  [orientation.css.coordinate]: `${start * 100}%`,
+  [orientation.css.length]: `${(end - start) * 100}%`,
+  [orientation.css.thickness]: `${thickness}px`,
+} as const);
 
 export function validateSliderRange(range: IRange) {
-  if (Object.entries(range).every(([, value]) => value === clamp(0, 1, value))) {
+  if (
+    Object.entries(range).every(([, value]) => value === clamp(0, 1, value))
+  ) {
     return;
   }
 

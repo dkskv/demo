@@ -1,80 +1,51 @@
-import { useCallback, useMemo, useState } from "react";
+import { IOrientationAttrs, Orientations } from "../utils/orientation";
 import "./index.css";
+import { expandEvenly, getIndexesRange, getItemStyle, getViewAreaStyle, rangeInclusive } from "./utils";
 
-interface IProps {
-  itemWidth?: number;
-  visibleCount?: number;
+export interface ICarouselProps {
+  position: number;
+  viewAreaSize: number;
+  itemSize: number;
   gutter?: number;
-  defaultKey?: string;
-  // заменить на renderer
-  items: { key: string; content: React.ReactNode }[];
+  count: number;
+  renderItem(index: number): React.ReactNode;
+  orientation?: IOrientationAttrs;
 }
 
-const Arrow: React.FC<{ disabled: boolean; onClick(): void }> = ({
-  children,
-  disabled,
-  onClick,
+const Carousel: React.VFC<ICarouselProps> = ({
+  gutter = 0,
+  viewAreaSize,
+  itemSize,
+  position,
+  count,
+  renderItem,
+  orientation = Orientations.horizontal
 }) => {
+  const slotSize = itemSize + gutter;
+
+  const maxPosition = slotSize * count;
+
+  const overscanCount = 1;
+
+  const indexes = getIndexesRange(position, viewAreaSize, slotSize);
+  const expandedIndexes = expandEvenly(overscanCount, indexes);
+
   return (
     <div
-      className={`Arrow ${disabled ? "Arrow_disabled" : ""}`}
-      onClick={onClick}
+      className="ViewArea"
+      style={getViewAreaStyle(viewAreaSize, gutter, orientation)}
     >
-      {children}
-    </div>
-  );
-};
-
-const Carousel: React.VFC<IProps> = ({
-  itemWidth = 100,
-  gutter = 0,
-  visibleCount = 3,
-  defaultKey,
-  items,
-}) => {
-  const stepWidth = itemWidth + gutter;
-  const actualVisibleCount = Math.min(visibleCount, items.length);
-  const maxPosition = -stepWidth * (items.length - actualVisibleCount);
-
-  const defaultPosition = useMemo(() => {
-    const index = items.findIndex(({ key }) => defaultKey === key);
-    return ~index ? Math.max(-index * stepWidth, maxPosition) : 0;
-  }, []);
-
-  const [position, setPosition] = useState(defaultPosition);
-
-  const handleClickPrev = useCallback(() => {
-    setPosition(Math.min(position + stepWidth * visibleCount, 0));
-  }, [position, stepWidth, visibleCount]);
-
-  const handleClickNext = useCallback(() => {
-    setPosition(Math.max(position - stepWidth * visibleCount, maxPosition));
-  }, [position, stepWidth, visibleCount, maxPosition]);
-
-  // Имеет смысл считать только если имеем фиксированный размер карточки
-  const viewAreaWidth = actualVisibleCount * stepWidth - gutter;
-
-  return (
-    <div className="Carousel">
-      <Arrow disabled={position === 0} onClick={handleClickPrev}>
-        {"<"}
-      </Arrow>
-      <div className="ViewArea" style={{ width: viewAreaWidth }}>
-        <div className="Strip" style={{ marginLeft: position }}>
-          {items.map(({ key, content }) => (
-            <div
-              key={key}
-              className="Item"
-              style={{ width: itemWidth, marginRight: gutter }}
-            >
-              {content}
-            </div>
-          ))}
-        </div>
-      </div>
-      <Arrow disabled={position === maxPosition} onClick={handleClickNext}>
-        {">"}
-      </Arrow>
+      {rangeInclusive(expandedIndexes.start, expandedIndexes.end).map(
+        (index) => (
+          <div
+            key={index}
+            className="Item"
+            style={getItemStyle(itemSize, index * slotSize - position, orientation)}
+          >
+            {renderItem(index)}
+          </div>
+        )
+      )}
     </div>
   );
 };

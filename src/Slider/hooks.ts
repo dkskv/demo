@@ -1,18 +1,18 @@
-import { mapObjIndexed } from "ramda";
 import { useCallback, useMemo } from "react";
 import { useResize } from "../Resizable/hooks";
 import { IThumbKey } from "../Resizable/utils";
 import { clampInBox } from "../Resizable/utils/geometry";
 import { IBounds, IRange } from "../utils/common";
-import { EBoxSide, IPosition } from "../utils/geometry";
-import { Converter, EOrientation, validateSliderRange } from "./utils";
+import { denormalize, IPosition } from "../utils/geometry";
+import { IOrientationAttrs } from "../utils/orientation";
+import { Converter, validateSliderRange } from "./utils";
 
 interface IProps<T> {
   element: T | null;
   range: IRange;
   onChange(range: IRange): void;
-  thickness?: number;
-  orientation?: EOrientation;
+  thickness: number;
+  orientation: IOrientationAttrs;
   /**
    * Подумать на счет возврата конфига вместо thumbs. И предоставить дефолтный рендерер из утилит.
    */
@@ -23,8 +23,8 @@ interface IProps<T> {
 export function useSlide<T extends HTMLElement>({
   element,
   range,
-  thickness = 10,
-  orientation = EOrientation.horizontal,
+  thickness,
+  orientation,
   lengthBounds,
   onChange,
 }: IProps<T>) {
@@ -54,10 +54,7 @@ export function useSlide<T extends HTMLElement>({
   );
 
   const thumbKeys = useMemo(
-    () =>
-      orientation === EOrientation.horizontal
-        ? [EBoxSide.left, EBoxSide.right]
-        : [EBoxSide.top, EBoxSide.bottom],
+    () => [orientation.startSide, orientation.endSide],
     [orientation]
   );
 
@@ -72,14 +69,10 @@ export function useSlide<T extends HTMLElement>({
 
   const dimensionsBounds = (() => {
     if (parentElement && lengthBounds) {
-      const key = orientation === EOrientation.horizontal ? "width" : "height";
+      const parentLength =
+        parentElement.getBoundingClientRect()[orientation.length];
 
-      return {
-        [key]: mapObjIndexed(
-          (a) => a * parentElement.getBoundingClientRect()[key],
-          lengthBounds
-        ),
-      };
+      return { [orientation.length]: denormalize(lengthBounds, parentLength) };
     }
   })();
 
