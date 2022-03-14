@@ -1,8 +1,10 @@
 import { useCallback, useMemo } from "react";
+import { useKeepingRefForEquals } from "../decorators/useKeepingRefForEquals";
 import { useResize } from "../Resizable/hooks";
 import { IThumbKey } from "../Resizable/utils";
 import { clampInBox } from "../Resizable/utils/geometry";
 import { IBounds, IRange } from "../utils/common";
+import { getElementPosition } from "../utils/dom";
 import { denormalize, IPosition } from "../utils/geometry";
 import { IOrientationAttrs } from "../utils/orientation";
 import { Converter, validateSliderRange } from "./utils";
@@ -32,13 +34,16 @@ export function useSlide<T extends HTMLElement>({
 
   const parentElement = element?.parentElement;
 
+  const parentPosition = useKeepingRefForEquals(
+    () => (parentElement ? getElementPosition(parentElement) : null),
+    [parentElement]
+  );
+
   const handleResize = useCallback(
     (position: IPosition, options: { thumbKey: IThumbKey }) => {
-      if (!parentElement) {
+      if (!parentPosition) {
         return;
       }
-
-      const parentPosition: IPosition = parentElement.getBoundingClientRect();
 
       const clampedPosition = clampInBox(
         parentPosition,
@@ -50,7 +55,7 @@ export function useSlide<T extends HTMLElement>({
         Converter.toSliderRange(clampedPosition, parentPosition, orientation)
       );
     },
-    [onChange, orientation, parentElement]
+    [onChange, orientation, parentPosition]
   );
 
   const thumbKeys = useMemo(
@@ -58,19 +63,18 @@ export function useSlide<T extends HTMLElement>({
     [orientation]
   );
 
-  const position = parentElement
+  const position = parentPosition
     ? Converter.toResizablePosition(
         range,
-        parentElement.getBoundingClientRect(),
+        parentPosition,
         orientation,
         thickness
       )
     : null;
 
   const dimensionsBounds = (() => {
-    if (parentElement && lengthBounds) {
-      const parentLength =
-        parentElement.getBoundingClientRect()[orientation.length];
+    if (parentPosition && lengthBounds) {
+      const parentLength = parentPosition[orientation.length];
 
       return { [orientation.length]: denormalize(lengthBounds, parentLength) };
     }
