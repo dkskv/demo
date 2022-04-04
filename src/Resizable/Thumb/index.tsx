@@ -1,32 +1,27 @@
 import React from "react";
 import { useDrag } from "../../Draggable/hooks";
 import { draggableStyle } from "../../Draggable/utils";
-import { useCallbackRef, useBindCallbackProp } from "../../hooks";
+import { useCallbackRef } from "../../hooks";
 import { type IPressedKeys } from "../../utils/common";
-import { type IPoint } from "../../utils/geometry";
+import { Point } from "../../utils/point";
 import "./index.css";
 
-interface Props<T = unknown> {
-  callbackProp: T;
+interface Props {
   onChange(
-    callbackProp: T,
-    origin: IPoint,
+    point: Point,
     pressedKeys: { pressedKeys: IPressedKeys }
   ): void;
-  point: IPoint;
+  point: Point;
 }
 
 const Thumb: React.FC<Props> = ({
-  callbackProp,
   onChange,
   point,
   children,
 }) => {
-  const handleChange = useBindCallbackProp(onChange, callbackProp);
-
   const [element, setRef] = useCallbackRef();
 
-  useDrag({ element, onChange: handleChange });
+  useDrag({ element, onChange });
 
   return (
     <div ref={setRef} style={draggableStyle(point)} className="Centered">

@@ -1,4 +1,4 @@
-import { IOrientationAttrs, Orientations } from "../utils/orientation";
+import { IOrientation, Orientations } from "../utils/orientation";
 import "./index.css";
 import { expandEvenly, getIndexesRange, getItemStyle, getViewAreaStyle, rangeInclusive } from "./utils";
 
@@ -9,7 +9,7 @@ export interface ICarouselProps {
   gutter?: number;
   count: number;
   renderItem(index: number): React.ReactNode;
-  orientation?: IOrientationAttrs;
+  orientation?: IOrientation;
 }
 
 const Carousel: React.VFC<ICarouselProps> = ({

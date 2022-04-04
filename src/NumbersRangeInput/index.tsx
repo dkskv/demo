@@ -1,57 +1,61 @@
-import { is } from "ramda";
 import { useCallback } from "react";
-import { getDefaultBounds, IBounds, IRange } from "../utils/common";
-import { getNextRange } from "./utils";
+import { Constraints } from "../utils/constraints";
+import { Range } from "../utils/range";
 
 export interface INumbersRangeInputProps {
-  value: IRange;
-  onChange(value: IRange): void;
-  bounds?: Partial<IBounds>;
-  lengthBounds?: Partial<IBounds>;
+  value: Range;
+  onChange(value: Range): void;
+  /** диапазон минимального и максимального значений */
+  constraints?: Constraints;
+  // todo: ограничить только положительными значениями
+  /** минимальный и максимальный размер диапазона */
+  sizeConstraints?: Constraints;
 }
 
 const NumbersRangeInput: React.VFC<INumbersRangeInputProps> = (props) => {
-  const {value: range, onChange } = props;
-  const bounds = getDefaultBounds(props.bounds);
-  const lengthBounds = getDefaultBounds(props.lengthBounds);
+  const {
+    value: range,
+    constraints = Constraints.without(),
+    sizeConstraints = Constraints.without(),
+    onChange,
+  } = props;
 
-  const handleChange = useCallback(
+  const handleChangeStart = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      const key = event.target.dataset.key as keyof IRange | undefined;
-
-      if (!is(String, key)) {
-        console.error(`Incorrect input key: ${key}`);
-        return;
-      }
-
-      const value = Number(event.target.value);
-
-      onChange(getNextRange(range, [key, value], lengthBounds));
+      onChange(
+        range
+          .setStart(Number(event.target.value))
+          .constrainStart(sizeConstraints)
+      );
     },
-    [range, onChange, lengthBounds]
+    [range, sizeConstraints, onChange]
   );
 
-  const startKey: keyof IRange = "start";
-  const endKey: keyof IRange = "end";
+  const handleChangeEnd = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      onChange(
+        range.setEnd(Number(event.target.value)).constrainEnd(sizeConstraints)
+      );
+    },
+    [range, sizeConstraints, onChange]
+  );
 
   return (
     <div>
       <input
-        data-key={startKey}
         type="number"
-        onChange={handleChange}
+        onChange={handleChangeStart}
         value={range.start}
-        min={bounds.min}
-        max={bounds.max}
+        min={constraints.min}
+        max={constraints.max}
       />
       -
       <input
-        data-key={endKey}
         type="number"
-        onChange={handleChange}
+        onChange={handleChangeEnd}
         value={range.end}
-        min={bounds.min}
-        max={bounds.max}
+        min={constraints.min}
+        max={constraints.max}
       />
     </div>
   );

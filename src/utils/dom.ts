@@ -1,6 +1,7 @@
-import { pick } from "ramda";
-import { IPosition } from "./geometry";
+import { BoundingBox } from "./boundingBox";
 
-export function getElementPosition(element: HTMLElement): IPosition {
-    return pick(["x", "y", "width", "height"], element.getBoundingClientRect());
+export function getElementBoundingBox(element: HTMLElement) {
+    const { x, y, width, height } = element.getBoundingClientRect();
+
+    return BoundingBox.createByDimensions(x, y, width, height);
 }

@@ -1,84 +1,91 @@
 import { useCallback } from "react";
 import { useDrag } from "../Draggable/hooks";
+import { BoundingBox } from "../utils/boundingBox";
 import { type IPressedKeys } from "../utils/common";
-import { getDimensions, type IPoint, type IPosition } from "../utils/geometry";
-import ThumbComponent from "./Thumb";
-import {
-  allThumbKeys,
-  getThumbs,
-  type IThumbKey,
-  withDefaultDimensionsBounds,
-} from "./utils";
-import { type IDimensionsBounds } from "./utils/geometry";
-import { type Thumb } from "./utils/Thumb";
+import { Point } from "../utils/point";
+import { SizesConstraints } from "../utils/sizesConstraints";
+import Thumb from "./Thumb";
+import { allThumbKeys, getThumbs, type IThumbKey } from "./utils";
+import { type MovableGroup } from "./utils/movableGroup";
 
 interface IProps<T> {
   element: T | null;
-  position: IPosition | null;
+  box: BoundingBox | null;
   onChange(
-    a: IPosition,
-    options: { pressedKeys: IPressedKeys; thumbKey: IThumbKey }
+    a: BoundingBox,
+    options: { pressedKeys?: IPressedKeys; thumbKey?: IThumbKey }
   ): void;
-  renderThumb?(key: IThumbKey): React.ReactElement;
   isDrag?: boolean;
-  dimensionsBounds?: Partial<IDimensionsBounds>;
+  sizesConstraints: SizesConstraints;
   onlyRateably?: boolean;
-  thumbKeys?: IThumbKey[];
+  thumbKeys?: readonly IThumbKey[];
+  /** todo: Можно просить компонент */
+  renderThumb?(key: IThumbKey): React.ReactElement;
 }
+
+/**
+ * todo: Можно предусмотреть пропс, устанавливающий расположение кнопок: внутри бокса 
+ * или на том же уровне
+ */
 
 export function useResize<T extends HTMLElement>({
   element,
-  position,
+  box,
   onChange,
-  renderThumb = () => <div className="Thumb" />,
   isDrag = true,
-  dimensionsBounds,
+  sizesConstraints,
   onlyRateably = false,
   thumbKeys = allThumbKeys,
-}: IProps<T>) {
-  useDrag({ element: isDrag ? element : null, onChange });
-
-  const onThumbChange = useCallback(
-    (
-      thumb: Thumb,
-      point: IPoint,
-      { pressedKeys }: { pressedKeys: IPressedKeys }
-    ) => {
-      if (position) {
-        const nextPosition = thumb.updateBoxPosition(
-          {
-            boxPosition: position,
-            dimensionsBounds: withDefaultDimensionsBounds(dimensionsBounds),
-            isRateably: onlyRateably || pressedKeys.shiftKey,
-          },
-          point
-        );
-
-        onChange(nextPosition, {
-          pressedKeys,
-          thumbKey: thumb.key as IThumbKey,
-        });
-      }
+  /** todo: Можно просить компонент */
+  renderThumb = () => <div className="Thumb" />,
+}: IProps<T>): React.ReactNode {
+  const handleDrag = useCallback(
+    (point: Point, { pressedKeys }: { pressedKeys: IPressedKeys }) => {
+      onChange(box!.setOrigin(point), { pressedKeys });
     },
-    [onChange, position, dimensionsBounds, onlyRateably]
+    [onChange, box]
   );
 
-  const thumbs = (() => {
-    if (element && position) {
-      const dimensions = getDimensions(position);
+  useDrag({ element: isDrag ? element : null, onChange: handleDrag });
 
-      return getThumbs(thumbKeys).map((thumb, i) => (
-        <ThumbComponent
-          key={thumb.stringKey}
-          callbackProp={thumb}
-          point={thumb.getRelativePoint(dimensions)}
-          onChange={onThumbChange}
-        >
-          {renderThumb(thumbKeys[i])}
-        </ThumbComponent>
-      ));
-    }
-  })();
+  const handleChangeThumb = useCallback(
+    (
+      thumb: MovableGroup,
+      innerPoint: Point,
+      { pressedKeys }: { pressedKeys: IPressedKeys }
+    ) => {
+      /** Т.к. кнопки располагаются внутри бокса, а не на том же уровне */
+      const outerPoint = innerPoint.add(box!.origin);
 
-  return { thumbs };
+      const updatedBox = thumb.updateBox({
+        point: outerPoint,
+        box: box!,
+        sizesConstraints,
+        isRateably: onlyRateably || pressedKeys.shiftKey,
+      });
+
+      onChange(updatedBox, {
+        pressedKeys,
+        thumbKey: thumb.key as IThumbKey,
+      });
+    },
+    [onChange, box, sizesConstraints, onlyRateably]
+  );
+
+  if (!element || !box) {
+    return null;
+  }
+
+  /** Т.к. кнопки располагаются внутри бокса, а не на том же уровне */
+  const innerBox = box.moveToOrigin();
+
+  return getThumbs(thumbKeys).map((thumb, i) => (
+    <Thumb
+      key={thumb.stringKey}
+      point={thumb.getPointInBox(innerBox)}
+      onChange={(point, keys) => handleChangeThumb(thumb, point, keys)}
+    >
+      {renderThumb(thumbKeys[i])}
+    </Thumb>
+  ));
 }

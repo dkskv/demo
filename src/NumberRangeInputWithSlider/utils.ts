@@ -1,8 +1,11 @@
-import { identity, mapObjIndexed } from "ramda";
-import { IBounds, IRange } from "../utils/common";
+import { identity } from "ramda";
+import { Constraints } from "../utils/constraints";
+import { Range} from "../utils/range";
 
-// абстрактное о конвертерах вынести отсюдава
-
+/**
+ * todo: Вынести в отдельную утилиту двустороннее связывание.
+ * И поработать над понятностью.
+ */
 export interface IConverter<T, U> {
   toUni(x: T): U;
   toSrc(x: U): T;
@@ -13,7 +16,7 @@ export const identityConverter = { toUni: identity, toSrc: identity };
 const getInputConverter = ({
   min,
   max,
-}: IBounds): IConverter<number, number> => ({
+}: Constraints): IConverter<number, number> => ({
   toUni(x: number) {
     return (x - min) / (max - min);
   },
@@ -23,20 +26,16 @@ const getInputConverter = ({
 });
 
 export const getInputsRangeConverter = (
-  bounds: IBounds
-): IConverter<IRange, IRange> => {
+  bounds: Constraints
+): IConverter<Range, Range> => {
   const converter = getInputConverter(bounds);
 
   return {
-    toUni(range) {
-      return mapObjIndexed(converter.toUni, range);
+    toUni(range: Range) {
+      return range.map(converter.toUni);
     },
-    toSrc(range) {
-      return mapObjIndexed(converter.toSrc, range);
+    toSrc(range: Range) {
+      return range.map(converter.toSrc);
     },
   };
 };
-
-export function toSliderLengthBounds(bounds: IBounds, lengthBounds: IBounds) {
-  return mapObjIndexed((x) => x / (bounds.max - bounds.min), lengthBounds);
-}

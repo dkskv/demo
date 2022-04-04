@@ -1,5 +1,5 @@
-import { mergeWithAdd, type IPressedKeys } from "../../utils/common";
-import { getDimensions, IPosition, type IPoint } from "../../utils/geometry";
+import { type IPressedKeys } from "../../utils/common";
+import { Point } from "../../utils/point";
 
 interface IMouseEvent
   extends Pick<
@@ -15,30 +15,23 @@ interface IMouseEvent
   > {}
 
 export interface IMoveCallback {
-  (a: IPoint, keys: IPressedKeys): void;
+  (a: Point, keys: IPressedKeys): void;
 }
 
 export function createDragHandler(
   area: HTMLElement,
   element: HTMLElement,
-  callback: (
-    position: IPosition,
-    options: { pressedKeys: IPressedKeys }
-  ) => void
+  callback: (point: Point, options: { pressedKeys: IPressedKeys }) => void
 ) {
   return function (mouseDown: IMouseEvent) {
     mouseDown.preventDefault();
     mouseDown.stopPropagation();
 
-    const dimensions = getDimensions(element.getBoundingClientRect());
+    const shift = getShiftFromOrigin(element, mouseDown.pageX, mouseDown.pageY);
 
-    const shifts = getShift(element, mouseDown.pageX, mouseDown.pageY);
-
-    createMoveHandler(area, (point, pressedKeys) => {
-      const elementOrigin = mergeWithAdd(point, shifts);
-
-      return callback({ ...elementOrigin, ...dimensions }, { pressedKeys });
-    });
+    createMoveHandler(area, (point, pressedKeys) =>
+      callback(point.add(shift), { pressedKeys })
+    );
   };
 }
 
@@ -57,18 +50,28 @@ function createMoveHandler(area: HTMLElement, callback: IMoveCallback) {
     const { pageX: mouseX, pageY: mouseY } = event;
     const { altKey, shiftKey, ctrlKey } = event;
 
-    callback(
-      { x: mouseX - areaX0, y: mouseY - areaY0 },
-      { altKey, shiftKey, ctrlKey }
-    );
+    callback(new Point(mouseX - areaX0, mouseY - areaY0), {
+      altKey,
+      shiftKey,
+      ctrlKey,
+    });
   }
 }
 
-function getShift(target: HTMLElement, clickX: number, clickY: number) {
+/**
+ * Рассчитывает смещение от точки захвата до origin:
+ * захват может быть произведен за любую точку элемента, а двигать нужно
+ * origin элемента.
+ */
+function getShiftFromOrigin(
+  target: HTMLElement,
+  clickX: number,
+  clickY: number
+) {
   const { x, y } = target.getBoundingClientRect();
   const { translateX, translateY } = getTranslate(target);
 
-  return { x: x - translateX - clickX, y: y - translateY - clickY };
+  return new Point(x - translateX - clickX, y - translateY - clickY);
 }
 
 function getTranslate(element: HTMLElement) {
@@ -78,7 +81,6 @@ function getTranslate(element: HTMLElement) {
   return { translateX: matrix.m41, translateY: matrix.m42 };
 }
 
-//
-export function draggableStyle({ x, y }: IPoint) {
+export function draggableStyle({ x, y }: Point) {
   return { position: "absolute", left: `${x}px`, top: `${y}px` } as const;
 }

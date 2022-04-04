@@ -1,6 +1,6 @@
 import { range } from "ramda";
-import { IRange } from "../utils/common";
-import { IOrientationAttrs } from "../utils/orientation";
+import { Range } from "../utils/range";
+import { IOrientation } from "../utils/orientation";
 
 export function rangeInclusive(from: number, to: number) {
   return range(from, to + 1);
@@ -14,32 +14,32 @@ export function getIndexesRange(
   x: number,
   length: number,
   slotSize: number
-): IRange {
-  return { start: fits(x, slotSize), end: fits(x + length, slotSize) };
+): Range {
+  return new Range(fits(x, slotSize), fits(x + length, slotSize))
 }
 
-export function expandEvenly(overscan: number, { start, end }: IRange): IRange {
-  return { start: start - overscan, end: end + overscan };
+export function expandEvenly(overscan: number, { start, end }: Range): Range {
+  return new Range(start - overscan, end + overscan)
 }
 
 export function getViewAreaStyle(
   areaLength: number,
   gutter: number,
-  orientation: IOrientationAttrs
+  orientation: IOrientation
 ) {
   return {
-    [orientation.css.length]: `${areaLength}px`,
-    [orientation.css.gap]: `${gutter}px`,
+    [orientation.cssKeys.length]: `${areaLength}px`,
+    [orientation.cssKeys.gap]: `${gutter}px`,
   };
 }
 
 export function getItemStyle(
   length: number,
   coordinate: number,
-  orientation: IOrientationAttrs
+  orientation: IOrientation
 ) {
   return {
-    [orientation.css.length]: `${length}px`,
-    [orientation.css.coordinate]: `${coordinate}px`,
+    [orientation.cssKeys.length]: `${length}px`,
+    [orientation.cssKeys.coordinate]: `${coordinate}px`,
   }; 
 }

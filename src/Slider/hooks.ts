@@ -1,92 +1,77 @@
-import { useCallback, useMemo } from "react";
-import { useKeepingRefForEquals } from "../decorators/useKeepingRefForEquals";
+import { useCallback } from "react";
 import { useResize } from "../Resizable/hooks";
 import { IThumbKey } from "../Resizable/utils";
-import { clampInBox } from "../Resizable/utils/geometry";
-import { IBounds, IRange } from "../utils/common";
-import { getElementPosition } from "../utils/dom";
-import { denormalize, IPosition } from "../utils/geometry";
-import { IOrientationAttrs } from "../utils/orientation";
-import { Converter, validateSliderRange } from "./utils";
+import { IOrientation } from "../utils/orientation";
+import {
+  Converter,
+  getTrackOuterBox,
+  validateSliderRange,
+} from "./utils";
+import { Range } from "../utils/range";
+import { BoundingBox } from "../utils/boundingBox";
+import { Constraints } from "../utils/constraints";
+import { denormalize, normalize } from "../utils/normalization";
 
 interface IProps<T> {
   element: T | null;
-  range: IRange;
-  onChange(range: IRange): void;
+  range: Range;
+  onChange(range: Range): void;
   thickness: number;
-  orientation: IOrientationAttrs;
-  /**
-   * Подумать на счет возврата конфига вместо thumbs. И предоставить дефолтный рендерер из утилит.
-   */
+  orientation: IOrientation;
+  sizeConstraints: Constraints;
   renderThumb?(key: IThumbKey): React.ReactElement;
-  lengthBounds?: IBounds;
 }
 
+/** Использует Resizable для реализации слайдера */
 export function useSlide<T extends HTMLElement>({
   element,
   range,
   thickness,
   orientation,
-  lengthBounds,
+  sizeConstraints,
   onChange,
 }: IProps<T>) {
   validateSliderRange(range);
-
-  const parentElement = element?.parentElement;
-
-  const parentPosition = useKeepingRefForEquals(
-    () => (parentElement ? getElementPosition(parentElement) : null),
-    [parentElement]
-  );
-
   const handleResize = useCallback(
-    (position: IPosition, options: { thumbKey: IThumbKey }) => {
-      if (!parentPosition) {
-        return;
-      }
+    (box: BoundingBox, { thumbKey }: { thumbKey: IThumbKey }) => {
+      const isDrag = !thumbKey;
 
-      const clampedPosition = clampInBox(
-        parentPosition,
-        position,
-        !options.thumbKey
-      );
+      const containerBox = getTrackOuterBox(element!);
 
-      onChange(
-        Converter.toSliderRange(clampedPosition, parentPosition, orientation)
-      );
+      const constrainedBox = isDrag
+        ? containerBox.moveToOrigin().clampInner(box)
+        : containerBox.moveToOrigin().clipInner(box);
+
+      onChange(Converter.toSliderRange(constrainedBox, orientation));
     },
-    [onChange, orientation, parentPosition]
+    [onChange, element, orientation]
   );
 
-  const thumbKeys = useMemo(
-    () => [orientation.startSide, orientation.endSide],
-    [orientation]
-  );
-
-  const position = parentPosition
-    ? Converter.toResizablePosition(
-        range,
-        parentPosition,
-        orientation,
-        thickness
-      )
-    : null;
-
-  const dimensionsBounds = (() => {
-    if (parentPosition && lengthBounds) {
-      const parentLength = parentPosition[orientation.length];
-
-      return { [orientation.length]: denormalize(lengthBounds, parentLength) };
-    }
-  })();
-
-  const { thumbs } = useResize({
+  const thumbsElements = useResize({
     element,
-    position,
+    box: Converter.toResizableBox(range, thickness, orientation),
     onChange: handleResize,
-    thumbKeys,
-    dimensionsBounds,
+    thumbKeys: orientation.sides,
+    sizesConstraints: orientation.getSizeConstraints(sizeConstraints),
   });
 
-  return { thumbs };
+  return thumbsElements;
+}
+
+/** Позволяет использовать нормализованный диапазон (в пределах от 0 до 1) */
+export function useNormalizedRange(
+  normalizedRange: Range,
+  outerLength: number,
+  onChange: (r: Range) => void
+) {
+  const range = denormalize(normalizedRange, outerLength);
+
+  const handleChange = useCallback(
+    (changedRange: Range) => {
+      onChange(normalize(changedRange, outerLength));
+    },
+    [onChange, outerLength]
+  );
+
+  return [range, handleChange] as const;
 }

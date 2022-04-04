@@ -1,11 +1,11 @@
 import { useEffect } from "react";
 import { IPressedKeys } from "../utils/common";
-import { IPosition } from "../utils/geometry";
+import { Point } from "../utils/point";
 import { createDragHandler } from "./utils";
 
 interface IProps<T> {
   element: T | null;
-  onChange(position: IPosition, options: { pressedKeys: IPressedKeys }): void;
+  onChange(point: Point, options: { pressedKeys: IPressedKeys }): void;
 }
 
 export function useDrag<T extends HTMLElement>({
@@ -20,7 +20,9 @@ export function useDrag<T extends HTMLElement>({
 
       element.addEventListener("mousedown", dragHandler);
 
-      return () => element.removeEventListener("mousedown", dragHandler);
+      return () => {
+        element.removeEventListener("mousedown", dragHandler);
+      };
     }
   }, [element, onChange]);
 }

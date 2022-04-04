@@ -1,14 +1,14 @@
 import React from "react";
 import makeStateful from "../decorators/makeStateful";
 import { useCallbackRef } from "../hooks";
-import { type IPoint } from "../utils/geometry";
+import { Point } from "../utils/point";
 import { useDrag } from "./hooks";
 import "./index.css";
 import { draggableStyle } from "./utils";
 
 type IProps = React.HTMLAttributes<HTMLDivElement> & {
-  value: IPoint;
-  onChange(value: IPoint): void;
+  value: Point;
+  onChange(value: Point): void;
 };
 
 const Draggable: React.FC<IProps> = ({
@@ -21,7 +21,7 @@ const Draggable: React.FC<IProps> = ({
   const [element, setRef] = useCallbackRef();
 
   useDrag({ element, onChange });
-
+  
   return (
     <div
       {...restProps}

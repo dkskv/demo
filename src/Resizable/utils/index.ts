@@ -1,42 +1,26 @@
 import { is, xprod } from "ramda";
 import { draggableStyle } from "../../Draggable/utils";
-import { EBoxSide, type IPosition } from "../../utils/geometry";
-import { CornerThumb, ICornerSides } from "./CornerThumb";
-import { IDimensionsBounds } from "./geometry";
-import { SideThumb } from "./SideThumb";
-import { type Thumb } from "./Thumb";
+import { BoundingBox } from "../../utils/boundingBox";
+import { EBoxSide, horizontalSides, verticalSides } from "../../utils/sides";
+import { MovableEdge, MovableCorner, type MovableGroup } from "./movableGroup";
 
-export type IThumbKey = EBoxSide | ICornerSides;
+export type ICornerSidesKey = [EBoxSide.left | EBoxSide.right, EBoxSide.top | EBoxSide.bottom];
+export type IThumbKey = EBoxSide | ICornerSidesKey;
 
-const l = EBoxSide.left;
-const r = EBoxSide.right;
-const t = EBoxSide.top;
-const b = EBoxSide.bottom;
+export const cornerThumbKeys: readonly ICornerSidesKey[] = xprod(horizontalSides, verticalSides);
+export const edgeThumbKeys: readonly EBoxSide[] = [...horizontalSides, ...verticalSides];
+export const allThumbKeys: readonly IThumbKey[] = [...cornerThumbKeys, ...edgeThumbKeys];
 
-export const cornerThumbKeys = xprod([l, r] as const, [t, b] as const);
-export const sideThumbKeys = [l, t, r, b];
-export const allThumbKeys = [...cornerThumbKeys, ...sideThumbKeys];
-
-export function getThumbs(includedKeys: IThumbKey[] = []): Thumb[] {
+export function getThumbs(includedKeys: readonly IThumbKey[] = []): MovableGroup[] {
   return includedKeys.map((key) =>
-    is(String, key) ? new SideThumb(key) : new CornerThumb(key)
+    is(String, key) ? new MovableEdge(key) : new MovableCorner(key)
   );
 }
 
-export function withDefaultDimensionsBounds(
-  dimensionsBounds: Partial<IDimensionsBounds> = {}
-): IDimensionsBounds {
+export function resizableStyle(box: BoundingBox) {
   return {
-    width: { min: 0, max: Infinity },
-    height: { min: 0, max: Infinity },
-    ...dimensionsBounds,
-  };
-}
-
-export function resizableStyle(position: IPosition) {
-  return {
-    ...draggableStyle(position),
-    width: position.width,
-    height: position.height,
+    ...draggableStyle(box.origin),
+    width: `${box.dx}px`,
+    height: `${box.dy}px`,
   } as const;
 }

@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { IConverter } from "./utils";
 
+/** Связывает 2 значения через промежуточное */
 export function useTwoWayBinding<A, B, U>(
   universalValue: U,
   onChange: (v: U) => void,

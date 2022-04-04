@@ -4,35 +4,35 @@ import NumbersRangeInput, {
   INumbersRangeInputProps,
 } from "../NumbersRangeInput";
 import Slider from "../Slider";
-import { getDefaultBounds, IRange } from "../utils/common";
-import { Orientations } from "../utils/orientation";
 import { useTwoWayBinding } from "./hooks";
 import "./index.css";
 import {
   getInputsRangeConverter,
   IConverter,
   identityConverter,
-  toSliderLengthBounds,
 } from "./utils";
+import { Range } from "../utils/range";
+import { Constraints } from "../utils/constraints";
+import { normalize } from "../utils/normalization";
 
 interface IProps extends INumbersRangeInputProps {
-  bounds: Required<Required<INumbersRangeInputProps>["bounds"]>;
-  independentSlider?: boolean;
+  constraints: NonNullable<INumbersRangeInputProps["constraints"]>;
+  /** будет ли слайдер прерывисто двигаться по числовым отметкам */ 
+  isDiscreteSlider?: boolean;
 }
 
 const NumberRangeInputWithSlider: React.VFC<IProps> = (props) => {
   const {
     value,
     onChange,
-    bounds,
-    independentSlider = true,
+    constraints,
+    sizeConstraints = Constraints.positives(),
+    isDiscreteSlider = false,
   } = props;
 
-  const lengthBounds = getDefaultBounds(props.lengthBounds)
-
   const inputsRangeConverter = useMemo(
-    () => getInputsRangeConverter(bounds),
-    [bounds]
+    () => getInputsRangeConverter(constraints),
+    [constraints]
   );
 
   const [sliderValue, setSliderValue] = useState(
@@ -40,18 +40,18 @@ const NumberRangeInputWithSlider: React.VFC<IProps> = (props) => {
   );
 
   const handleUniChange = useCallback(
-    (value: IRange) => {
+    (value: Range) => {
       setSliderValue(value);
-      // событие, даже когда числовой ввод не изменился
+      // todo: событие, даже когда числовой ввод не изменился
       onChange(inputsRangeConverter.toSrc(value));
     },
     [inputsRangeConverter, onChange]
   );
 
   const { values, callbacks } = useTwoWayBinding(
-    independentSlider ? sliderValue : inputsRangeConverter.toUni(value),
+    isDiscreteSlider ? inputsRangeConverter.toUni(value) : sliderValue,
     handleUniChange,
-    [identityConverter as IConverter<IRange, IRange>, inputsRangeConverter]
+    [identityConverter as IConverter<Range, Range>, inputsRangeConverter]
   );
 
   return (
@@ -60,14 +60,13 @@ const NumberRangeInputWithSlider: React.VFC<IProps> = (props) => {
         value={values[0]}
         onChange={callbacks[0]}
         trackThickness={15}
-        lengthBounds={toSliderLengthBounds(bounds, lengthBounds)}
-        // orientation={Orientations.vertical}
+        sizeConstraints={normalize(sizeConstraints, constraints.between)}
       />
       <NumbersRangeInput
         value={values[1]}
         onChange={callbacks[1]}
-        bounds={bounds}
-        lengthBounds={lengthBounds}
+        constraints={constraints}
+        sizeConstraints={sizeConstraints}
       />
     </div>
   );
