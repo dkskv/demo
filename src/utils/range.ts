@@ -1,5 +1,5 @@
 import { clamp } from "ramda";
-import { Constraints } from "./constraints";
+import { Bounds } from "./bounds";
 
 export class Range {
   constructor(public start: number, public end: number) {}
@@ -24,13 +24,13 @@ export class Range {
     return new Range(this.start, value);
   }
 
-  constrainStart({ min: minSize, max: maxSize }: Constraints) {
+  constrainStart({ min: minSize, max: maxSize }: Bounds) {
     return this.setStart(
       clamp(this.end - maxSize, this.end - minSize, this.start)
     );
   }
 
-  constrainEnd({ min: minSize, max: maxSize }: Constraints) {
+  constrainEnd({ min: minSize, max: maxSize }: Bounds) {
     return this.setEnd(
       clamp(this.start + minSize, this.start + maxSize, this.end)
     );

@@ -9,7 +9,7 @@ import "./index.css";
 interface Props {
   onChange(
     point: Point,
-    pressedKeys: { pressedKeys: IPressedKeys }
+    options: { pressedKeys: IPressedKeys }
   ): void;
   point: Point;
 }

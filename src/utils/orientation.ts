@@ -2,8 +2,8 @@ import { CSSProperties } from "react";
 import { BoundingBox } from "./boundingBox";
 import { EBoxSide, horizontalSides, verticalSides } from "./sides";
 import { Range } from "./range";
-import { SizesConstraints } from "./sizesConstraints";
-import { Constraints } from "./constraints";
+import { BoxSizesBounds } from "./boxSizesBounds";
+import { Bounds } from "./bounds";
 
 /**
  * Интерфейс для поворота компонентов, работающих в одной плоскости.
@@ -14,7 +14,7 @@ export interface IOrientation {
   /** Строит бокс из заданных диапазонов */
   getBoxFromRanges(range: Range, normalRange: Range): BoundingBox;
   /** Устанавливает ограничения размеров только для параллельной оси */
-  getSizeConstraints(c: Constraints): SizesConstraints;
+  getSizeBounds(c: Bounds): BoxSizesBounds;
   /** Стороны бокса, перпендикулярные оси ориентации */
   sides: readonly [EBoxSide, EBoxSide];
   cssKeys: {
@@ -33,8 +33,8 @@ export namespace Orientations {
     getBoxFromRanges(range: Range, normalRange: Range) {
       return BoundingBox.createByRanges(range, normalRange);
     },
-    getSizeConstraints({ min, max }: Constraints) {
-      return SizesConstraints.onlyWidth(min, max);
+    getSizeBounds({ min, max }: Bounds) {
+      return BoxSizesBounds.onlyWidth(min, max);
     },
     sides: horizontalSides,
     cssKeys: {
@@ -52,8 +52,8 @@ export namespace Orientations {
     getBoxFromRanges(range: Range, normalRange: Range) {
       return BoundingBox.createByRanges(normalRange, range);
     },
-    getSizeConstraints({ min, max }: Constraints) {
-      return SizesConstraints.onlyHeight(min, max);
+    getSizeBounds({ min, max }: Bounds) {
+      return BoxSizesBounds.onlyHeight(min, max);
     },
     sides: verticalSides,
     cssKeys: {

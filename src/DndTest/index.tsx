@@ -4,7 +4,7 @@ import Draggable from "../Draggable";
 import Resizable from "../Resizable";
 import { Point } from "../utils/point";
 import { BoundingBox } from "../utils/boundingBox";
-import { SizesConstraints } from "../utils/sizesConstraints";
+import { BoxSizesBounds } from "../utils/boxSizesBounds";
 
 const DndTest = () => {
   return (
@@ -14,7 +14,7 @@ const DndTest = () => {
       </Draggable>
       <Resizable
         initialValue={BoundingBox.createByDimensions(50, 60, 200, 150)}
-        sizesConstraints={SizesConstraints.onlyMax(400, 400)}
+        sizesBounds={BoxSizesBounds.onlyMax(400, 400)}
       >
         <div className="Resizable" />
       </Resizable>

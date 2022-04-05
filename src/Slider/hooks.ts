@@ -9,7 +9,7 @@ import {
 } from "./utils";
 import { Range } from "../utils/range";
 import { BoundingBox } from "../utils/boundingBox";
-import { Constraints } from "../utils/constraints";
+import { Bounds } from "../utils/bounds";
 import { denormalize, normalize } from "../utils/normalization";
 
 interface IProps<T> {
@@ -18,7 +18,7 @@ interface IProps<T> {
   onChange(range: Range): void;
   thickness: number;
   orientation: IOrientation;
-  sizeConstraints: Constraints;
+  sizeBounds: Bounds;
   renderThumb?(key: IThumbKey): React.ReactElement;
 }
 
@@ -28,7 +28,7 @@ export function useSlide<T extends HTMLElement>({
   range,
   thickness,
   orientation,
-  sizeConstraints,
+  sizeBounds,
   onChange,
 }: IProps<T>) {
   validateSliderRange(range);
@@ -52,7 +52,9 @@ export function useSlide<T extends HTMLElement>({
     box: Converter.toResizableBox(range, thickness, orientation),
     onChange: handleResize,
     thumbKeys: orientation.sides,
-    sizesConstraints: orientation.getSizeConstraints(sizeConstraints),
+    sizesBounds: orientation.getSizeBounds(sizeBounds),
+    isDrag: true,
+    onlyRateably: false
   });
 
   return thumbsElements;

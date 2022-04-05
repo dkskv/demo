@@ -1,7 +1,7 @@
 import { BoundingBox } from "../../utils/boundingBox";
 import { EBoxSide } from "../../utils/sides";
 import { Point } from "../../utils/point";
-import { SizesConstraints } from "../../utils/sizesConstraints";
+import { BoxSizesBounds } from "../../utils/boxSizesBounds";
 
 export interface IMovableSide {
   /** Спроецировать произвольную точку на сторону бокса */
@@ -10,7 +10,7 @@ export interface IMovableSide {
   move(
     box: BoundingBox,
     point: Point,
-    constraints: SizesConstraints
+    bounds: BoxSizesBounds
   ): BoundingBox;
 }
 
@@ -28,8 +28,8 @@ export abstract class MovableSideFactory {
     projectPoint(box: BoundingBox, p: Point) {
       return p.setX(box.x1);
     },
-    move(box: BoundingBox, point: Point, constraints: SizesConstraints) {
-      return box.setX1(point.x).constrainX1(constraints.width);
+    move(box: BoundingBox, point: Point, bounds: BoxSizesBounds) {
+      return box.setX1(point.x).constrainX1(bounds.width);
     },
   };
 
@@ -37,8 +37,8 @@ export abstract class MovableSideFactory {
     projectPoint(box: BoundingBox, p: Point) {
       return p.setX(box.x2);
     },
-    move(box: BoundingBox, point: Point, constraints: SizesConstraints) {
-      return box.setX2(point.x).constrainX2(constraints.width);
+    move(box: BoundingBox, point: Point, bounds: BoxSizesBounds) {
+      return box.setX2(point.x).constrainX2(bounds.width);
     },
   };
 
@@ -46,8 +46,8 @@ export abstract class MovableSideFactory {
     projectPoint(box: BoundingBox, p: Point) {
       return p.setY(box.y1);
     },
-    move(box: BoundingBox, point: Point, constraints: SizesConstraints) {
-      return box.setY1(point.y).constrainY1(constraints.height);
+    move(box: BoundingBox, point: Point, bounds: BoxSizesBounds) {
+      return box.setY1(point.y).constrainY1(bounds.height);
     },
   };
 
@@ -55,8 +55,8 @@ export abstract class MovableSideFactory {
     projectPoint(box: BoundingBox, p: Point) {
       return p.setY(box.y2);
     },
-    move(box: BoundingBox, point: Point, constraints: SizesConstraints) {
-      return box.setY2(point.y).constrainY2(constraints.height);
+    move(box: BoundingBox, point: Point, bounds: BoxSizesBounds) {
+      return box.setY2(point.y).constrainY2(bounds.height);
     },
   };
 

@@ -12,11 +12,11 @@ import {
   identityConverter,
 } from "./utils";
 import { Range } from "../utils/range";
-import { Constraints } from "../utils/constraints";
+import { Bounds } from "../utils/bounds";
 import { normalize } from "../utils/normalization";
 
 interface IProps extends INumbersRangeInputProps {
-  constraints: NonNullable<INumbersRangeInputProps["constraints"]>;
+  bounds: NonNullable<INumbersRangeInputProps["bounds"]>;
   /** будет ли слайдер прерывисто двигаться по числовым отметкам */ 
   isDiscreteSlider?: boolean;
 }
@@ -25,14 +25,14 @@ const NumberRangeInputWithSlider: React.VFC<IProps> = (props) => {
   const {
     value,
     onChange,
-    constraints,
-    sizeConstraints = Constraints.positives(),
+    bounds,
+    sizeBounds = Bounds.positives(),
     isDiscreteSlider = false,
   } = props;
 
   const inputsRangeConverter = useMemo(
-    () => getInputsRangeConverter(constraints),
-    [constraints]
+    () => getInputsRangeConverter(bounds),
+    [bounds]
   );
 
   const [sliderValue, setSliderValue] = useState(
@@ -60,13 +60,13 @@ const NumberRangeInputWithSlider: React.VFC<IProps> = (props) => {
         value={values[0]}
         onChange={callbacks[0]}
         trackThickness={15}
-        sizeConstraints={normalize(sizeConstraints, constraints.between)}
+        sizeBounds={normalize(sizeBounds, bounds.between)}
       />
       <NumbersRangeInput
         value={values[1]}
         onChange={callbacks[1]}
-        constraints={constraints}
-        sizeConstraints={sizeConstraints}
+        bounds={bounds}
+        sizeBounds={sizeBounds}
       />
     </div>
   );

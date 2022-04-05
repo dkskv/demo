@@ -1,11 +1,10 @@
-// todo: возможно, лучше переименовать в Bounds
-export class Constraints {
+export class Bounds {
   static without() {
-    return new Constraints(-Infinity, Infinity);
+    return new Bounds(-Infinity, Infinity);
   }
 
   static positives() {
-    return new Constraints(0, Infinity);
+    return new Bounds(0, Infinity);
   }
 
   constructor(public min: number, public max: number) {
@@ -19,6 +18,6 @@ export class Constraints {
   }
 
   map(f: (a: number) => number) {
-    return new Constraints(f(this.min), f(this.max));
+    return new Bounds(f(this.min), f(this.max));
   }
 }

@@ -3,9 +3,9 @@ import { useDrag } from "../Draggable/hooks";
 import { BoundingBox } from "../utils/boundingBox";
 import { type IPressedKeys } from "../utils/common";
 import { Point } from "../utils/point";
-import { SizesConstraints } from "../utils/sizesConstraints";
+import { BoxSizesBounds } from "../utils/boxSizesBounds";
 import Thumb from "./Thumb";
-import { allThumbKeys, getThumbs, type IThumbKey } from "./utils";
+import { getThumbs, type IThumbKey } from "./utils";
 import { type MovableGroup } from "./utils/movableGroup";
 
 interface IProps<T> {
@@ -15,10 +15,10 @@ interface IProps<T> {
     a: BoundingBox,
     options: { pressedKeys?: IPressedKeys; thumbKey?: IThumbKey }
   ): void;
-  isDrag?: boolean;
-  sizesConstraints: SizesConstraints;
-  onlyRateably?: boolean;
-  thumbKeys?: readonly IThumbKey[];
+  isDrag: boolean;
+  sizesBounds: BoxSizesBounds;
+  onlyRateably: boolean;
+  thumbKeys: readonly IThumbKey[];
   /** todo: Можно просить компонент */
   renderThumb?(key: IThumbKey): React.ReactElement;
 }
@@ -32,10 +32,10 @@ export function useResize<T extends HTMLElement>({
   element,
   box,
   onChange,
-  isDrag = true,
-  sizesConstraints,
-  onlyRateably = false,
-  thumbKeys = allThumbKeys,
+  isDrag,
+  sizesBounds,
+  onlyRateably,
+  thumbKeys,
   /** todo: Можно просить компонент */
   renderThumb = () => <div className="Thumb" />,
 }: IProps<T>): React.ReactNode {
@@ -60,7 +60,7 @@ export function useResize<T extends HTMLElement>({
       const updatedBox = thumb.updateBox({
         point: outerPoint,
         box: box!,
-        sizesConstraints,
+        sizesBounds,
         isRateably: onlyRateably || pressedKeys.shiftKey,
       });
 
@@ -69,7 +69,7 @@ export function useResize<T extends HTMLElement>({
         thumbKey: thumb.key as IThumbKey,
       });
     },
-    [onChange, box, sizesConstraints, onlyRateably]
+    [onChange, box, sizesBounds, onlyRateably]
   );
 
   if (!element || !box) {

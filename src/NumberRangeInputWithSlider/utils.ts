@@ -1,5 +1,5 @@
 import { identity } from "ramda";
-import { Constraints } from "../utils/constraints";
+import { Bounds } from "../utils/bounds";
 import { Range} from "../utils/range";
 
 /**
@@ -16,7 +16,7 @@ export const identityConverter = { toUni: identity, toSrc: identity };
 const getInputConverter = ({
   min,
   max,
-}: Constraints): IConverter<number, number> => ({
+}: Bounds): IConverter<number, number> => ({
   toUni(x: number) {
     return (x - min) / (max - min);
   },
@@ -26,7 +26,7 @@ const getInputConverter = ({
 });
 
 export const getInputsRangeConverter = (
-  bounds: Constraints
+  bounds: Bounds
 ): IConverter<Range, Range> => {
   const converter = getInputConverter(bounds);
 

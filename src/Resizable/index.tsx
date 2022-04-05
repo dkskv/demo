@@ -3,9 +3,9 @@ import makeStateful from "../decorators/makeStateful";
 import { useCallbackRef } from "../hooks";
 import { BoundingBox } from "../utils/boundingBox";
 import { IPressedKeys } from "../utils/common";
-import { SizesConstraints } from "../utils/sizesConstraints";
+import { BoxSizesBounds } from "../utils/boxSizesBounds";
 import { useResize } from "./hooks";
-import { IThumbKey, resizableStyle } from "./utils";
+import { allThumbKeys, IThumbKey, resizableStyle } from "./utils";
 
 type IProps = React.HTMLAttributes<HTMLDivElement> & {
   value: BoundingBox;
@@ -13,20 +13,28 @@ type IProps = React.HTMLAttributes<HTMLDivElement> & {
     value: BoundingBox,
     options: { pressedKeys: IPressedKeys; thumbKey: IThumbKey }
   ): void;
-  sizesConstraints?: SizesConstraints;
+  sizesBounds?: BoxSizesBounds;
 };
 
 const Resizable: React.FC<IProps> = ({
   value,
   onChange,
-  sizesConstraints = SizesConstraints.without(),
+  sizesBounds = BoxSizesBounds.without(),
   children,
   style,
   ...restProps
 }) => {
   const [element, setRef] = useCallbackRef();
 
-  const thumbsElements = useResize({ element, box: value, onChange, sizesConstraints });
+  const thumbsElements = useResize({
+    element,
+    box: value,
+    onChange,
+    sizesBounds,
+    isDrag: true,
+    onlyRateably: false,
+    thumbKeys: allThumbKeys
+  });
 
   return (
     <div

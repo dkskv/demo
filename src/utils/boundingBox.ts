@@ -1,5 +1,5 @@
 import { clamp } from "ramda";
-import { Constraints } from "./constraints";
+import { Bounds } from "./bounds";
 import { Point } from "./point";
 import { Range } from "./range";
 
@@ -115,26 +115,26 @@ export class BoundingBox {
     );
   }
 
-  constrainX1(constraints: Constraints) {
-    const { start } = this.xsRange.constrainStart(constraints);
+  constrainX1(widthBounds: Bounds) {
+    const { start } = this.xsRange.constrainStart(widthBounds);
 
     return this.setX1(start);
   }
 
-  constrainX2(constraints: Constraints) {
-    const { end } = this.xsRange.constrainEnd(constraints);
+  constrainX2(widthBounds: Bounds) {
+    const { end } = this.xsRange.constrainEnd(widthBounds);
 
     return this.setX2(end);
   }
 
-  constrainY1(constraints: Constraints) {
-    const { start } = this.ysRange.constrainStart(constraints);
+  constrainY1(heightBounds: Bounds) {
+    const { start } = this.ysRange.constrainStart(heightBounds);
 
     return this.setY1(start);
   }
 
-  constrainY2(constraints: Constraints) {
-    const { end } = this.ysRange.constrainEnd(constraints);
+  constrainY2(heightBounds: Bounds) {
+    const { end } = this.ysRange.constrainEnd(heightBounds);
 
     return this.setY2(end);
   }

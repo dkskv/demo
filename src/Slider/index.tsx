@@ -5,14 +5,14 @@ import { IOrientation, Orientations } from "../utils/orientation";
 import { useNormalizedRange, useSlide } from "./hooks";
 import "./index.css";
 import { getTrackOuterBox, sliderTrackStyle } from "./utils";
-import { Constraints } from "../utils/constraints";
+import { Bounds } from "../utils/bounds";
 import { denormalize } from "../utils/normalization";
 
 interface Props {
   /** Нормализованный диапазон (в пределах от 0 до 1) */
   value: Range;
   onChange(value: Range): void;
-  sizeConstraints?: Constraints;
+  sizeBounds?: Bounds;
   trackThickness?: number;
   orientation?: IOrientation;
 }
@@ -20,7 +20,7 @@ interface Props {
 const Slider: React.VFC<Props> = ({
   value,
   onChange,
-  sizeConstraints = Constraints.without(),
+  sizeBounds = Bounds.without(),
   trackThickness = 10,
   orientation = Orientations.horizontal,
 }) => {
@@ -36,7 +36,7 @@ const Slider: React.VFC<Props> = ({
     onChange: handleChange,
     thickness: trackThickness,
     orientation,
-    sizeConstraints: denormalize(sizeConstraints, outerLength)
+    sizeBounds: denormalize(sizeBounds, outerLength)
   });
 
   return (

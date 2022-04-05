@@ -2,13 +2,13 @@ import { BoundingBox } from "../../utils/boundingBox";
 import { EBoxSide } from "../../utils/sides";
 import { LineSegment } from "../../utils/lineSegment";
 import { Point } from "../../utils/point";
-import { SizesConstraints } from "../../utils/sizesConstraints";
+import { BoxSizesBounds } from "../../utils/boxSizesBounds";
 import { IMovableSide, MovableSideFactory } from "./movableSide";
 
 interface IUpdateParams {
   /** Обновляемый бокс */
   box: BoundingBox;
-  sizesConstraints: SizesConstraints;
+  sizesBounds: BoxSizesBounds;
   /** Координаты кнопки, в соответствии с которыи обновить бокс */
   point: Point;
   /** Сохранять ли пропорции */
@@ -37,9 +37,9 @@ export abstract class MovableGroup {
   /** @deprecated Точка расположения */
   abstract getPointInBox(box: BoundingBox): Point;
 
-  updateBox({ box, sizesConstraints, point }: IUpdateParams): BoundingBox {
+  updateBox({ box, sizesBounds, point }: IUpdateParams): BoundingBox {
     return this.dependentSides.reduce(
-      (accBox, side) => side.move(accBox, point, sizesConstraints),
+      (accBox, side) => side.move(accBox, point, sizesBounds),
       box
     );
   }

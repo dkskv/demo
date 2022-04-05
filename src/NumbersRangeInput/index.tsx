@@ -1,22 +1,22 @@
 import { useCallback } from "react";
-import { Constraints } from "../utils/constraints";
+import { Bounds } from "../utils/bounds";
 import { Range } from "../utils/range";
 
 export interface INumbersRangeInputProps {
   value: Range;
   onChange(value: Range): void;
   /** диапазон минимального и максимального значений */
-  constraints?: Constraints;
+  bounds?: Bounds;
   // todo: ограничить только положительными значениями
   /** минимальный и максимальный размер диапазона */
-  sizeConstraints?: Constraints;
+  sizeBounds?: Bounds;
 }
 
 const NumbersRangeInput: React.VFC<INumbersRangeInputProps> = (props) => {
   const {
     value: range,
-    constraints = Constraints.without(),
-    sizeConstraints = Constraints.without(),
+    bounds = Bounds.without(),
+    sizeBounds = Bounds.without(),
     onChange,
   } = props;
 
@@ -25,19 +25,19 @@ const NumbersRangeInput: React.VFC<INumbersRangeInputProps> = (props) => {
       onChange(
         range
           .setStart(Number(event.target.value))
-          .constrainStart(sizeConstraints)
+          .constrainStart(sizeBounds)
       );
     },
-    [range, sizeConstraints, onChange]
+    [range, sizeBounds, onChange]
   );
 
   const handleChangeEnd = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onChange(
-        range.setEnd(Number(event.target.value)).constrainEnd(sizeConstraints)
+        range.setEnd(Number(event.target.value)).constrainEnd(sizeBounds)
       );
     },
-    [range, sizeConstraints, onChange]
+    [range, sizeBounds, onChange]
   );
 
   return (
@@ -46,16 +46,16 @@ const NumbersRangeInput: React.VFC<INumbersRangeInputProps> = (props) => {
         type="number"
         onChange={handleChangeStart}
         value={range.start}
-        min={constraints.min}
-        max={constraints.max}
+        min={bounds.min}
+        max={bounds.max}
       />
       -
       <input
         type="number"
         onChange={handleChangeEnd}
         value={range.end}
-        min={constraints.min}
-        max={constraints.max}
+        min={bounds.min}
+        max={bounds.max}
       />
     </div>
   );
