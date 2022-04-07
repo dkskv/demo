@@ -1,21 +1,28 @@
 import { has } from "ramda";
 import { useCallback, useState } from "react";
 
-interface IStatelessProps<T, U> {
-  value: T;
-  onChange(value: T, options?: U): void;
+interface IStatelessProps<V, O> {
+  value: V;
+  onChange(value: V, options: O): void;
 }
 
-interface IStatefulProps<T, U> extends Partial<IStatelessProps<T, U>> {
-  initialValue: T;
+interface IStatefulProps<V> {
+  initialValue: V;
 }
 
-// Добавляет возможность переместить управление состоянием внутрь компонента
-export default function makeStateful<P extends IStatelessProps<T, U>, T, U>(
-  Component: React.ComponentType<P>
+/**
+ * Добавляет возможность переместить управление состоянием внутрь компонента
+ * - Принимает компонент с обязательными пропсами: value и onChange.
+ * - Возвращает компонент с необязательными пропсами: value, onChange, initialValue
+ */
+export default function makeStateful<V, O, RestProps>(
+  Component: React.ComponentType<RestProps & IStatelessProps<V, O>>
 ) {
   return function (
-    props: Omit<P, keyof IStatelessProps<T, U>> & IStatefulProps<T, U>
+    props: React.PropsWithChildren<
+      Omit<RestProps, keyof IStatelessProps<V, O>> &
+        Partial<IStatelessProps<V, O> & IStatefulProps<V>>
+    >
   ) {
     const { initialValue, onChange, value: propsValue, ...restProps } = props;
     const isStateful = !has("value", props);
@@ -29,7 +36,7 @@ export default function makeStateful<P extends IStatelessProps<T, U>, T, U>(
     const [stateValue, setStateValue] = useState(props.initialValue);
 
     const handleChange = useCallback(
-      (nextValue: T, options: U) => {
+      (nextValue: V, options: O) => {
         isStateful && setStateValue(nextValue);
 
         onChange?.(nextValue, options);
@@ -37,11 +44,19 @@ export default function makeStateful<P extends IStatelessProps<T, U>, T, U>(
       [isStateful, onChange]
     );
 
+    const value = isStateful ? stateValue : propsValue;
+
+    if (value === undefined) {
+      throw new Error(
+        "At least one argument 'value' or 'initialValue' must be passed"
+      );
+    }
+
     const newProps = {
-      ...restProps,
-      value: isStateful ? stateValue : propsValue,
+      ...(restProps as RestProps),
+      value,
       onChange: handleChange,
-    } as unknown as P;
+    };
 
     return <Component {...newProps} />;
   };

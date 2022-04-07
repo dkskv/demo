@@ -4,6 +4,7 @@ import { useMemo, useRef } from "react";
 /**
  * Если значение не поменялось, то возвращается старый результат.
  * Таким образом не меняется ссылка на объект.
+ * @deprecated
  */
 export const useKeepingRefForEquals: typeof useMemo = (factory, deps) => {
   const ref = useRef<any>();

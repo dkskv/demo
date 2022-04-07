@@ -1,7 +1,18 @@
 import { clamp } from "ramda";
-import { Bounds } from "./bounds";
 
 export class Range {
+  static createBySize(start: number, size: number) {
+    return new Range(start, start + size);
+  }
+
+  static infinite() {
+    return new Range(-Infinity, Infinity);
+  }
+
+  static endless(start: number) {
+    return new Range(start, Infinity);
+  }
+
   constructor(public start: number, public end: number) {}
 
   get size() {
@@ -24,16 +35,24 @@ export class Range {
     return new Range(this.start, value);
   }
 
-  constrainStart({ min: minSize, max: maxSize }: Bounds) {
+  constrainStart({ start: minSize, end: maxSize }: Range) {
     return this.setStart(
       clamp(this.end - maxSize, this.end - minSize, this.start)
     );
   }
 
-  constrainEnd({ min: minSize, max: maxSize }: Bounds) {
+  constrainEnd({ start: minSize, end: maxSize }: Range) {
     return this.setEnd(
       clamp(this.start + minSize, this.start + maxSize, this.end)
     );
+  }
+
+  clipInner(inner: Range) {
+    return inner.map((a) => clamp(this.start, this.end, a));
+  }
+
+  clampInner({ start, size }: Range) {
+    return Range.createBySize(clamp(this.start, this.end - size, start), size);
   }
 
   map(f: (item: number) => number) {

@@ -1,7 +1,6 @@
 import { clamp } from "ramda";
-import { Bounds } from "./bounds";
-import { Point } from "./point";
 import { Range } from "./range";
+import { Point } from "./point";
 
 export class BoundingBox {
   static createByDimensions(x0: number, y0: number, dx: number, dy: number) {
@@ -10,6 +9,10 @@ export class BoundingBox {
 
   static createByRanges(xRange: Range, yRange: Range) {
     return new BoundingBox(xRange.start, xRange.end, yRange.start, yRange.end);
+  }
+
+  static nullish() {
+    return new BoundingBox(0, 0, 0, 0);
   }
 
   constructor(
@@ -61,22 +64,22 @@ export class BoundingBox {
     return new Point((this.x1 + this.x2) / 2, (this.y1 + this.y2) / 2);
   }
 
-  /** @deprecated */ 
+  /** @deprecated */
   shiftX1(offset: number) {
     return this.setX1(this.x1 + offset);
   }
 
-  /** @deprecated */ 
+  /** @deprecated */
   shiftX2(offset: number) {
     return this.setX2(this.x2 + offset);
   }
 
-  /** @deprecated */ 
+  /** @deprecated */
   shiftY1(offset: number) {
     return this.setY1(this.y1 + offset);
   }
 
-  /** @deprecated */ 
+  /** @deprecated */
   shiftY2(offset: number) {
     return this.setY2(this.y2 + offset);
   }
@@ -107,33 +110,31 @@ export class BoundingBox {
   }
 
   clampInner(inner: BoundingBox) {
-    return BoundingBox.createByDimensions(
-      clamp(this.x1, this.x2 - inner.dx, inner.x0),
-      clamp(this.y1, this.y2 - inner.dy, inner.y0),
-      inner.dx,
-      inner.dy
+    return BoundingBox.createByRanges(
+      this.xsRange.clampInner(inner.xsRange),
+      this.ysRange.clampInner(inner.ysRange)
     );
   }
 
-  constrainX1(widthBounds: Bounds) {
+  constrainX1(widthBounds: Range) {
     const { start } = this.xsRange.constrainStart(widthBounds);
 
     return this.setX1(start);
   }
 
-  constrainX2(widthBounds: Bounds) {
+  constrainX2(widthBounds: Range) {
     const { end } = this.xsRange.constrainEnd(widthBounds);
 
     return this.setX2(end);
   }
 
-  constrainY1(heightBounds: Bounds) {
+  constrainY1(heightBounds: Range) {
     const { start } = this.ysRange.constrainStart(heightBounds);
 
     return this.setY1(start);
   }
 
-  constrainY2(heightBounds: Bounds) {
+  constrainY2(heightBounds: Range) {
     const { end } = this.ysRange.constrainEnd(heightBounds);
 
     return this.setY2(end);
@@ -146,5 +147,9 @@ export class BoundingBox {
 
   moveToOrigin() {
     return BoundingBox.createByDimensions(0, 0, this.dx, this.dy);
+  }
+
+  placeRelatively(origin: Point) {
+    return this.setOrigin(this.origin.subtract(origin));
   }
 }
