@@ -2,7 +2,6 @@ import React from "react";
 import makeStateful from "../../decorators/makeStateful";
 import { useCallbackRef } from "../../hooks";
 import { BoundingBox } from "../../utils/boundingBox";
-import { IPressedKeys } from "../../utils/common";
 import { BoxSizesBounds } from "../../utils/boxSizesBounds";
 import { IResizeCallbackOptions, useResize } from "./hooks";
 import { allThumbKeys } from "../../utils/boxResize";
@@ -41,6 +40,7 @@ const Resizable: React.FC<IProps> = ({
       ref={setRef}
       style={{ ...getBoxStyle(value), position: "absolute", ...style }}
     >
+      {/* todo: растягивать на 100% по умолчанию */}
       {React.Children.only(children)}
       {thumbsElements}
     </div>
