@@ -10,6 +10,7 @@ import { BoxSizesBounds } from "./boxSizesBounds";
 export interface IOrientation {
   /** Возвращает диапазон крайних точек проекции на соответствующую ось */
   getRangeOfBox(box: BoundingBox): Range;
+  getNormalRangeOfBox(box: BoundingBox): Range;
   /** Строит бокс из заданных диапазонов */
   getBoxFromRanges(range: Range, normalRange: Range): BoundingBox;
   /** Устанавливает ограничения размеров только для параллельной оси */
@@ -29,6 +30,9 @@ export namespace Orientations {
     getRangeOfBox(box: BoundingBox) {
       return box.xsRange;
     },
+    getNormalRangeOfBox(box: BoundingBox) {
+      return box.ysRange;
+    },
     getBoxFromRanges(range: Range, normalRange: Range) {
       return BoundingBox.createByRanges(range, normalRange);
     },
@@ -47,6 +51,9 @@ export namespace Orientations {
   export const vertical: IOrientation = {
     getRangeOfBox(box: BoundingBox) {
       return box.ysRange;
+    },
+    getNormalRangeOfBox(box: BoundingBox) {
+      return box.xsRange;
     },
     getBoxFromRanges(range: Range, normalRange: Range) {
       return BoundingBox.createByRanges(normalRange, range);

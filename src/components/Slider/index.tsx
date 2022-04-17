@@ -6,7 +6,7 @@ import "./index.css";
 import { sliderTrackStyle, validateSliderRange } from "./utils";
 import { Range } from "../../utils/range";
 import { denormalize, normalize } from "../../utils/normalization";
-import { getBoxStyle, getInnerBoundingBox } from "../../utils/dom";
+import { getBoxStyle } from "../../utils/dom";
 import { BoundingBox } from "../../utils/boundingBox";
 
 export interface ISliderProps {
@@ -45,6 +45,7 @@ const Slider: React.VFC<ISliderProps> = ({
 
   const thumbsElements = useSlide({
     range: denormalize(value, boundsRange.size),
+    thickness: orientation.getNormalRangeOfBox(boundingBox).size,
     draggableElement: track,
     onChange: handleChange,
     orientation,

@@ -9,7 +9,7 @@ interface IUpdateParams {
   /** Обновляемый бокс */
   box: BoundingBox;
   sizesBounds: BoxSizesBounds;
-  /** Координаты кнопки, в соответствии с которыи обновить бокс */
+  /** Координаты кнопки, в соответствии с которыми обновить бокс */
   point: Point;
   /** Сохранять ли пропорции */
   isRateably: boolean;
