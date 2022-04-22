@@ -11,7 +11,7 @@ import {
   IConverter,
   identityConverter,
 } from "./utils";
-import { Range } from "../../utils/range";
+import { NumbersRange } from "../../utils/numbersRange";
 import { normalize } from "../../utils/normalization";
 
 interface IProps
@@ -28,7 +28,7 @@ const NumberRangeInputWithSlider: React.VFC<IProps> = (props) => {
     onChange,
     bounds,
     boundingBox,
-    sizeBounds = Range.endless(0),
+    sizeBounds = NumbersRange.endless(0),
     isDiscreteSlider = false,
   } = props;
 
@@ -42,7 +42,7 @@ const NumberRangeInputWithSlider: React.VFC<IProps> = (props) => {
   );
 
   const handleUniChange = useCallback(
-    (value: Range) => {
+    (value: NumbersRange) => {
       setSliderValue(value);
       // todo: событие, даже когда числовой ввод не изменился
       onChange(inputsRangeConverter.toSrc(value));
@@ -53,7 +53,7 @@ const NumberRangeInputWithSlider: React.VFC<IProps> = (props) => {
   const { values, callbacks } = useTwoWayBinding(
     isDiscreteSlider ? inputsRangeConverter.toUni(value) : sliderValue,
     handleUniChange,
-    [identityConverter as IConverter<Range, Range>, inputsRangeConverter]
+    [identityConverter as IConverter<NumbersRange, NumbersRange>, inputsRangeConverter]
   );
 
   return (

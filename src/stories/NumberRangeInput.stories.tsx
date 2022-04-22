@@ -1,7 +1,7 @@
 import { ComponentMeta, ComponentStory } from "@storybook/react";
 import NumberRangeInputWithSlider from "../components/NumberRangeInputWithSlider";
 import { BoundingBox } from "../utils/boundingBox";
-import { Range } from "../utils/range";
+import { NumbersRange } from "../utils/numbersRange";
 
 export default {
   title: "Demo/NumberRangeInput",
@@ -15,7 +15,7 @@ const Template: ComponentStory<typeof NumberRangeInputWithSlider> = (args) => (
 
 export const WithSlider = Template.bind({});
 WithSlider.args = {
-  initialValue: new Range(1, 7),
-  bounds: new Range(-10, 10),
+  initialValue: new NumbersRange(1, 7),
+  bounds: new NumbersRange(-10, 10),
   boundingBox: BoundingBox.createByDimensions(0, 0, 500, 25),
 };

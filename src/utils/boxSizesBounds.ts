@@ -1,6 +1,5 @@
-import { Range } from "./range";
+import { NumbersRange } from "./numbersRange";
 
-// todo: лучше конкретизировать до BoxSizesBounds
 export class BoxSizesBounds {
   static without() {
     return new BoxSizesBounds();
@@ -33,11 +32,11 @@ export class BoxSizesBounds {
     public maxH = Infinity
   ) {}
 
-  get width(): Range {
-    return new Range(this.minW, this.maxW);
+  get width(): NumbersRange {
+    return new NumbersRange(this.minW, this.maxW);
   }
 
-  get height(): Range {
-    return new Range(this.minH, this.maxH);
+  get height(): NumbersRange {
+    return new NumbersRange(this.minH, this.maxH);
   }
 }

@@ -3,7 +3,7 @@ import { Point } from "./point";
 export class LineSegment {
   constructor(private p1: Point, private p2: Point) {}
 
-  /** Получить проекцию точки */
+  /** Получить проекцию точки на эту прямую */
   projectPoint(p: Point) {
     // Координата p относительно p1  
     const p_ = p.subtract(this.p1);

@@ -1,25 +1,24 @@
 import { CSSProperties } from "react";
 import { BoundingBox } from "./boundingBox";
 import { EBoxSide, horizontalSides, verticalSides } from "./sides";
-import { Range } from "./range";
+import { NumbersRange } from "./numbersRange";
 import { BoxSizesBounds } from "./boxSizesBounds";
 
-/**
- * Интерфейс для поворота компонентов, работающих в одной плоскости.
- */
+/** Интерфейс для работы компонентов в разных ориентациях */
 export interface IOrientation {
-  /** Возвращает диапазон крайних точек проекции на соответствующую ось */
-  getRangeOfBox(box: BoundingBox): Range;
-  getNormalRangeOfBox(box: BoundingBox): Range;
+  /** Возвращает диапазон крайних точек проекции на параллельную ось */
+  getRangeOfBox(box: BoundingBox): NumbersRange;
+  /** Возвращает диапазон крайних точек проекции на перпендикулярную ось */
+  getNormalRangeOfBox(box: BoundingBox): NumbersRange;
   /** Строит бокс из заданных диапазонов */
-  getBoxFromRanges(range: Range, normalRange: Range): BoundingBox;
+  getBoxFromRanges(range: NumbersRange, normalRange: NumbersRange): BoundingBox;
   /** Устанавливает ограничения размеров только для параллельной оси */
-  getSizeBounds(sizeRange: Range): BoxSizesBounds;
+  getSizeBounds(sizeRange: NumbersRange): BoxSizesBounds;
   /** Стороны бокса, перпендикулярные оси ориентации */
   sides: readonly [EBoxSide, EBoxSide];
   cssKeys: {
     length: keyof Pick<CSSProperties, "width" | "height">;
-    thickness: IOrientation["cssKeys"]["length"];
+    thickness: IOrientation["cssKeys"]["length"]; 
     coordinate: keyof Pick<CSSProperties, "left" | "top" | "right" | "bottom">;
     gap: keyof Pick<CSSProperties, "rowGap" | "columnGap">;
   };
@@ -33,10 +32,10 @@ export namespace Orientations {
     getNormalRangeOfBox(box: BoundingBox) {
       return box.ysRange;
     },
-    getBoxFromRanges(range: Range, normalRange: Range) {
+    getBoxFromRanges(range: NumbersRange, normalRange: NumbersRange) {
       return BoundingBox.createByRanges(range, normalRange);
     },
-    getSizeBounds({ start, end }: Range) {
+    getSizeBounds({ start, end }: NumbersRange) {
       return BoxSizesBounds.onlyWidth(start, end);
     },
     sides: horizontalSides,
@@ -55,10 +54,10 @@ export namespace Orientations {
     getNormalRangeOfBox(box: BoundingBox) {
       return box.xsRange;
     },
-    getBoxFromRanges(range: Range, normalRange: Range) {
+    getBoxFromRanges(range: NumbersRange, normalRange: NumbersRange) {
       return BoundingBox.createByRanges(normalRange, range);
     },
-    getSizeBounds({ start, end }: Range) {
+    getSizeBounds({ start, end }: NumbersRange) {
       return BoxSizesBounds.onlyHeight(start, end);
     },
     sides: verticalSides,

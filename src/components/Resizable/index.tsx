@@ -5,7 +5,7 @@ import { BoundingBox } from "../../utils/boundingBox";
 import { BoxSizesBounds } from "../../utils/boxSizesBounds";
 import { IResizeCallbackOptions, useResize } from "./hooks";
 import { allThumbKeys } from "../../utils/boxResize";
-import { getBoxStyle } from "../../utils/dom";
+import { getBoxStyle } from "../../utils/styles";
 import { Thumb } from "../Thumb";
 
 type IProps = React.HTMLAttributes<HTMLDivElement> & {
@@ -31,19 +31,21 @@ const Resizable: React.FC<IProps> = ({
     sizesBounds,
     onlyRateably: false,
     thumbKeys: allThumbKeys,
-    thumbComponent: Thumb,
+    Thumb,
   });
 
   return (
-    <div
-      {...restProps}
-      ref={setRef}
-      style={{ ...getBoxStyle(value), position: "absolute", ...style }}
-    >
-      {/* todo: растягивать на 100% по умолчанию */}
-      {React.Children.only(children)}
+    <>
+      <div
+        {...restProps}
+        ref={setRef}
+        style={{ ...getBoxStyle(value), position: "absolute", ...style }}
+      >
+        {/* todo: растягивать на 100% по умолчанию */}
+        {React.Children.only(children)}
+      </div>
       {thumbsElements}
-    </div>
+    </>
   );
 };
 

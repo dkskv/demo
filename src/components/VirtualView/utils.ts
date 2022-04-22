@@ -1,5 +1,5 @@
 import { range } from "ramda";
-import { Range } from "../../utils/range";
+import { NumbersRange } from "../../utils/numbersRange";
 import { IOrientation } from "../../utils/orientation";
 
 export function rangeInclusive(from: number, to: number) {
@@ -14,12 +14,12 @@ export function getIndexesRange(
   x: number,
   length: number,
   slotSize: number
-): Range {
-  return new Range(fits(x, slotSize), fits(x + length, slotSize))
+): NumbersRange {
+  return new NumbersRange(fits(x, slotSize), fits(x + length, slotSize))
 }
 
-export function expandEvenly(overscan: number, { start, end }: Range): Range {
-  return new Range(start - overscan, end + overscan)
+export function expandEvenly(overscan: number, { start, end }: NumbersRange): NumbersRange {
+  return new NumbersRange(start - overscan, end + overscan)
 }
 
 export function getViewAreaStyle(

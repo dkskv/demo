@@ -4,25 +4,26 @@ import { IOrientation, Orientations } from "../../utils/orientation";
 import { useSlide } from "./hooks";
 import "./index.css";
 import { sliderTrackStyle, validateSliderRange } from "./utils";
-import { Range } from "../../utils/range";
+import { NumbersRange } from "../../utils/numbersRange";
 import { denormalize, normalize } from "../../utils/normalization";
-import { getBoxStyle } from "../../utils/dom";
+import { getBoxStyle } from "../../utils/styles";
 import { BoundingBox } from "../../utils/boundingBox";
+import { Thumb } from "../Thumb";
 
 export interface ISliderProps {
   /** Нормализованный диапазон (в пределах от 0 до 1) */
-  value: Range;
-  onChange(value: Range): void;
+  value: NumbersRange;
+  onChange(value: NumbersRange): void;
   boundingBox: BoundingBox;
   orientation?: IOrientation;
-  sizeBounds?: Range;
+  sizeBounds?: NumbersRange;
 }
 
 const Slider: React.VFC<ISliderProps> = ({
   value,
   onChange,
   boundingBox,
-  sizeBounds = Range.infinite(),
+  sizeBounds = NumbersRange.infinite(),
   orientation = Orientations.horizontal,
 }) => {
   validateSliderRange(value);
@@ -33,7 +34,7 @@ const Slider: React.VFC<ISliderProps> = ({
   const boundsRange = orientation.getRangeOfBox(boundingBox.moveToOrigin());
 
   const handleChange = useCallback(
-    (range: Range, isDrag: boolean) => {
+    (range: NumbersRange, isDrag: boolean) => {
       const boundedRange = isDrag
         ? boundsRange.clampInner(range)
         : boundsRange.clipInner(range);
@@ -50,6 +51,7 @@ const Slider: React.VFC<ISliderProps> = ({
     onChange: handleChange,
     orientation,
     sizeBounds: denormalize(sizeBounds, boundsRange.size),
+    Thumb
   });
 
   return (
@@ -58,9 +60,8 @@ const Slider: React.VFC<ISliderProps> = ({
         ref={setTrackRef}
         className="Track"
         style={sliderTrackStyle(orientation, value)}
-      >
-        {thumbsElements}
-      </div>
+      ></div>
+      {thumbsElements}
     </div>
   );
 };

@@ -1,5 +1,5 @@
 import { clamp } from "ramda";
-import { Range } from "./range";
+import { NumbersRange } from "./numbersRange";
 import { Point } from "./point";
 
 export class BoundingBox {
@@ -7,7 +7,7 @@ export class BoundingBox {
     return new BoundingBox(x0, x0 + dx, y0, y0 + dy);
   }
 
-  static createByRanges(xRange: Range, yRange: Range) {
+  static createByRanges(xRange: NumbersRange, yRange: NumbersRange) {
     return new BoundingBox(xRange.start, xRange.end, yRange.start, yRange.end);
   }
 
@@ -52,12 +52,12 @@ export class BoundingBox {
 
   /** Возвращает диапазон крайних точек проекции на ось `x` */
   get xsRange() {
-    return new Range(this.x1, this.x2);
+    return new NumbersRange(this.x1, this.x2);
   }
 
   /** Возвращает диапазон крайних точек проекции на ось `y` */
   get ysRange() {
-    return new Range(this.y1, this.y2);
+    return new NumbersRange(this.y1, this.y2);
   }
 
   get center() {
@@ -116,25 +116,25 @@ export class BoundingBox {
     );
   }
 
-  constrainX1(widthBounds: Range) {
+  constrainX1(widthBounds: NumbersRange) {
     const { start } = this.xsRange.constrainStart(widthBounds);
 
     return this.setX1(start);
   }
 
-  constrainX2(widthBounds: Range) {
+  constrainX2(widthBounds: NumbersRange) {
     const { end } = this.xsRange.constrainEnd(widthBounds);
 
     return this.setX2(end);
   }
 
-  constrainY1(heightBounds: Range) {
+  constrainY1(heightBounds: NumbersRange) {
     const { start } = this.ysRange.constrainStart(heightBounds);
 
     return this.setY1(start);
   }
 
-  constrainY2(heightBounds: Range) {
+  constrainY2(heightBounds: NumbersRange) {
     const { end } = this.ysRange.constrainEnd(heightBounds);
 
     return this.setY2(end);
@@ -149,7 +149,21 @@ export class BoundingBox {
     return BoundingBox.createByDimensions(0, 0, this.dx, this.dy);
   }
 
+  /** Получить бокс в координатах относительно переданной точки */
   placeRelatively(origin: Point) {
     return this.setOrigin(this.origin.subtract(origin));
+  }
+
+  /** Соотношение сторон (ширина / высота) */
+  get ratio() {
+    return this.dx / this.dy;
+  }
+
+  /** Выровнять бокс по переданному соотношению сторон (ширина / высота) */
+  alignByRatio(ratio: number) {
+    const dx = Math.min(this.dx, this.dy * ratio);
+    const dy = Math.min(this.dy, this.dx / ratio);
+
+    return BoundingBox.createByDimensions(this.x0, this.y0, dx, dy);
   }
 }

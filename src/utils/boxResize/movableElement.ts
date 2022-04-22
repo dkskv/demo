@@ -5,13 +5,14 @@ import { Point } from "../point";
 import { EBoxSide } from "../sides";
 import { IMovableSide, MovableSideFactory } from "./movableSide";
 
-interface IUpdateParams {
-  /** Обновляемый бокс */
+export interface IUpdateParams {
+  /** Текущее состояние элемента */
   box: BoundingBox;
+  /** Ограничения размера элемента */ 
   sizesBounds: BoxSizesBounds;
-  /** Координаты кнопки, в соответствии с которыми обновить бокс */
+  /** Координаты, в соответствии с которыми обновить бокс */
   point: Point;
-  /** Сохранять ли пропорции */
+  /** Менять размер, сохраняя соотношении длины и ширины  */
   isRateably: boolean;
 }
 
@@ -25,7 +26,7 @@ export abstract class MovableElement {
     this.dependentSides = dependentSidesKeys.map(MovableSideFactory.getByKey);
   }
 
-  /** @deprecated Точка расположения */
+  /** Стандартная точка расположения внутри бокса */
   abstract getPointInBox(box: BoundingBox): Point;
 
   updateBox({ box, sizesBounds, point }: IUpdateParams): BoundingBox {

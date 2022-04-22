@@ -1,14 +1,15 @@
 import React from "react";
 import makeStateful from "../../decorators/makeStateful";
 import { useCallbackRef } from "../../hooks";
-import { getPointStyle } from "../../utils/dom";
+import { getPointStyle } from "../../utils/styles";
+import { IDragCallback } from "../../utils/drag";
 import { Point } from "../../utils/point";
-import { IDragCallbackOptions, useDrag } from "./hooks";
+import { useDrag } from "./hooks";
 import "./index.css";
 
 type IProps = {
   value: Point;
-  onChange(value: Point, options: IDragCallbackOptions): void;
+  onChange: IDragCallback;
   /** Установить origin элемента в центр */
   isCentered?: boolean;
 };

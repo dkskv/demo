@@ -15,11 +15,6 @@ export interface IMovableSide {
   ): BoundingBox;
 }
 
-/**
- * todo: Для уменьшения количества кода можно выделить супер класс, который бы содержал
- * реализации по параметрам, указанным в сторонах.
- */
-
 export abstract class MovableSideFactory {
   public static getByKey(key: EBoxSide): IMovableSide {
     return MovableSideFactory.sides[key];

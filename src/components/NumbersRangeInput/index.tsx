@@ -1,21 +1,21 @@
 import { useCallback } from "react";
-import { Range } from "../../utils/range";
+import { NumbersRange } from "../../utils/numbersRange";
 
 export interface INumbersRangeInputProps {
-  value: Range;
-  onChange(value: Range): void;
+  value: NumbersRange;
+  onChange(value: NumbersRange): void;
   /** диапазон минимального и максимального значений */
-  bounds?: Range;
+  bounds?: NumbersRange;
   // todo: ограничить только положительными значениями
   /** минимальный и максимальный размер диапазона */
-  sizeBounds?: Range;
+  sizeBounds?: NumbersRange;
 }
 
 const NumbersRangeInput: React.VFC<INumbersRangeInputProps> = (props) => {
   const {
     value: range,
-    bounds = Range.infinite(),
-    sizeBounds = Range.infinite(),
+    bounds = NumbersRange.infinite(),
+    sizeBounds = NumbersRange.infinite(),
     onChange,
   } = props;
 

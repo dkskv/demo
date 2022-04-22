@@ -1,5 +1,5 @@
 import { IPressedKeys } from "./common";
-import { getOriginPointOnPage, getPointOnPage } from "./dom";
+import { getOriginOnPage } from "./domElement";
 import { Point } from "./point";
 
 interface IMouseEvent
@@ -15,57 +15,61 @@ interface IMouseEvent
     | "ctrlKey"
   > {}
 
-export interface IMoveCallback {
+export interface IDragCallback {
   (a: Point, keys: IPressedKeys): void;
 }
 
-/**
- * Обработчик перетаскивания элемента (срабатывает на событие `mousedown`)
- * Подписывает callback на изменение координат элемента внутри offsetParent
- */
+/** Подписывает callback на намерение переместить элемент (в координатах страницы) */
 export function listenDrag(
-  target: HTMLElement,
-  callback: (point: Point, options: { pressedKeys: IPressedKeys }) => void
+  element: Element,
+  callback: (point: Point, pressedKeys: IPressedKeys) => void
 ) {
-  return function (mouseDown: IMouseEvent) {
-    mouseDown.preventDefault();
-    mouseDown.stopPropagation();
+  return function (downEvent: IMouseEvent) {
+    downEvent.preventDefault();
+    downEvent.stopPropagation();
 
-    /**
-     * Отступ от точки захвата до origin target элемента:
-     * - захват может быть произведен за любую точку элемента
-     * - двигать можно только origin элемента
-     */
-    const mouseShift = getMousePointOnPage(mouseDown).subtract(
-      getOriginPointOnPage(target)
+    const dragPointInsideElement = getDragPointInsideElement(
+      element,
+      downEvent
     );
-    // Отступ, вычитаемый из координат мыши для получения координат target
-    const shift = getPointOnPage(target.offsetParent!).add(mouseShift);
 
     listenMouseMove((mousePoint, pressedKeys) =>
-      callback(mousePoint.subtract(shift), { pressedKeys })
+      callback(mousePoint.subtract(dragPointInsideElement), pressedKeys)
     );
   };
 }
 
-function listenMouseMove(callback: IMoveCallback) {
-  document.addEventListener("mousemove", handleMoveTarget);
-  document.addEventListener("mouseup", stopListen);
+function listenMouseMove(callback: IDragCallback) {
+  document.addEventListener("mousemove", handleMove);
+  document.addEventListener("mouseup", handleStop, { once: true });
 
-  function handleMoveTarget(event: MouseEvent) {
-    callback(getMousePointOnPage(event), getPressedKeys(event));
+  function handleMove(event: MouseEvent) {
+    callback(getMousePoint(event), extractPressedKeys(event));
   }
 
-  function stopListen() {
-    document.removeEventListener("mousemove", handleMoveTarget);
+  function handleStop() {
+    document.removeEventListener("mousemove", handleMove);
   }
 }
 
-function getMousePointOnPage(event: IMouseEvent) {
+/** Получить координаты точки захвата внутри элемента */
+function getDragPointInsideElement(
+  element: Element,
+  mouseEvent: IMouseEvent
+): Point {
+  const elementOrigin = getOriginOnPage(element);
+  const mousePoint = getMousePoint(mouseEvent);
+
+  return mousePoint.subtract(elementOrigin);
+}
+
+/** Координаты мыши на странице */
+function getMousePoint(event: IMouseEvent) {
+  /** todo: Почему не clientX? */
   return new Point(event.pageX, event.pageY);
 }
 
-function getPressedKeys({
+function extractPressedKeys({
   altKey,
   shiftKey,
   ctrlKey,

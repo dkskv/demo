@@ -1,8 +1,8 @@
 import { clamp } from "ramda";
-import { Range } from "../../utils/range";
+import { NumbersRange } from "../../utils/numbersRange";
 import { IOrientation } from "../../utils/orientation";
 
-export function validateSliderRange(range: Range) {
+export function validateSliderRange(range: NumbersRange) {
   if (
     Object.entries(range).every(([, value]) => value === clamp(0, 1, value))
   ) {
@@ -18,7 +18,7 @@ export function validateSliderRange(range: Range) {
 
 export const sliderTrackStyle = (
   orientation: IOrientation,
-  { start, end }: Range,
+  { start, end }: NumbersRange,
   /** В процентах */
   thickness = 100,
 ) =>

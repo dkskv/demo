@@ -1,30 +1,35 @@
 import { useCallback } from "react";
-import { IResizeCallbackOptions, useResize } from "../Resizable/hooks";
-import { IMovableElementKey } from "../../utils/boxResize";
+import { IResizeCallbackOptions, IResizeParams, useResize } from "../Resizable/hooks";
 import { IOrientation } from "../../utils/orientation";
-import { Range } from "../../utils/range";
+import { NumbersRange } from "../../utils/numbersRange";
 import { BoundingBox } from "../../utils/boundingBox";
-import { Thumb } from "../Thumb";
 
-interface IProps<T> {
-  range: Range;
+interface ISlideParams extends Pick<IResizeParams, "Thumb" | "draggableElement"> {
+  /** Диапазон трека слайдера */
+  range: NumbersRange;
+
+  /** Callback, вызываемый при намерении изменить диапазон трека */
+  onChange(range: NumbersRange, isDrag: boolean): void;
+
+  /** Толщина трека */
   thickness: number;
-  draggableElement: T | null;
-  onChange(range: Range, isDrag: boolean): void;
+
+  /** Диапазон возможных размеров трека */
+  sizeBounds: NumbersRange;
+
   orientation: IOrientation;
-  sizeBounds: Range;
-  renderThumb?(key: IMovableElementKey): React.ReactElement;
 }
 
-/** Использование Resizable для реализации слайдера (частного случая) */
-export function useSlide<T extends HTMLElement>({
+/** Использование Resizable для реализации слайдера (одномерного случая Resizable) */
+export function useSlide({
   range,
   thickness,
   draggableElement,
   orientation,
   sizeBounds,
   onChange,
-}: IProps<T>) {
+  Thumb
+}: ISlideParams) {
   const handleResize = useCallback(
     (box: BoundingBox, { isDrag }: IResizeCallbackOptions) => {
       onChange(orientation.getRangeOfBox(box), isDrag);
@@ -33,13 +38,13 @@ export function useSlide<T extends HTMLElement>({
   );
 
   const thumbsElements = useResize({
-    box: orientation.getBoxFromRanges(range, new Range(0, thickness)),
+    box: orientation.getBoxFromRanges(range, new NumbersRange(0, thickness)),
     draggableElement,
     onChange: handleResize,
     thumbKeys: orientation.sides,
     sizesBounds: orientation.getSizeBounds(sizeBounds),
     onlyRateably: false,
-    thumbComponent: Thumb
+    Thumb
   });
 
   return thumbsElements;

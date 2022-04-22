@@ -1,30 +1,38 @@
-import { useEffect } from "react";
-import { IPressedKeys } from "../../utils/common";
-import { listenDrag } from "../../utils/drag";
-import { Point } from "../../utils/point";
+import { useCallback, useEffect } from "react";
+import { getPointOnPage } from "../../utils/domElement";
+import { IDragCallback, listenDrag } from "../../utils/drag";
 
-export interface IDragCallbackOptions {
-  pressedKeys: IPressedKeys;
+interface IProps {
+  /** Перемещаемый элемент */
+  element: HTMLElement | null;
+  /** Callback, вызываемый при намерении переместить элемент */
+  onChange: IDragCallback;
 }
 
-interface IProps<T> {
-  element: T | null;
-  onChange(point: Point, options: IDragCallbackOptions): void;
-}
+/**
+ * Подписаться на перемещение HTML элемента в координатах родителя,
+ * относительно которого позиционируется перемещаемый элемент.
+ */
+export function useDrag({ element, onChange }: IProps) {
+  /** Обертка, преобразующая координаты к внутренним */
+  const handleChange: IDragCallback = useCallback(
+    (point, pressedKeys) => {
+      const offsetParentPoint = getPointOnPage(element!.offsetParent!);
 
-export function useDrag<T extends HTMLElement>({
-  element,
-  onChange,
-}: IProps<T>) {
+      onChange(point.subtract(offsetParentPoint), pressedKeys);
+    },
+    [element, onChange]
+  );
+
   useEffect(() => {
     if (element) {
-      const dragHandler = listenDrag(element, onChange);
+      const callback = listenDrag(element, handleChange);
 
-      element.addEventListener("mousedown", dragHandler);
+      element.addEventListener("mousedown", callback);
 
       return () => {
-        element.removeEventListener("mousedown", dragHandler);
+        element.removeEventListener("mousedown", callback);
       };
     }
-  }, [element, onChange]);
+  }, [element, handleChange]);
 }

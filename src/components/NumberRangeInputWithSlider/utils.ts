@@ -1,5 +1,5 @@
 import { identity } from "ramda";
-import { Range } from "../../utils/range";
+import { NumbersRange } from "../../utils/numbersRange";
 
 /**
  * todo: Вынести в отдельную утилиту двустороннее связывание.
@@ -12,7 +12,7 @@ export interface IConverter<T, U> {
 
 export const identityConverter = { toUni: identity, toSrc: identity };
 
-const getInputConverter = (range: Range): IConverter<number, number> => ({
+const getInputConverter = (range: NumbersRange): IConverter<number, number> => ({
   toUni(x: number) {
     return (x - range.start) / range.size;
   },
@@ -22,15 +22,15 @@ const getInputConverter = (range: Range): IConverter<number, number> => ({
 });
 
 export const getInputsRangeConverter = (
-  bounds: Range
-): IConverter<Range, Range> => {
+  bounds: NumbersRange
+): IConverter<NumbersRange, NumbersRange> => {
   const converter = getInputConverter(bounds);
 
   return {
-    toUni(range: Range) {
+    toUni(range: NumbersRange) {
       return range.map(converter.toUni);
     },
-    toSrc(range: Range) {
+    toSrc(range: NumbersRange) {
       return range.map(converter.toSrc);
     },
   };

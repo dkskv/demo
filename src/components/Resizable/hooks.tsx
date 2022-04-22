@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { IDragCallbackOptions, useDrag } from "../Draggable/hooks";
+import { useDrag } from "../Draggable/hooks";
 import { BoundingBox } from "../../utils/boundingBox";
 import { type IPressedKeys } from "../../utils/common";
 import { Point } from "../../utils/point";
@@ -16,32 +16,46 @@ export interface IResizeCallbackOptions {
   isDrag: boolean;
 }
 
-interface IProps<T> {
+export interface IResizeParams {
+  /** Текущее состояние элемента */
   box: BoundingBox;
-  onChange(a: BoundingBox, options: IResizeCallbackOptions): void;
-  draggableElement: T | null;
+
+  /** Callback, срабатывающий при намерении изменить состояние элемента */
+  onChange(box: BoundingBox, options: IResizeCallbackOptions): void;
+
+  /** Если элемент передан, то его можно перемещать */
+  draggableElement: HTMLElement | null;
+
+  /** Ограничения размера элемента */
   sizesBounds: BoxSizesBounds;
+
+  /** Менять размер, сохраняя соотношении длины и ширины */
   onlyRateably: boolean;
+
+  /** Ключи отображаемых кнопок, за которые производится resize  */
   thumbKeys: readonly IMovableElementKey[];
-  thumbComponent: React.ComponentType<{}>;
+
+  /** React компонент кнопки, за которую производится resize */
+  Thumb: React.ComponentType<{
+    movableElement: MovableElement
+  }>;
 }
 
-/**
- * todo: Можно предусмотреть пропс, устанавливающий расположение кнопок: внутри бокса
- * или на том же уровне
+/** 
+ * Возвращает кнопки, которые нужно расположить в одной системе координат 
+ * с resizable-элементом
  */
-
-export function useResize<T extends HTMLElement>({
+export function useResize({
   box,
   draggableElement,
   onChange,
   sizesBounds,
   onlyRateably,
   thumbKeys,
-  thumbComponent: ThumbComponent,
-}: IProps<T>): React.ReactNode {
+  Thumb,
+}: IResizeParams): React.ReactNode {
   const handleDrag = useCallback(
-    (point: Point, { pressedKeys }: IDragCallbackOptions) => {
+    (point: Point, pressedKeys: IPressedKeys) => {
       onChange(box.setOrigin(point), { pressedKeys, isDrag: true });
     },
     [onChange, box]
@@ -52,14 +66,11 @@ export function useResize<T extends HTMLElement>({
   const handleChangeThumb = useCallback(
     (
       movable: MovableElement,
-      innerPoint: Point,
-      { pressedKeys }: IDragCallbackOptions
+      dragPoint: Point,
+      pressedKeys: IPressedKeys
     ) => {
-      /** Т.к. кнопки располагаются внутри бокса, а не на том же уровне */
-      const outerPoint = innerPoint.add(box!.origin);
-
       const updatedBox = movable.updateBox({
-        point: outerPoint,
+        point: dragPoint,
         box,
         sizesBounds,
         isRateably: onlyRateably || pressedKeys.shiftKey,
@@ -70,9 +81,6 @@ export function useResize<T extends HTMLElement>({
     [onChange, box, sizesBounds, onlyRateably]
   );
 
-  /** Т.к. кнопки располагаются внутри бокса, а не на том же уровне */
-  const innerBox = box.moveToOrigin();
-
   return getMovableElements(thumbKeys).map((movable, i) => {
     const key = thumbKeys[i];
    
@@ -80,12 +88,12 @@ export function useResize<T extends HTMLElement>({
       <Draggable
         key={String(key)}
         isCentered={true}
-        value={movable.getPointInBox(innerBox)}
+        value={movable.getPointInBox(box)}
         onChange={(point, options) =>
           handleChangeThumb(movable, point, options)
         }
       >
-        <ThumbComponent />
+        <Thumb movableElement={movable}/>
       </Draggable>
     );
   });

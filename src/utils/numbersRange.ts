@@ -1,16 +1,16 @@
 import { clamp } from "ramda";
 
-export class Range {
+export class NumbersRange {
   static createBySize(start: number, size: number) {
-    return new Range(start, start + size);
+    return new NumbersRange(start, start + size);
   }
 
   static infinite() {
-    return new Range(-Infinity, Infinity);
+    return new NumbersRange(-Infinity, Infinity);
   }
 
   static endless(start: number) {
-    return new Range(start, Infinity);
+    return new NumbersRange(start, Infinity);
   }
 
   constructor(public start: number, public end: number) {}
@@ -28,34 +28,34 @@ export class Range {
   }
 
   setStart(value: number) {
-    return new Range(value, this.end);
+    return new NumbersRange(value, this.end);
   }
 
   setEnd(value: number) {
-    return new Range(this.start, value);
+    return new NumbersRange(this.start, value);
   }
 
-  constrainStart({ start: minSize, end: maxSize }: Range) {
+  constrainStart({ start: minSize, end: maxSize }: NumbersRange) {
     return this.setStart(
       clamp(this.end - maxSize, this.end - minSize, this.start)
     );
   }
 
-  constrainEnd({ start: minSize, end: maxSize }: Range) {
+  constrainEnd({ start: minSize, end: maxSize }: NumbersRange) {
     return this.setEnd(
       clamp(this.start + minSize, this.start + maxSize, this.end)
     );
   }
 
-  clipInner(inner: Range) {
+  clipInner(inner: NumbersRange) {
     return inner.map((a) => clamp(this.start, this.end, a));
   }
 
-  clampInner({ start, size }: Range) {
-    return Range.createBySize(clamp(this.start, this.end - size, start), size);
+  clampInner({ start, size }: NumbersRange) {
+    return NumbersRange.createBySize(clamp(this.start, this.end - size, start), size);
   }
 
   map(f: (item: number) => number) {
-    return new Range(f(this.start), f(this.end));
+    return new NumbersRange(f(this.start), f(this.end));
   }
 }
