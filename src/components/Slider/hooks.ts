@@ -43,7 +43,7 @@ export function useSlide({
     onChange: handleResize,
     thumbKeys: orientation.sides,
     sizesBounds: orientation.getSizeBounds(sizeBounds),
-    onlyRateably: false,
+    keepAspectRatio: false,
     Thumb
   });
 

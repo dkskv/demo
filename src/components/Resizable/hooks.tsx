@@ -1,15 +1,15 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useDrag } from "../Draggable/hooks";
 import { BoundingBox } from "../../utils/boundingBox";
 import { type IPressedKeys } from "../../utils/common";
 import { Point } from "../../utils/point";
 import { BoxSizesBounds } from "../../utils/boxSizesBounds";
 import {
-  getMovableElements,
+  getResizingPoints,
   type IMovableElementKey,
 } from "../../utils/boxResize";
-import { MovableElement } from "../../utils/boxResize/movableElement";
 import { Draggable } from "../Draggable";
+import { ResizingPoint } from "../../utils/boxResize/resizingPoint";
 
 export interface IResizeCallbackOptions {
   pressedKeys: IPressedKeys;
@@ -26,19 +26,17 @@ export interface IResizeParams {
   /** Если элемент передан, то его можно перемещать */
   draggableElement: HTMLElement | null;
 
-  /** Ограничения размера элемента */
+  /** Ограничения размера сторон */
   sizesBounds: BoxSizesBounds;
 
-  /** Менять размер, сохраняя соотношении длины и ширины */
-  onlyRateably: boolean;
+  /** Сохранять соотношении сторон */
+  keepAspectRatio: boolean;
 
   /** Ключи отображаемых кнопок, за которые производится resize  */
   thumbKeys: readonly IMovableElementKey[];
 
   /** React компонент кнопки, за которую производится resize */
-  Thumb: React.ComponentType<{
-    movableElement: MovableElement
-  }>;
+  Thumb: React.ComponentType<{}>;
 }
 
 /** 
@@ -50,13 +48,13 @@ export function useResize({
   draggableElement,
   onChange,
   sizesBounds,
-  onlyRateably,
+  keepAspectRatio,
   thumbKeys,
   Thumb,
 }: IResizeParams): React.ReactNode {
   const handleDrag = useCallback(
     (point: Point, pressedKeys: IPressedKeys) => {
-      onChange(box.setOrigin(point), { pressedKeys, isDrag: true });
+      onChange(box.moveTo(point), { pressedKeys, isDrag: true });
     },
     [onChange, box]
   );
@@ -65,35 +63,44 @@ export function useResize({
 
   const handleChangeThumb = useCallback(
     (
-      movable: MovableElement,
-      dragPoint: Point,
+      resizingPoint: ResizingPoint,
+      nextPoint: Point,
       pressedKeys: IPressedKeys
     ) => {
-      const updatedBox = movable.updateBox({
-        point: dragPoint,
-        box,
-        sizesBounds,
-        isRateably: onlyRateably || pressedKeys.shiftKey,
-      });
+      // Изменение размера
+      let updatedBox = resizingPoint.resizeBox(box, nextPoint);
+
+      // Ограничение размера
+      updatedBox = updatedBox.constrainDeltas(sizesBounds);
+
+      // Сохранение соотношения сторон
+      if (keepAspectRatio || pressedKeys.shiftKey) {
+        updatedBox = updatedBox.setAspectRatio(box.aspectRatio);
+      }
+
+      // Поправка расположения
+      updatedBox = resizingPoint.keepTransformOrigin(box, updatedBox);
 
       onChange(updatedBox, { pressedKeys, isDrag: false });
     },
-    [onChange, box, sizesBounds, onlyRateably]
+    [onChange, box, sizesBounds, keepAspectRatio]
   );
 
-  return getMovableElements(thumbKeys).map((movable, i) => {
+  const resizingPoints = useMemo(() => getResizingPoints(thumbKeys), [thumbKeys]);
+
+  return resizingPoints.map((resizingPoint, i) => {
     const key = thumbKeys[i];
    
     return (
       <Draggable
         key={String(key)}
         isCentered={true}
-        value={movable.getPointInBox(box)}
+        value={box.denormalizePoint(resizingPoint)}
         onChange={(point, options) =>
-          handleChangeThumb(movable, point, options)
+          handleChangeThumb(resizingPoint, point, options)
         }
       >
-        <Thumb movableElement={movable}/>
+        <Thumb />
       </Draggable>
     );
   });

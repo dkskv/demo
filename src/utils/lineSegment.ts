@@ -5,9 +5,9 @@ export class LineSegment {
 
   /** Получить проекцию точки на эту прямую */
   projectPoint(p: Point) {
-    // Координата p относительно p1  
+    /** Координата p относительно p1 */  
     const p_ = p.subtract(this.p1);
-    // Координата p2 относительно p1  
+    /** Координата p2 относительно p1 */ 
     const p2_ = this.p2.subtract(this.p1);
 
     const k = p_.dot(p2_) / p2_.dot(p2_);

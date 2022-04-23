@@ -16,7 +16,7 @@ const Template: ComponentStory<typeof Resizable> = (args) => (
 export const Simple = Template.bind({});
 Simple.args = {
   initialValue: BoundingBox.createByDimensions(50, 60, 200, 150),
-  sizesBounds: BoxSizesBounds.onlyMax(400, 400),
+  sizesBounds: new BoxSizesBounds(100, 600, 80, 400),
   children: (
     <span
       style={{

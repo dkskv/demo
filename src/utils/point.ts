@@ -7,6 +7,10 @@ export class Point {
 
   constructor(public readonly x: number, public readonly y: number) {}
 
+  map(f: (item: number) => number) {
+    return new Point(f(this.x), f(this.y));
+  }
+
   setX(value: number) {
     return new Point(value, this.y);
   }
@@ -35,7 +39,7 @@ export class Point {
     return new Point(this.x * k, this.y * k);
   }
 
-  private mul(p: Point) {
+  mul(p: Point) {
     return new Point(this.x * p.x, this.y * p.y);
   }
 

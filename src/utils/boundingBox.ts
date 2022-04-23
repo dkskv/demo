@@ -1,4 +1,5 @@
 import { clamp } from "ramda";
+import { BoxSizesBounds } from "./boxSizesBounds";
 import { NumbersRange } from "./numbersRange";
 import { Point } from "./point";
 
@@ -64,26 +65,6 @@ export class BoundingBox {
     return new Point((this.x1 + this.x2) / 2, (this.y1 + this.y2) / 2);
   }
 
-  /** @deprecated */
-  shiftX1(offset: number) {
-    return this.setX1(this.x1 + offset);
-  }
-
-  /** @deprecated */
-  shiftX2(offset: number) {
-    return this.setX2(this.x2 + offset);
-  }
-
-  /** @deprecated */
-  shiftY1(offset: number) {
-    return this.setY1(this.y1 + offset);
-  }
-
-  /** @deprecated */
-  shiftY2(offset: number) {
-    return this.setY2(this.y2 + offset);
-  }
-
   setX1(value: number) {
     return new BoundingBox(value, this.x2, this.y1, this.y2);
   }
@@ -116,54 +97,61 @@ export class BoundingBox {
     );
   }
 
-  constrainX1(widthBounds: NumbersRange) {
-    const { start } = this.xsRange.constrainStart(widthBounds);
-
-    return this.setX1(start);
-  }
-
-  constrainX2(widthBounds: NumbersRange) {
-    const { end } = this.xsRange.constrainEnd(widthBounds);
-
-    return this.setX2(end);
-  }
-
-  constrainY1(heightBounds: NumbersRange) {
-    const { start } = this.ysRange.constrainStart(heightBounds);
-
-    return this.setY1(start);
-  }
-
-  constrainY2(heightBounds: NumbersRange) {
-    const { end } = this.ysRange.constrainEnd(heightBounds);
-
-    return this.setY2(end);
+  /** Смещает координату левого верхнего угла */
+  shift(offsets: Point): BoundingBox {
+    return this.moveTo(this.origin.add(offsets));
   }
 
   /** Устанавливает координату левого верхнего угла */
-  setOrigin({ x, y }: Point) {
+  moveTo({ x, y }: Point) {
     return BoundingBox.createByDimensions(x, y, this.dx, this.dy);
   }
 
-  moveToOrigin() {
+  /** Перемещаем бокс в начало координат */
+  resetOrigin() {
     return BoundingBox.createByDimensions(0, 0, this.dx, this.dy);
+  }
+
+  constrainDeltas(bounds: BoxSizesBounds) {
+    const dx = clamp(bounds.minW, bounds.maxW, this.dx);
+    const dy = clamp(bounds.minH, bounds.maxH, this.dy);
+
+    return BoundingBox.createByDimensions(this.x0, this.y0, dx, dy);
+  }
+
+  shiftDeltas(offsetX: number, offsetY: number) {
+    return BoundingBox.createByDimensions(
+      this.x0,
+      this.y0,
+      this.dx + offsetX,
+      this.dy + offsetY
+    );
+  }
+
+  get deltasVector() {
+    return new Point(this.dx, this.dy);
   }
 
   /** Получить бокс в координатах относительно переданной точки */
   placeRelatively(origin: Point) {
-    return this.setOrigin(this.origin.subtract(origin));
+    return this.moveTo(this.origin.subtract(origin));
   }
 
   /** Соотношение сторон (ширина / высота) */
-  get ratio() {
+  get aspectRatio() {
     return this.dx / this.dy;
   }
 
   /** Выровнять бокс по переданному соотношению сторон (ширина / высота) */
-  alignByRatio(ratio: number) {
+  setAspectRatio(ratio: number) {
     const dx = Math.min(this.dx, this.dy * ratio);
     const dy = Math.min(this.dy, this.dx / ratio);
 
     return BoundingBox.createByDimensions(this.x0, this.y0, dx, dy);
+  }
+
+  /** Получить координаты точки по ее нормированным координатам внутри бокса */
+  denormalizePoint(point: Point): Point {
+    return this.origin.add(point.mul(this.deltasVector));
   }
 }

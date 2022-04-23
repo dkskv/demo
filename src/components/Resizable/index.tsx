@@ -29,7 +29,7 @@ const Resizable: React.FC<IProps> = ({
     draggableElement: element,
     onChange,
     sizesBounds,
-    onlyRateably: false,
+    keepAspectRatio: false,
     thumbKeys: allThumbKeys,
     Thumb,
   });

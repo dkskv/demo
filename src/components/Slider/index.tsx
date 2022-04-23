@@ -31,7 +31,7 @@ const Slider: React.VFC<ISliderProps> = ({
   const [track, setTrackRef] = useCallbackRef();
 
   // todo: ломает мемоизацию колбека
-  const boundsRange = orientation.getRangeOfBox(boundingBox.moveToOrigin());
+  const boundsRange = orientation.getRangeOfBox(boundingBox.resetOrigin());
 
   const handleChange = useCallback(
     (range: NumbersRange, isDrag: boolean) => {
