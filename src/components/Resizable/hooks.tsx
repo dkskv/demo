@@ -7,6 +7,8 @@ import { BoxSizesBounds } from "../../utils/boxSizesBounds";
 import { Draggable } from "../Draggable";
 import { ResizingPoint } from "../../utils/boxResize/resizingPoint";
 import { IResizeThumbKey, resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
+import { updateBox } from "../../utils/boxResize";
+import { useActualRef } from "../../decorators/useActualRef";
 
 export interface IResizeCallbackOptions {
   pressedKeys: IPressedKeys;
@@ -14,10 +16,10 @@ export interface IResizeCallbackOptions {
 }
 
 export interface IResizeParams {
-  /** Текущее состояние элемента */
+  /** Текущее состояние бокса */
   box: BoundingBox;
 
-  /** Callback, срабатывающий при намерении изменить состояние элемента */
+  /** Callback, срабатывающий при намерении изменить состояние бокса */
   onChange(box: BoundingBox, options: IResizeCallbackOptions): void;
 
   /** Если элемент передан, то его можно перемещать */
@@ -45,47 +47,43 @@ export function useResize({
   thumbKeys,
   ThumbComponent,
 }: IResizeParams): React.ReactNode {
+  const boxRef = useActualRef(box);
+  const keepAspectRatioRef = useActualRef(keepAspectRatio);
+  const sizesBoundsRef = useActualRef(sizesBounds);
+
   const handleDrag = useCallback(
     (point: Point, pressedKeys: IPressedKeys) => {
-      onChange(box.moveTo(point), { pressedKeys, isDrag: true });
+      onChange(boxRef.current.moveTo(point), { pressedKeys, isDrag: true });
     },
-    [onChange, box]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [onChange]
   );
 
   useDrag({ element: draggableElement, onChange: handleDrag });
-
+ 
   const handleChangeThumb = useCallback(
     (
       resizingPoint: ResizingPoint,
-      nextPoint: Point,
+      resizingPointTarget: Point,
       pressedKeys: IPressedKeys
     ) => {
-      // Изменение размера
-      let updatedBox = resizingPoint.resizeBox(box, nextPoint);
-
-      // Ограничение размера
-      updatedBox = updatedBox.constrainDeltas(sizesBounds);
-
-      // Сохранение соотношения сторон
-      if (keepAspectRatio || pressedKeys.shiftKey) {
-        // todo: работает не всегда правильно:
-        // - Может сделать стороны бокса меньше минимума (всегда Math.min);
-        // - Боковая сторона может пропорционально только уменьшаться (всегда Math.min).
-        // Возможное решение: условно использовать Math.min и Math.max
-        updatedBox = updatedBox.setAspectRatio(box.aspectRatio);
-      }
-
-      // Поправка расположения
-      updatedBox = resizingPoint.keepTransformOrigin(box, updatedBox);
+      const updatedBox = updateBox({
+        prevBox: boxRef.current,
+        resizingPoint,
+        resizingPointTarget,
+        keepAspectRatio: keepAspectRatioRef.current || pressedKeys.shiftKey,
+        sizesBounds: sizesBoundsRef.current
+      });
 
       onChange(updatedBox, { pressedKeys, isDrag: false });
     }, 
-    [onChange, box, sizesBounds, keepAspectRatio]
-  );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [onChange]
+  )
 
   const resizingPoints = useMemo(() => thumbKeys.map(resizingPointsPreset.get), [thumbKeys]);
 
-  // Кнопки нужно расположить в одной системе координат с resizable-элементом
+  // Кнопки располагать в одной системе координат с resizable-элементом
   return resizingPoints.map((resizingPoint, i) => {
     const key = thumbKeys[i];
    

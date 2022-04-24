@@ -128,10 +128,6 @@ export class BoundingBox {
     );
   }
 
-  get deltasVector() {
-    return new Point(this.dx, this.dy);
-  }
-
   /** Получить бокс в координатах относительно переданной точки */
   placeRelatively(origin: Point) {
     return this.moveTo(this.origin.subtract(origin));
@@ -142,16 +138,24 @@ export class BoundingBox {
     return this.dx / this.dy;
   }
 
-  /** Выровнять бокс по переданному соотношению сторон (ширина / высота) */
+  /** Задать `aspectRatio` */
   setAspectRatio(ratio: number) {
-    const dx = Math.min(this.dx, this.dy * ratio);
-    const dy = Math.min(this.dy, this.dx / ratio);
+    // Исходя из уравнения: ratio * dy + dy = dx + dy
+
+    const dy = (this.dx + this.dy) / (ratio + 1);
+    const dx = ratio * dy;
 
     return BoundingBox.createByDimensions(this.x0, this.y0, dx, dy);
   }
 
   /** Получить координаты точки по ее нормированным координатам внутри бокса */
   denormalizePoint(point: Point): Point {
-    return this.origin.add(point.mul(this.deltasVector));
+    const deltasVector = new Point(this.dx, this.dy);
+
+    return this.origin.add(point.mul(deltasVector));
+  }
+
+  isEqual({ x1, x2, y1, y2 }: BoundingBox) {
+    return x1 === this.x1 && x2 === this.x2 && y1 === this.y1 && y2 === this.y2;
   }
 }

@@ -13,6 +13,7 @@ class ResizingPointsPreset {
     this.get = this.get.bind(this);
   }
 
+  // todo: наверное, лучше всегда держать в памяти
   get all() {
     return [...this.edges, ...this.corners] as const;
   }
@@ -43,6 +44,14 @@ class ResizingPointsPreset {
     return new ResizingPoint(x, y);
   }
 
+  private getCornerPoint(key: ICornerThumbKey): Point {
+    const [p1, p2] = (
+      key.split("-") as [IVerticalBoxSide, IHorizontalBoxSide]
+    ).map(this.getEdgePoint);
+
+    return p1.mul(p2).map(Math.round);
+  }
+
   private getEdgePoint(key: IEdgeThumbKey): Point {
     switch (key) {
       case EBoxSide.left:
@@ -56,14 +65,6 @@ class ResizingPointsPreset {
       default:
         throw new Error("Incorrect thumb key");
     }
-  }
-
-  private getCornerPoint(key: ICornerThumbKey): Point {
-    const [p1, p2] = (
-      key.split("-") as [IVerticalBoxSide, IHorizontalBoxSide]
-    ).map(this.getEdgePoint);
-
-    return p1.mul(p2).map(Math.round);
   }
 
   private isCorner(key: IResizeThumbKey): key is ICornerThumbKey {
