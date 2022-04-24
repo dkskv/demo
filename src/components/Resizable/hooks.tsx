@@ -4,12 +4,9 @@ import { BoundingBox } from "../../utils/boundingBox";
 import { type IPressedKeys } from "../../utils/common";
 import { Point } from "../../utils/point";
 import { BoxSizesBounds } from "../../utils/boxSizesBounds";
-import {
-  getResizingPoints,
-  type IMovableElementKey,
-} from "../../utils/boxResize";
 import { Draggable } from "../Draggable";
 import { ResizingPoint } from "../../utils/boxResize/resizingPoint";
+import { IResizeThumbKey, resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
 
 export interface IResizeCallbackOptions {
   pressedKeys: IPressedKeys;
@@ -33,16 +30,12 @@ export interface IResizeParams {
   keepAspectRatio: boolean;
 
   /** Ключи отображаемых кнопок, за которые производится resize  */
-  thumbKeys: readonly IMovableElementKey[];
+  thumbKeys: readonly IResizeThumbKey[];
 
   /** React компонент кнопки, за которую производится resize */
-  Thumb: React.ComponentType<{}>;
+  ThumbComponent: React.ComponentType<{}>;
 }
 
-/** 
- * Возвращает кнопки, которые нужно расположить в одной системе координат 
- * с resizable-элементом
- */
 export function useResize({
   box,
   draggableElement,
@@ -50,7 +43,7 @@ export function useResize({
   sizesBounds,
   keepAspectRatio,
   thumbKeys,
-  Thumb,
+  ThumbComponent,
 }: IResizeParams): React.ReactNode {
   const handleDrag = useCallback(
     (point: Point, pressedKeys: IPressedKeys) => {
@@ -75,6 +68,10 @@ export function useResize({
 
       // Сохранение соотношения сторон
       if (keepAspectRatio || pressedKeys.shiftKey) {
+        // todo: работает не всегда правильно:
+        // - Может сделать стороны бокса меньше минимума (всегда Math.min);
+        // - Боковая сторона может пропорционально только уменьшаться (всегда Math.min).
+        // Возможное решение: условно использовать Math.min и Math.max
         updatedBox = updatedBox.setAspectRatio(box.aspectRatio);
       }
 
@@ -82,12 +79,13 @@ export function useResize({
       updatedBox = resizingPoint.keepTransformOrigin(box, updatedBox);
 
       onChange(updatedBox, { pressedKeys, isDrag: false });
-    },
+    }, 
     [onChange, box, sizesBounds, keepAspectRatio]
   );
 
-  const resizingPoints = useMemo(() => getResizingPoints(thumbKeys), [thumbKeys]);
+  const resizingPoints = useMemo(() => thumbKeys.map(resizingPointsPreset.get), [thumbKeys]);
 
+  // Кнопки нужно расположить в одной системе координат с resizable-элементом
   return resizingPoints.map((resizingPoint, i) => {
     const key = thumbKeys[i];
    
@@ -100,7 +98,7 @@ export function useResize({
           handleChangeThumb(resizingPoint, point, options)
         }
       >
-        <Thumb />
+        <ThumbComponent />
       </Draggable>
     );
   });

@@ -5,8 +5,9 @@ export const enum EBoxSide {
   right = "right",
 }
 
-export const horizontalSides = [EBoxSide.left, EBoxSide.right] as const;
-export const verticalSides = [EBoxSide.top, EBoxSide.bottom] as const;
+export type IVerticalBoxSide = EBoxSide.left | EBoxSide.right;
+export type IHorizontalBoxSide = EBoxSide.top | EBoxSide.bottom;
+
 
 
 

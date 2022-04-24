@@ -4,7 +4,7 @@ import { IOrientation } from "../../utils/orientation";
 import { NumbersRange } from "../../utils/numbersRange";
 import { BoundingBox } from "../../utils/boundingBox";
 
-interface ISlideParams extends Pick<IResizeParams, "Thumb" | "draggableElement"> {
+export interface ISlideParams extends Pick<IResizeParams, "ThumbComponent" | "draggableElement"> {
   /** Диапазон трека слайдера */
   range: NumbersRange;
 
@@ -28,7 +28,7 @@ export function useSlide({
   orientation,
   sizeBounds,
   onChange,
-  Thumb
+  ThumbComponent
 }: ISlideParams) {
   const handleResize = useCallback(
     (box: BoundingBox, { isDrag }: IResizeCallbackOptions) => {
@@ -44,8 +44,9 @@ export function useSlide({
     thumbKeys: orientation.sides,
     sizesBounds: orientation.getSizeBounds(sizeBounds),
     keepAspectRatio: false,
-    Thumb
+    ThumbComponent
   });
 
   return thumbsElements;
 }
+ 

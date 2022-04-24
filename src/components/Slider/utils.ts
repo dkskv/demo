@@ -1,13 +1,8 @@
-import { clamp } from "ramda";
 import { NumbersRange } from "../../utils/numbersRange";
 import { IOrientation } from "../../utils/orientation";
 
 export function validateSliderRange(range: NumbersRange) {
-  if (
-    Object.entries(range).every(([, value]) => value === clamp(0, 1, value))
-  ) {
-    return;
-  }
+  // todo: добавить проверку на нормализацию
 
   if (range.end >= range.start) {
     return;

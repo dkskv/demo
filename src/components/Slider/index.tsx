@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import { useCallbackRef } from "../../hooks";
-import { IOrientation, Orientations } from "../../utils/orientation";
-import { useSlide } from "./hooks";
+import { Orientations } from "../../utils/orientation";
+import { ISlideParams, useSlide } from "./hooks";
 import "./index.css";
 import { sliderTrackStyle, validateSliderRange } from "./utils";
 import { NumbersRange } from "../../utils/numbersRange";
@@ -10,13 +10,16 @@ import { getBoxStyle } from "../../utils/styles";
 import { BoundingBox } from "../../utils/boundingBox";
 import { Thumb } from "../Thumb";
 
-export interface ISliderProps {
-  /** Нормализованный диапазон (в пределах от 0 до 1) */
+export interface ISliderProps
+  extends Pick<
+    Partial<ISlideParams>,
+    "orientation" | "sizeBounds" | "ThumbComponent"
+  > {
+  /** Нормированный диапазон (в пределах от 0 до 1) */
   value: NumbersRange;
   onChange(value: NumbersRange): void;
+  /** Контейнер, ограничивающий трек слайдера */
   boundingBox: BoundingBox;
-  orientation?: IOrientation;
-  sizeBounds?: NumbersRange;
 }
 
 const Slider: React.VFC<ISliderProps> = ({
@@ -25,6 +28,7 @@ const Slider: React.VFC<ISliderProps> = ({
   boundingBox,
   sizeBounds = NumbersRange.infinite(),
   orientation = Orientations.horizontal,
+  ThumbComponent = Thumb,
 }) => {
   validateSliderRange(value);
 
@@ -51,7 +55,7 @@ const Slider: React.VFC<ISliderProps> = ({
     onChange: handleChange,
     orientation,
     sizeBounds: denormalize(sizeBounds, boundsRange.size),
-    Thumb
+    ThumbComponent,
   });
 
   return (

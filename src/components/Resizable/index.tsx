@@ -1,26 +1,30 @@
-import React from "react";
+import React, { useMemo } from "react";
 import makeStateful from "../../decorators/makeStateful";
 import { useCallbackRef } from "../../hooks";
 import { BoundingBox } from "../../utils/boundingBox";
 import { BoxSizesBounds } from "../../utils/boxSizesBounds";
-import { IResizeCallbackOptions, useResize } from "./hooks";
-import { allThumbKeys } from "../../utils/boxResize";
+import { IResizeCallbackOptions, IResizeParams, useResize } from "./hooks";
+import { resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
 import { getBoxStyle } from "../../utils/styles";
 import { Thumb } from "../Thumb";
 
-type IProps = React.HTMLAttributes<HTMLDivElement> & {
+interface IProps
+  extends Pick<
+    Partial<IResizeParams>,
+    "sizesBounds" | "keepAspectRatio" | "thumbKeys" | "ThumbComponent"
+  > {
   value: BoundingBox;
   onChange(value: BoundingBox, options: IResizeCallbackOptions): void;
-  sizesBounds?: BoxSizesBounds;
-};
+}
 
 const Resizable: React.FC<IProps> = ({
   value,
   onChange,
   sizesBounds = BoxSizesBounds.without(),
+  keepAspectRatio = false,
+  thumbKeys = resizingPointsPreset.all,
+  ThumbComponent = Thumb,
   children,
-  style,
-  ...restProps
 }) => {
   const [element, setRef] = useCallbackRef();
 
@@ -29,19 +33,15 @@ const Resizable: React.FC<IProps> = ({
     draggableElement: element,
     onChange,
     sizesBounds,
-    keepAspectRatio: false,
-    thumbKeys: allThumbKeys,
-    Thumb,
+    keepAspectRatio,
+    thumbKeys,
+    ThumbComponent,
   });
 
   return (
     <>
-      <div
-        {...restProps}
-        ref={setRef}
-        style={{ ...getBoxStyle(value), position: "absolute", ...style }}
-      >
-        {/* todo: растягивать на 100% по умолчанию */}
+      <div ref={setRef} style={{ ...getBoxStyle(value), position: "absolute" }}>
+        {/* todo: растягивать на 100% по умолчанию? */}
         {React.Children.only(children)}
       </div>
       {thumbsElements}

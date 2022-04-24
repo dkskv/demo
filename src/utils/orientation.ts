@@ -1,6 +1,6 @@
 import { CSSProperties } from "react";
 import { BoundingBox } from "./boundingBox";
-import { EBoxSide, horizontalSides, verticalSides } from "./sides";
+import { EBoxSide } from "./sides";
 import { NumbersRange } from "./numbersRange";
 import { BoxSizesBounds } from "./boxSizesBounds";
 
@@ -38,7 +38,7 @@ export namespace Orientations {
     getSizeBounds({ start, end }: NumbersRange) {
       return BoxSizesBounds.onlyWidth(start, end);
     },
-    sides: horizontalSides,
+    sides: [EBoxSide.left, EBoxSide.right],
     cssKeys: {
       length: "width",
       thickness: "height",
@@ -60,7 +60,7 @@ export namespace Orientations {
     getSizeBounds({ start, end }: NumbersRange) {
       return BoxSizesBounds.onlyHeight(start, end);
     },
-    sides: verticalSides,
+    sides: [EBoxSide.top, EBoxSide.bottom],
     cssKeys: {
       length: "height",
       thickness: "width",

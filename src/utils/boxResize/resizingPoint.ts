@@ -1,7 +1,7 @@
 import { BoundingBox } from "../boundingBox";
 import { Point } from "../point";
 
-/** Точка, нормированная в координатах бокса, умеющая менять размеры бокса */
+/** Точка, меняющая размеры бокса (координаты точки нормированы) */
 export class ResizingPoint extends Point {
   /** Точка бокса, остающаяся неподвижной при его трансформировании */
   private get transformOrigin(): Point {
@@ -32,9 +32,7 @@ export class ResizingPoint extends Point {
     const moveVector = target.subtract(source).mul(this.signs);
 
     /** Изменение размеров бокса на вектор перемещения */
-    const resizedBox = box.shiftDeltas(moveVector.x, moveVector.y);
-
-    return resizedBox;
+    return box.shiftDeltas(moveVector.x, moveVector.y);
   }
 
   /** Переместить бокс в соответствии с `transformOrigin` после применения трансформаций */
