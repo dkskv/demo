@@ -1,6 +1,6 @@
 import { clamp } from "ramda";
 
-export class NumbersRange {
+export class NumbersRange implements Iterable<number> {
   static createBySize(start: number, size: number) {
     return new NumbersRange(start, start + size);
   }
@@ -15,8 +15,16 @@ export class NumbersRange {
 
   constructor(public start: number, public end: number) {}
 
-  get size() {
+  get delta() {
     return this.end - this.start;
+  }
+
+  get size() {
+    return Math.abs(this.delta);
+  }
+
+  get direction() {
+    return Math.sign(this.delta);
   }
 
   shiftStart(offset: number) {
@@ -35,12 +43,14 @@ export class NumbersRange {
     return new NumbersRange(this.start, value);
   }
 
+  /** Ограничить начало, опираясь на конец и длину диапазона */
   constrainStart({ start: minSize, end: maxSize }: NumbersRange) {
     return this.setStart(
       clamp(this.end - maxSize, this.end - minSize, this.start)
     );
   }
 
+  /** Ограничить конец, опираясь на начало и длину диапазона */
   constrainEnd({ start: minSize, end: maxSize }: NumbersRange) {
     return this.setEnd(
       clamp(this.start + minSize, this.start + maxSize, this.end)
@@ -57,5 +67,10 @@ export class NumbersRange {
 
   map(f: (item: number) => number) {
     return new NumbersRange(f(this.start), f(this.end));
+  }
+
+  *[Symbol.iterator]() {
+    yield this.start;
+    yield this.end;
   }
 }

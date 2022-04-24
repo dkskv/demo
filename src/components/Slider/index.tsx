@@ -3,12 +3,13 @@ import { useCallbackRef } from "../../hooks";
 import { Orientations } from "../../utils/orientation";
 import { ISlideParams, useSlide } from "./hooks";
 import "./index.css";
-import { sliderTrackStyle, validateSliderRange } from "./utils";
+import { validateSliderRange } from "./utils";
 import { NumbersRange } from "../../utils/numbersRange";
 import { denormalize, normalize } from "../../utils/normalization";
 import { getBoxStyle } from "../../utils/styles";
 import { BoundingBox } from "../../utils/boundingBox";
 import { Thumb } from "../Thumb";
+import { sliderTrackStyle } from "./styles";
 
 export interface ISliderProps
   extends Pick<
