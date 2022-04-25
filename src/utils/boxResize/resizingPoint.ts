@@ -1,6 +1,8 @@
 import { BoundingBox } from "../boundingBox";
 import { Point } from "../point";
 
+// todo: Придумать способ кастомно задать transformOrigin
+
 /** Точка, меняющая размеры бокса (координаты точки нормированы) */
 export class ResizingPoint extends Point {
   /** Точка бокса, остающаяся неподвижной при его трансформировании */

@@ -4,27 +4,23 @@ import { NumbersRange } from "../../utils/numbersRange";
 export interface INumbersRangeInputProps {
   value: NumbersRange;
   onChange(value: NumbersRange): void;
-  /** диапазон минимального и максимального значений */
+  /** Диапазон минимального и максимального значений */
   bounds?: NumbersRange;
-  // todo: ограничить только положительными значениями
-  /** минимальный и максимальный размер диапазона */
+  /** Минимальный и максимальный размер диапазона */
   sizeBounds?: NumbersRange;
 }
 
-const NumbersRangeInput: React.VFC<INumbersRangeInputProps> = (props) => {
-  const {
-    value: range,
-    bounds = NumbersRange.infinite(),
-    sizeBounds = NumbersRange.infinite(),
-    onChange,
-  } = props;
-
+const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
+  value: range,
+  bounds = NumbersRange.infinite(),
+  sizeBounds = NumbersRange.infinite(),
+  onChange,
+  children,
+}) => {
   const handleChangeStart = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       onChange(
-        range
-          .setStart(Number(event.target.value))
-          .constrainStart(sizeBounds)
+        range.setStart(Number(event.target.value)).constrainStart(sizeBounds)
       );
     },
     [range, sizeBounds, onChange]
@@ -40,7 +36,8 @@ const NumbersRangeInput: React.VFC<INumbersRangeInputProps> = (props) => {
   );
 
   return (
-    <div>
+    // todo: менять стиль в зависимости от ориентации
+    <div style={{ display: "flex", columnGap: "12px" }}>
       <input
         type="number"
         onChange={handleChangeStart}
@@ -48,7 +45,7 @@ const NumbersRangeInput: React.VFC<INumbersRangeInputProps> = (props) => {
         min={bounds.start}
         max={bounds.end}
       />
-      -
+      {children}
       <input
         type="number"
         onChange={handleChangeEnd}

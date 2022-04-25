@@ -27,14 +27,6 @@ export class NumbersRange implements Iterable<number> {
     return Math.sign(this.delta);
   }
 
-  shiftStart(offset: number) {
-    return this.setStart(this.start + offset);
-  }
-
-  shiftEnd(offset: number) {
-    return this.setEnd(this.end + offset);
-  }
-
   setStart(value: number) {
     return new NumbersRange(value, this.end);
   }
@@ -63,6 +55,20 @@ export class NumbersRange implements Iterable<number> {
 
   clampInner({ start, size }: NumbersRange) {
     return NumbersRange.createBySize(clamp(this.start, this.end - size, start), size);
+  }
+
+  /** Вернуть реальную позицию числа, нормированного внутри диапазона */
+  denormalizeNumber(n: number) {
+    return this.start + n * this.delta;
+  }
+
+  /** Нормировать точку внутри диапазона */
+  normalizeNumber(n: number) {
+    return (n - this.start) / this.delta;
+  }
+
+  isEqual({start, end}: NumbersRange) {
+    return this.start === start && this.end === end;
   }
 
   map(f: (item: number) => number) {

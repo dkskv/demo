@@ -1,5 +1,6 @@
 import { Point } from "./point";
 
+/** @deprecated нигде не используется */
 export class LineSegment {
   constructor(private p1: Point, private p2: Point) {}
 

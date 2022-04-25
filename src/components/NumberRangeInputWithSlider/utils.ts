@@ -1,37 +1,20 @@
-import { identity } from "ramda";
+import { IConverter } from "../../utils/converter";
 import { NumbersRange } from "../../utils/numbersRange";
 
-/**
- * todo: Вынести в отдельную утилиту двустороннее связывание.
- * И поработать над понятностью.
+/** 
+ * Создать конвертер между нормированным диапазоном и диапазон чисел
+ * @param bounds Границы, в которых происходит нормирование
+ * @returns Конвертер
  */
-export interface IConverter<T, U> {
-  toUni(x: T): U;
-  toSrc(x: U): T;
-}
-
-export const identityConverter = { toUni: identity, toSrc: identity };
-
-const getInputConverter = (range: NumbersRange): IConverter<number, number> => ({
-  toUni(x: number) {
-    return (x - range.start) / range.size;
-  },
-  toSrc(x: number) {
-    return Math.round(range.start + x * range.size);
-  },
-});
-
-export const getInputsRangeConverter = (
+export const createConverter = (
   bounds: NumbersRange
 ): IConverter<NumbersRange, NumbersRange> => {
-  const converter = getInputConverter(bounds);
-
   return {
-    toUni(range: NumbersRange) {
-      return range.map(converter.toUni);
+    toDestination(normalizedRange: NumbersRange) {
+      return normalizedRange.map((n) => Math.round(bounds.denormalizeNumber(n)));
     },
-    toSrc(range: NumbersRange) {
-      return range.map(converter.toSrc);
+    fromDestination(numbersRange: NumbersRange) {
+      return numbersRange.map((n) => bounds.normalizeNumber(n));
     },
   };
 };
