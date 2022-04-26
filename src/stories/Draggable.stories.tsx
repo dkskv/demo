@@ -1,6 +1,7 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { StatefulDraggable } from "../components/Draggable";
 import { Point } from "../utils/point";
+import { centererStyle } from "../utils/styles";
 
 export default {
   title: "Demo/Draggable",
@@ -18,11 +19,9 @@ Simple.args = {
   children: (
     <div
       style={{
+        ...centererStyle,
         width: "100px",
         height: "60px",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
         background: "purple",
         color: "white",
         cursor: "pointer"

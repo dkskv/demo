@@ -2,6 +2,7 @@ import { ComponentStory, ComponentMeta } from "@storybook/react";
 import Resizable from "../components/Resizable";
 import { BoundingBox } from "../utils/boundingBox";
 import { BoxSizesBounds } from "../utils/boxSizesBounds";
+import { centererStyle, stretchStyle } from "../utils/styles";
 
 export default {
   title: "Demo/Resizable",
@@ -20,11 +21,8 @@ Simple.args = {
   children: (
     <span
       style={{
-        width: "100%",
-        height: "100%",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
+        ...stretchStyle,
+        ...centererStyle,
         background: "purple",
         color: "white",
         cursor: "pointer"

@@ -15,3 +15,14 @@ export function getBoxStyle(box: BoundingBox) {
     height: `${box.dy}px`,
   } as const;
 }
+
+export const stretchStyle = {
+  width: "100%",
+  height: "100%",
+} as const;
+
+export const centererStyle = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+} as const;

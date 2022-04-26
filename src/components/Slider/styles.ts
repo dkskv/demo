@@ -9,6 +9,7 @@ export const sliderTrackStyle = (
   ) =>
     ({
       position: "absolute" as const,
+      [orientation.cssKeys.normalCoordinate]: 0,
       [orientation.cssKeys.coordinate]: `${start * 100}%`,
       [orientation.cssKeys.length]: `${(end - start) * 100}%`,
       [orientation.cssKeys.thickness]: `${thickness}%`,

@@ -20,6 +20,7 @@ export interface IOrientation {
     length: keyof Pick<CSSProperties, "width" | "height">;
     thickness: IOrientation["cssKeys"]["length"]; 
     coordinate: keyof Pick<CSSProperties, "left" | "top" | "right" | "bottom">;
+    normalCoordinate: keyof Pick<CSSProperties, "left" | "top" | "right" | "bottom">;
     gap: keyof Pick<CSSProperties, "rowGap" | "columnGap">;
   };
 }
@@ -43,6 +44,7 @@ export namespace Orientations {
       length: "width",
       thickness: "height",
       coordinate: "left",
+      normalCoordinate: "top",
       gap: "columnGap",
     },
   };
@@ -65,6 +67,7 @@ export namespace Orientations {
       length: "height",
       thickness: "width",
       coordinate: "top",
+      normalCoordinate: "left",
       gap: "rowGap",
     },
   };

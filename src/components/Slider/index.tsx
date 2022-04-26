@@ -2,7 +2,6 @@ import React, { useCallback } from "react";
 import { useCallbackRef } from "../../hooks";
 import { Orientations } from "../../utils/orientation";
 import { ISlideParams, useSlide } from "./hooks";
-import "./index.css";
 import { validateSliderRange } from "./utils";
 import { NumbersRange } from "../../utils/numbersRange";
 import { denormalize, normalize } from "../../utils/normalization";
@@ -21,6 +20,9 @@ export interface ISliderProps
   onChange(value: NumbersRange): void;
   /** Контейнер, ограничивающий трек слайдера */
   boundingBox: BoundingBox;
+
+  containerContent?: React.ReactNode;
+  trackContent?: React.ReactNode;
 }
 
 const Slider: React.VFC<ISliderProps> = ({
@@ -30,6 +32,8 @@ const Slider: React.VFC<ISliderProps> = ({
   sizeBounds = NumbersRange.infinite(),
   orientation = Orientations.horizontal,
   ThumbComponent = Thumb,
+  containerContent,
+  trackContent,
 }) => {
   validateSliderRange(value);
 
@@ -60,12 +64,11 @@ const Slider: React.VFC<ISliderProps> = ({
   });
 
   return (
-    <div className="Container" style={getBoxStyle(boundingBox)}>
-      <div
-        ref={setTrackRef}
-        className="Track"
-        style={sliderTrackStyle(orientation, value)}
-      ></div>
+    <div style={{ position: "relative", ...getBoxStyle(boundingBox) }}>
+      {containerContent}
+      <div ref={setTrackRef} style={sliderTrackStyle(orientation, value)}>
+        {trackContent}
+      </div>
       {thumbsElements}
     </div>
   );
