@@ -1,32 +1,28 @@
-import { useCallback, useMemo } from "react";
-import { useDrag } from "../Draggable/hooks";
+import { useCallback, useRef } from "react";
 import { BoundingBox } from "../../utils/boundingBox";
 import { type IPressedKeys } from "../../utils/common";
 import { Point } from "../../utils/point";
-import { BoxSizesBounds } from "../../utils/boxSizesBounds";
 import { Draggable } from "../Draggable";
 import { ResizingPoint } from "../../utils/boxResize/resizingPoint";
 import { IResizeThumbKey, resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
-import { updateBox } from "../../utils/boxResize";
+import { ISizeBounds, updateBox } from "../../utils/boxResize";
 import { useActualRef } from "../../decorators/useActualRef";
+import { IDragCallbacks } from "../../utils/drag";
+import { IDragParams, useDrag } from "../Draggable/hooks";
+import { getBoxOnPage } from "../../utils/domElement";
 
-export interface IResizeCallbackOptions {
-  pressedKeys: IPressedKeys;
-  isDrag: boolean;
-}
-
-export interface IResizeParams {
+export interface IResizeParams extends Partial<
+{ 
+  onStart(pressedKeys: IPressedKeys): void;
+  onEnd(pressedKeys: IPressedKeys): void;}
+  > {
   /** Текущее состояние бокса */
   box: BoundingBox;
 
-  /** Callback, срабатывающий при намерении изменить состояние бокса */
-  onChange(box: BoundingBox, options: IResizeCallbackOptions): void;
-
-  /** Если элемент передан, то его можно перемещать */
-  draggableElement: HTMLElement | null;
+  onChange(box: BoundingBox, pressedKeys: IPressedKeys): void;
 
   /** Ограничения размера сторон */
-  sizesBounds: BoxSizesBounds;
+  sizeBounds: ISizeBounds;
 
   /** Сохранять соотношении сторон */
   keepAspectRatio: boolean;
@@ -38,66 +34,77 @@ export interface IResizeParams {
   ThumbComponent: React.ComponentType<{}>;
 }
 
-export function useResize({
-  box,
-  draggableElement,
-  onChange,
-  sizesBounds,
-  keepAspectRatio,
-  thumbKeys,
-  ThumbComponent,
-}: IResizeParams): React.ReactNode {
-  const boxRef = useActualRef(box);
-  const keepAspectRatioRef = useActualRef(keepAspectRatio);
-  const sizesBoundsRef = useActualRef(sizesBounds);
+export function useResize(params: IResizeParams): React.ReactNode {
+  const {
+    onChange,
+    onStart,
+    onEnd,
+    thumbKeys,
+    ThumbComponent,
+  } = params;
+  const aspectRatioRef = useRef<number | null>(null);
+  const paramsRef = useActualRef(params);
 
-  const handleDrag = useCallback(
-    (point: Point, pressedKeys: IPressedKeys) => {
-      onChange(boxRef.current.moveTo(point), { pressedKeys, isDrag: true });
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [onChange]
-  );
+  const handleStart: typeof onStart = useCallback((pressedKeys) => {
+    aspectRatioRef.current = paramsRef.current.box.aspectRatio;
 
-  useDrag({ element: draggableElement, onChange: handleDrag });
- 
-  const handleChangeThumb = useCallback(
+    onStart?.(pressedKeys);
+  }, [paramsRef, onStart]);
+
+  const handleChangeSize = useCallback(
     (
       resizingPoint: ResizingPoint,
       resizingPointTarget: Point,
       pressedKeys: IPressedKeys
     ) => {
+      const { box, keepAspectRatio, sizeBounds } = paramsRef.current;
+
       const updatedBox = updateBox({
-        prevBox: boxRef.current,
+        prevBox: box,
         resizingPoint,
         resizingPointTarget,
-        keepAspectRatio: keepAspectRatioRef.current || pressedKeys.shiftKey,
-        sizesBounds: sizesBoundsRef.current
+        aspectRatio: keepAspectRatio || pressedKeys.shiftKey ? aspectRatioRef.current : null,
+        sizeBounds
       });
 
-      onChange(updatedBox, { pressedKeys, isDrag: false });
+      onChange(updatedBox, pressedKeys);
     }, 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [onChange]
+    [paramsRef, onChange]
   )
 
-  const resizingPoints = useMemo(() => thumbKeys.map(resizingPointsPreset.get), [thumbKeys]);
+  // Кнопки нужно располагать в одной системе координат с resizable-элементом
+  return thumbKeys.map((key) => {
+    const resizingPoint = resizingPointsPreset.get(key);
+    const { box } = paramsRef.current;
 
-  // Кнопки располагать в одной системе координат с resizable-элементом
-  return resizingPoints.map((resizingPoint, i) => {
-    const key = thumbKeys[i];
-   
     return (
       <Draggable
         key={String(key)}
         isCentered={true}
         value={box.denormalizePoint(resizingPoint)}
         onChange={(point, options) =>
-          handleChangeThumb(resizingPoint, point, options)
+          handleChangeSize(resizingPoint, point, options)
         }
+        onStart={handleStart}
+        onEnd={onEnd}
       >
         <ThumbComponent />
       </Draggable>
     );
-  });
+  })
+}
+
+interface IDragBoxParams extends Omit<IDragParams, "onChange"> {
+  onChange(box: BoundingBox, pressedKeys: IPressedKeys): void;
+}
+
+/** useDrag с измененным типом onChange: передает бокс вместо точки */
+export function useDragBox(params: IDragBoxParams) {
+  const { element, onChange } = params;
+
+  const handleChange: IDragCallbacks["onChange"] = useCallback((point, pressedKeys) => {
+    onChange(getBoxOnPage(element!).moveTo(point), pressedKeys);
+  }, [element, onChange]);
+
+  return useDrag({...params, onChange: handleChange });
 }

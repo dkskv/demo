@@ -2,14 +2,14 @@ import React from "react";
 import makeStateful from "../../decorators/makeStateful";
 import { useCallbackRef } from "../../hooks";
 import { getPointStyle } from "../../utils/styles";
-import { IDragCallback } from "../../utils/drag";
+import { IDragCallbacks } from "../../utils/drag";
 import { Point } from "../../utils/point";
 import { useDrag } from "./hooks";
 import "./index.css";
 
-type IProps = {
+interface IProps extends Partial<IDragCallbacks> {
   value: Point;
-  onChange: IDragCallback;
+  onChange: IDragCallbacks["onChange"];
   /** Установить origin элемента в центр */
   isCentered?: boolean;
 };
@@ -17,12 +17,14 @@ type IProps = {
 export const Draggable: React.FC<IProps> = ({
   value,
   onChange,
+  onStart,
+  onEnd,
   isCentered = false,
   children,
 }) => {
   const [element, setRef] = useCallbackRef();
 
-  useDrag({ element, onChange });
+  useDrag({ element, onChange, onStart, onEnd });
 
   const transform = isCentered ? "translate(-50%, -50%)" : undefined;
 

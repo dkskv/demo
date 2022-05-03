@@ -3,3 +3,5 @@ export interface IPressedKeys {
   altKey: boolean;
   ctrlKey: boolean;
 }
+
+export const noop = () => {}

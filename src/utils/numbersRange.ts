@@ -71,7 +71,7 @@ export class NumbersRange implements Iterable<number> {
     return this.start === start && this.end === end;
   }
 
-  map(f: (item: number) => number) {
+  map(f: (a: number) => number) {
     return new NumbersRange(f(this.start), f(this.end));
   }
 

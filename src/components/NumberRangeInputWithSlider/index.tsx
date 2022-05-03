@@ -17,6 +17,10 @@ interface IProps
   isDiscreteSlider?: boolean;
 }
 
+// todo: 
+// - перенести из components в demos
+// - использовать 2 useSmoothControl наверное плохая идея
+
 const NumberRangeInputWithSlider: React.VFC<IProps> = (props) => {
   const {
     value,

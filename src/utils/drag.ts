@@ -15,45 +15,60 @@ interface IMouseEvent
     | "ctrlKey"
   > {}
 
-export interface IDragCallback {
-  (a: Point, keys: IPressedKeys): void;
+export interface IDragCallbacks {
+  onStart(pressedKeys: IPressedKeys): void;
+  onChange(a: Point, pressedKeys: IPressedKeys): void;
+  onEnd(pressedKeys: IPressedKeys): void;
 }
 
-/** Подписывает callback на намерение переместить элемент (в координатах страницы) */
-export function listenDrag(
-  element: Element,
-  callback: (point: Point, pressedKeys: IPressedKeys) => void
-) {
-  return function (downEvent: IMouseEvent) {
+export class DragListener {
+  constructor(private element: Element, private callbacks: IDragCallbacks) {
+    this.handleDown = this.handleDown.bind(this);
+  }
+
+  /** Подписывает `callbacks` на намерение переместить элемент (в координатах страницы) */
+  public launch() {
+    this.element.addEventListener("mousedown", this.handleDown);
+  }
+
+  /** Перестать слушать новые перетаскивания (обработка текущего не останавливается) */
+  public stop() {
+    this.element.removeEventListener("mousedown", this.handleDown);
+  }
+
+  private handleDown(event: Event) {
+    const downEvent = event as unknown as IMouseEvent;
+
     downEvent.preventDefault();
     downEvent.stopPropagation();
 
-    const dragPointInsideElement = getDragPointInsideElement(
-      element,
+    const dragPointInsideElement = getMousePointInsideElement(
+      this.element,
       downEvent
     );
 
-    listenMouseMove((mousePoint, pressedKeys) =>
-      callback(mousePoint.subtract(dragPointInsideElement), pressedKeys)
-    );
-  };
-}
+    const { onStart, onChange, onEnd } = this.callbacks;
 
-function listenMouseMove(callback: IDragCallback) {
-  document.addEventListener("mousemove", handleMove);
-  document.addEventListener("mouseup", handleStop, { once: true });
+    onStart(extractPressedKeys(downEvent));
 
-  function handleMove(event: MouseEvent) {
-    callback(getMousePoint(event), extractPressedKeys(event));
-  }
+    const handleMove = (moveEvent: MouseEvent) => {
+      const point = getMousePoint(moveEvent).subtract(dragPointInsideElement);
+      onChange(point, extractPressedKeys(moveEvent));
+    };
 
-  function handleStop() {
-    document.removeEventListener("mousemove", handleMove);
+    const handleUp = (upEvent: MouseEvent) => {
+      onEnd(extractPressedKeys(upEvent));
+
+      document.removeEventListener("mousemove", handleMove);
+    };
+
+    document.addEventListener("mousemove", handleMove);
+    document.addEventListener("mouseup", handleUp, { once: true });
   }
 }
 
 /** Получить координаты точки захвата внутри элемента */
-function getDragPointInsideElement(
+function getMousePointInsideElement(
   element: Element,
   mouseEvent: IMouseEvent
 ): Point {
@@ -73,6 +88,6 @@ function extractPressedKeys({
   altKey,
   shiftKey,
   ctrlKey,
-}: MouseEvent): IPressedKeys {
+}: IMouseEvent): IPressedKeys {
   return { altKey, shiftKey, ctrlKey };
 }

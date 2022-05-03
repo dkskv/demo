@@ -1,44 +1,48 @@
 import { CSSProperties } from "react";
 import { BoundingBox } from "./boundingBox";
-import { EBoxSide } from "./sides";
+import { EBoxLength, EBoxSide } from "./boxParams";
 import { NumbersRange } from "./numbersRange";
-import { BoxSizesBounds } from "./boxSizesBounds";
+
+export const enum EOrientation {
+  horizontal = "horizontal",
+  vertical = "vertical",
+}
 
 /** Интерфейс для работы компонентов в разных ориентациях */
 export interface IOrientation {
-  /** Возвращает диапазон крайних точек проекции на параллельную ось */
-  getRangeOfBox(box: BoundingBox): NumbersRange;
-  /** Возвращает диапазон крайних точек проекции на перпендикулярную ось */
-  getNormalRangeOfBox(box: BoundingBox): NumbersRange;
-  /** Строит бокс из заданных диапазонов */
-  getBoxFromRanges(range: NumbersRange, normalRange: NumbersRange): BoundingBox;
-  /** Устанавливает ограничения размеров только для параллельной оси */
-  getSizeBounds(sizeRange: NumbersRange): BoxSizesBounds;
+  key: EOrientation;
+  /** Возвращает диапазоны (параллельный и перпендикулярный) из переданного бокса */
+  rangesOfBox(box: BoundingBox): [NumbersRange, NumbersRange];
+  /** Строит бокс из заданных диапазонов (параллельного и перпендикулярного) */
+  boxFromRanges(
+    parallelRange: NumbersRange,
+    normalRange: NumbersRange
+  ): BoundingBox;
+  lengthKey: EBoxLength,
   /** Стороны бокса, перпендикулярные оси ориентации */
   sides: readonly [EBoxSide, EBoxSide];
   cssKeys: {
     length: keyof Pick<CSSProperties, "width" | "height">;
-    thickness: IOrientation["cssKeys"]["length"]; 
+    thickness: IOrientation["cssKeys"]["length"];
     coordinate: keyof Pick<CSSProperties, "left" | "top" | "right" | "bottom">;
-    normalCoordinate: keyof Pick<CSSProperties, "left" | "top" | "right" | "bottom">;
+    normalCoordinate: keyof Pick<
+      CSSProperties,
+      "left" | "top" | "right" | "bottom"
+    >;
     gap: keyof Pick<CSSProperties, "rowGap" | "columnGap">;
   };
 }
 
 export namespace Orientations {
   export const horizontal: IOrientation = {
-    getRangeOfBox(box: BoundingBox) {
-      return box.xsRange;
+    key: EOrientation.horizontal,
+    rangesOfBox(box: BoundingBox) {
+      return [box.xsRange, box.ysRange];
     },
-    getNormalRangeOfBox(box: BoundingBox) {
-      return box.ysRange;
+    boxFromRanges(parallelRange: NumbersRange, normalRange: NumbersRange) {
+      return BoundingBox.createByRanges(parallelRange, normalRange);
     },
-    getBoxFromRanges(range: NumbersRange, normalRange: NumbersRange) {
-      return BoundingBox.createByRanges(range, normalRange);
-    },
-    getSizeBounds({ start, end }: NumbersRange) {
-      return BoxSizesBounds.onlyWidth(start, end);
-    },
+    lengthKey: EBoxLength.width,
     sides: [EBoxSide.left, EBoxSide.right],
     cssKeys: {
       length: "width",
@@ -50,18 +54,14 @@ export namespace Orientations {
   };
 
   export const vertical: IOrientation = {
-    getRangeOfBox(box: BoundingBox) {
-      return box.ysRange;
+    key: EOrientation.vertical,
+    rangesOfBox(box: BoundingBox) {
+      return [box.ysRange, box.xsRange];
     },
-    getNormalRangeOfBox(box: BoundingBox) {
-      return box.xsRange;
+    boxFromRanges(parallelRange: NumbersRange, normalRange: NumbersRange) {
+      return BoundingBox.createByRanges(normalRange, parallelRange);
     },
-    getBoxFromRanges(range: NumbersRange, normalRange: NumbersRange) {
-      return BoundingBox.createByRanges(normalRange, range);
-    },
-    getSizeBounds({ start, end }: NumbersRange) {
-      return BoxSizesBounds.onlyHeight(start, end);
-    },
+    lengthKey: EBoxLength.height,
     sides: [EBoxSide.top, EBoxSide.bottom],
     cssKeys: {
       length: "height",

@@ -1,9 +1,12 @@
-import React, { useMemo } from "react";
+import React from "react";
 import makeStateful from "../../decorators/makeStateful";
 import { useCallbackRef } from "../../hooks";
 import { BoundingBox } from "../../utils/boundingBox";
-import { BoxSizesBounds } from "../../utils/boxSizesBounds";
-import { IResizeCallbackOptions, IResizeParams, useResize } from "./hooks";
+import {
+  IResizeParams,
+  useDragBox,
+  useResize,
+} from "./hooks";
 import { resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
 import { getBoxStyle } from "../../utils/styles";
 import { Thumb } from "../Thumb";
@@ -11,16 +14,18 @@ import { Thumb } from "../Thumb";
 interface IProps
   extends Pick<
     Partial<IResizeParams>,
-    "sizesBounds" | "keepAspectRatio" | "thumbKeys" | "ThumbComponent"
+    "sizeBounds" | "keepAspectRatio" | "thumbKeys" | "ThumbComponent" | "onStart" | "onEnd"
   > {
   value: BoundingBox;
-  onChange(value: BoundingBox, options: IResizeCallbackOptions): void;
+  onChange: IResizeParams["onChange"];
 }
 
 const Resizable: React.FC<IProps> = ({
   value,
   onChange,
-  sizesBounds = BoxSizesBounds.without(),
+  onStart,
+  onEnd,
+  sizeBounds = {},
   keepAspectRatio = false,
   thumbKeys = resizingPointsPreset.all,
   ThumbComponent = Thumb,
@@ -28,11 +33,14 @@ const Resizable: React.FC<IProps> = ({
 }) => {
   const [element, setRef] = useCallbackRef();
 
+  useDragBox({ element, onChange, onStart, onEnd });
+
   const thumbsElements = useResize({
     box: value,
-    draggableElement: element,
     onChange,
-    sizesBounds,
+    onStart,
+    onEnd,
+    sizeBounds,
     keepAspectRatio,
     thumbKeys,
     ThumbComponent,

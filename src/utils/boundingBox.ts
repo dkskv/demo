@@ -1,5 +1,4 @@
 import { clamp } from "ramda";
-import { BoxSizesBounds } from "./boxSizesBounds";
 import { NumbersRange } from "./numbersRange";
 import { Point } from "./point";
 
@@ -112,11 +111,14 @@ export class BoundingBox {
     return BoundingBox.createByDimensions(0, 0, this.dx, this.dy);
   }
 
-  constrainDeltas(bounds: BoxSizesBounds) {
-    const dx = clamp(bounds.minW, bounds.maxW, this.dx);
-    const dy = clamp(bounds.minH, bounds.maxH, this.dy);
+  constrainDx(bounds: NumbersRange) {
+    const dx = clamp(bounds.start, bounds.end, this.dx);
+    return BoundingBox.createByDimensions(this.x0, this.y0, dx, this.dy);
+  }
 
-    return BoundingBox.createByDimensions(this.x0, this.y0, dx, dy);
+  constrainDy(bounds: NumbersRange) {
+    const dy = clamp(bounds.start, bounds.end, this.dy);
+    return BoundingBox.createByDimensions(this.x0, this.y0, this.dx, dy);
   }
 
   shiftDeltas(offsetX: number, offsetY: number) {
@@ -157,5 +159,9 @@ export class BoundingBox {
 
   isEqual({ x1, x2, y1, y2 }: BoundingBox) {
     return x1 === this.x1 && x2 === this.x2 && y1 === this.y1 && y2 === this.y2;
+  }
+
+  map(f: (a: number) => number) {
+    return new BoundingBox(f(this.x1), f(this.x2), f(this.y1), f(this.y2));
   }
 }

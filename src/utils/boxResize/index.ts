@@ -1,7 +1,8 @@
 import { BoundingBox } from "../boundingBox";
 import { ResizingPoint } from "./resizingPoint";
-import { BoxSizesBounds } from "../boxSizesBounds";
 import { Point } from "../point";
+import { NumbersRange } from "../numbersRange";
+import { EBoxLength } from "../boxParams";
 
 interface IUpdateBoxParams {
   prevBox: BoundingBox;
@@ -10,29 +11,34 @@ interface IUpdateBoxParams {
 
   // Ограничения
 
-  keepAspectRatio: boolean;
-  sizesBounds: BoxSizesBounds;
+  aspectRatio: number | null;
+  sizeBounds: ISizeBounds;
+  // todo: outerBox
 }
+
+export type ISizeBounds = Partial<Record<EBoxLength, NumbersRange>>;
 
 /** Изменить размер бокса, сохранив наложенные ограничения */
 export function updateBox({
   prevBox,
   resizingPoint,
   resizingPointTarget,
-  keepAspectRatio,
-  sizesBounds,
+  aspectRatio,
+  sizeBounds,
 }: IUpdateBoxParams): BoundingBox {
   // Изменение размера
   let nextBox = resizingPoint.resizeBox(prevBox, resizingPointTarget);
 
+  const keepAspectRatio = aspectRatio !== null;
+
   // Сохранение соотношения сторон
   if (keepAspectRatio) {
-    nextBox = nextBox.setAspectRatio(prevBox.aspectRatio);
+    nextBox = nextBox.setAspectRatio(aspectRatio);
   }
 
   // Ограничение размера
   const boxBeforeClamp = nextBox;
-  nextBox = nextBox.constrainDeltas(sizesBounds);
+  nextBox = constrainSize(nextBox, sizeBounds);
 
   // Если ограничение размера сломало соотношение сторон
   if (keepAspectRatio && !nextBox.isEqual(boxBeforeClamp)) {
@@ -43,4 +49,16 @@ export function updateBox({
 
   // Поправка расположения
   return resizingPoint.keepTransformOrigin(prevBox, nextBox);
+}
+
+function constrainSize(box: BoundingBox, { width, height }: ISizeBounds) {
+  if (width) {
+    box = box.constrainDx(width);
+  }
+
+  if (height) {
+    box = box.constrainDy(height);
+  }
+
+  return box;
 }
