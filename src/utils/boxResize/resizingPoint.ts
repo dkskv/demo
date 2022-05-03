@@ -1,54 +1,61 @@
 import { BoundingBox } from "../boundingBox";
 import { Point } from "../point";
 
-// todo: Придумать способ кастомно задать transformOrigin
-
 /** Точка, меняющая размеры бокса (координаты точки нормированы) */
 export class ResizingPoint extends Point {
-  /** Точка бокса, остающаяся неподвижной при его трансформировании */
-  private get transformOrigin(): Point {
-    /* return new Point(0.5, 0.5); */
+  private get mirroredPoint(): Point {
     return this.reflectAroundPoint(new Point(0.5, 0.5));
   }
 
   /**
-   * Положение этой точки относительно `transformOrigin`:
+   * Получить положение этой точки относительно `origin`:
    *   1  - координата `origin` меньше;
    * (-1) - координата `origin` больше.
    */
-  private get signs(): Point {
-    return this.subtract(this.transformOrigin).map(Math.sign);
+  private getSigns(origin: Point): Point {
+    return this.subtract(origin).map(Math.sign);
   }
 
   /**
    * Как изменится бокс, если эта точка (this) сместится в переданные координаты.
    * @param box Бокс, размеры которого нужно изменить
    * @param target Реальные координаты, в которые переместилась эта точка (this)
+   * @param origin Точка бокса, остающаяся неподвижной при его трансформировании
    * @returns Трансформированный бокс
    */
-  public resizeBox(box: BoundingBox, target: Point): BoundingBox {
+  public resizeBox(
+    box: BoundingBox,
+    target: Point,
+    origin = this.mirroredPoint
+  ): BoundingBox {
     /** Исходная точка (реальные координаты) */
     const source = box.denormalizePoint(this);
 
+    const signs = this.getSigns(origin);
+
     /** Вектор перемещения точки */
-    const moveVector = target.subtract(source).mul(this.signs);
+    const moveVector = target.subtract(source).mul(signs);
 
     /** Изменение размеров бокса на вектор перемещения */
     return box.shiftDeltas(moveVector.x, moveVector.y);
   }
 
-  /** Переместить бокс в соответствии с `transformOrigin` после применения трансформаций */
-  public keepTransformOrigin(prevBox: BoundingBox, nextBox: BoundingBox): BoundingBox {
-    /** Исходное значение `transformOrigin` (реальные координаты) */
-    const prevOrigin = prevBox.denormalizePoint(this.transformOrigin);
+  /** Переместить бокс в соответствии с `origin` после применения трансформаций */
+  public keepTransformOrigin(
+    prevBox: BoundingBox,
+    nextBox: BoundingBox,
+    origin = this.mirroredPoint
+  ): BoundingBox {
+    /** Исходное значение `origin` (реальные координаты) */
+    const prevOrigin = prevBox.denormalizePoint(origin);
 
-    /** Координаты, в которые сместился `transformOrigin` после трансформирования */
-    const nextOrigin = nextBox.denormalizePoint(this.transformOrigin);
+    /** Координаты, в которые сместился `origin` после трансформирования */
+    const nextOrigin = nextBox.denormalizePoint(origin);
 
-    /** Вектор смещения `transformOrigin` */
+    /** Вектор смещения `origin` */
     const originOffset = prevOrigin.subtract(nextOrigin);
 
-    /** Возвращаем `transformOrigin` в исходное положение */
+    /** Возвращаем `origin` в исходное положение */
     return nextBox.shift(originOffset);
   }
 }
