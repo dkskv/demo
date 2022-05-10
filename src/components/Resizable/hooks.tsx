@@ -21,11 +21,18 @@ export interface IResizeParams extends Partial<
 
   onChange(box: BoundingBox, pressedKeys: IPressedKeys): void;
 
+  // Ограничения
+
   /** Ограничения размера сторон */
   sizeBounds: ISizeBounds;
 
   /** Сохранять соотношении сторон */
   keepAspectRatio: boolean;
+
+  /** Внешний бокс, за пределы которого нельзя выходить */
+  outerBox: BoundingBox;
+
+  // Кнопки
 
   /** Ключи отображаемых кнопок, за которые производится resize  */
   thumbKeys: readonly IResizeThumbKey[];
@@ -57,14 +64,15 @@ export function useResize(params: IResizeParams): React.ReactNode {
       resizingPointTarget: Point,
       pressedKeys: IPressedKeys
     ) => {
-      const { box, keepAspectRatio, sizeBounds } = paramsRef.current;
+      const { box, keepAspectRatio, sizeBounds, outerBox } = paramsRef.current;
 
       const updatedBox = updateBox({
         prevBox: box,
         resizingPoint,
         resizingPointTarget,
         aspectRatio: keepAspectRatio || pressedKeys.shiftKey ? aspectRatioRef.current : null,
-        sizeBounds
+        sizeBounds,
+        outerBox
       });
 
       onChange(updatedBox, pressedKeys);
@@ -96,15 +104,20 @@ export function useResize(params: IResizeParams): React.ReactNode {
 
 interface IDragBoxParams extends Omit<IDragParams, "onChange"> {
   onChange(box: BoundingBox, pressedKeys: IPressedKeys): void;
+  outerBox: BoundingBox;
 }
 
 /** useDrag с измененным типом onChange: передает бокс вместо точки */
 export function useDragBox(params: IDragBoxParams) {
   const { element, onChange } = params;
+  const paramsRef = useActualRef(params);
 
   const handleChange: IDragCallbacks["onChange"] = useCallback((point, pressedKeys) => {
-    onChange(getBoxOnPage(element!).moveTo(point), pressedKeys);
-  }, [element, onChange]);
+    const { outerBox } = paramsRef.current;
+    const box = getBoxOnPage(element!).moveTo(point);
+
+    onChange(outerBox.clampInner(box), pressedKeys);
+  }, [element, onChange, paramsRef]);
 
   return useDrag({...params, onChange: handleChange });
 }

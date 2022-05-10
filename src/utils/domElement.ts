@@ -26,3 +26,9 @@ export function getBoxOnPage(element: Element) {
 
   return BoundingBox.createByDimensions(x, y, width, height);
 }
+
+export function getOffsetBox(element: HTMLElement) {
+  const parent = element?.offsetParent;
+
+  return parent ? getBoxOnPage(parent).resetOrigin() : BoundingBox.infinite();
+}

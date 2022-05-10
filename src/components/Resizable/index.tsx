@@ -1,39 +1,52 @@
-import React from "react";
+import React, { RefCallback, useCallback, useState } from "react";
 import makeStateful from "../../decorators/makeStateful";
-import { useCallbackRef } from "../../hooks";
 import { BoundingBox } from "../../utils/boundingBox";
-import {
-  IResizeParams,
-  useDragBox,
-  useResize,
-} from "./hooks";
+import { IResizeParams, useDragBox, useResize } from "./hooks";
 import { resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
 import { getBoxStyle } from "../../utils/styles";
 import { Thumb } from "../Thumb";
 
-interface IProps
+export interface IResizableProps
   extends Pick<
     Partial<IResizeParams>,
-    "sizeBounds" | "keepAspectRatio" | "thumbKeys" | "ThumbComponent" | "onStart" | "onEnd"
+    | "sizeBounds"
+    | "keepAspectRatio"
+    | "thumbKeys"
+    | "ThumbComponent"
+    | "onStart"
+    | "onEnd"
+    | "outerBox"
   > {
   value: BoundingBox;
   onChange: IResizeParams["onChange"];
+
+  callbackRef?: RefCallback<HTMLElement>;
 }
 
-const Resizable: React.FC<IProps> = ({
+const Resizable: React.FC<IResizableProps> = ({
   value,
   onChange,
+  callbackRef,
   onStart,
   onEnd,
   sizeBounds = {},
+  outerBox = BoundingBox.infinite(),
   keepAspectRatio = false,
   thumbKeys = resizingPointsPreset.all,
   ThumbComponent = Thumb,
   children,
 }) => {
-  const [element, setRef] = useCallbackRef();
+  const [element, setElement] = useState<HTMLElement | null>(null);
 
-  useDragBox({ element, onChange, onStart, onEnd });
+  const handleRefChange = useCallback(
+    (el: HTMLDivElement) => {
+      setElement(el);
+      callbackRef?.(el);
+    },
+    [callbackRef]
+  );
+
+  useDragBox({ element, outerBox, onChange, onStart, onEnd });
 
   const thumbsElements = useResize({
     box: value,
@@ -43,13 +56,16 @@ const Resizable: React.FC<IProps> = ({
     sizeBounds,
     keepAspectRatio,
     thumbKeys,
+    outerBox,
     ThumbComponent,
   });
 
   return (
     <>
-      <div ref={setRef} style={{ ...getBoxStyle(value), position: "absolute" }}>
-        {/* todo: растягивать на 100% по умолчанию? */}
+      <div
+        ref={handleRefChange}
+        style={{ ...getBoxStyle(value), position: "absolute" }}
+      >
         {React.Children.only(children)}
       </div>
       {thumbsElements}

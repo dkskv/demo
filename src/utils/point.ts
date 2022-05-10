@@ -43,6 +43,10 @@ export class Point {
     return new Point(this.x * p.x, this.y * p.y);
   }
 
+  div(p: Point) {
+    return new Point(this.x / p.x, this.y / p.y);
+  }
+
   /** Скалярное произведение */
   dot(p: Point) {
     const { x, y } = this.mul(p);

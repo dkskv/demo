@@ -15,6 +15,10 @@ export class BoundingBox {
     return new BoundingBox(0, 0, 0, 0);
   }
 
+  static infinite() {
+    return new BoundingBox(-Infinity, Infinity, -Infinity, Infinity);
+  }
+
   constructor(
     public x1: number,
     public x2: number,
@@ -150,11 +154,41 @@ export class BoundingBox {
     return BoundingBox.createByDimensions(this.x0, this.y0, dx, dy);
   }
 
+  /** Нормировать внутренний бокс */
+  normalizeInner(inner: BoundingBox): BoundingBox {
+    const { xsRange, ysRange } = this;
+
+    return new BoundingBox(
+      xsRange.normalizeNumber(inner.x1),
+      xsRange.normalizeNumber(inner.x2),
+      ysRange.normalizeNumber(inner.y1),
+      ysRange.normalizeNumber(inner.y2),
+    );
+  }
+
+  denormalizeInner(inner: BoundingBox): BoundingBox {
+    const { xsRange, ysRange } = this;
+
+    return new BoundingBox(
+      xsRange.denormalizeNumber(inner.x1),
+      xsRange.denormalizeNumber(inner.x2),
+      ysRange.denormalizeNumber(inner.y1),
+      ysRange.denormalizeNumber(inner.y2),
+    );
+  }
+
+  /** Нормировать координаты точки внутри бокса */
+  normalizePoint(point: Point): Point {
+    return point.subtract(this.origin).div(this.deltasVector);
+  }
+
   /** Получить координаты точки по ее нормированным координатам внутри бокса */
   denormalizePoint(point: Point): Point {
-    const deltasVector = new Point(this.dx, this.dy);
+    return this.origin.add(point.mul(this.deltasVector));
+  }
 
-    return this.origin.add(point.mul(deltasVector));
+  private get deltasVector() {
+    return new Point(this.dx, this.dy);
   }
 
   isEqual({ x1, x2, y1, y2 }: BoundingBox) {

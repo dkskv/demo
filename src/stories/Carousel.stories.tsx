@@ -9,6 +9,7 @@ import { Point } from "../utils/point";
 import {
   centererStyle,
   ellipsisStyle,
+  getBoxStyle,
   getRgbaColor,
   stretchStyle,
 } from "../utils/styles";
@@ -35,7 +36,7 @@ const Template: ComponentStory<typeof VirtualView> = (args) => {
   const handleDrag = useCallback(
     (delta: Point) => {
       setSliderValue((prevValue) => {
-        const bounds = new NumbersRange(0, 1);
+        const bounds = NumbersRange.normalizationBounds();
         return bounds.clampInner(prevValue.shift(-delta.x / totalSize));
       });
     },
@@ -62,12 +63,18 @@ const Template: ComponentStory<typeof VirtualView> = (args) => {
           renderItem={DataRenderer.renderItem}
         />
       </div>
-      <Slider
-        value={sliderValue}
-        onChange={setSliderValue}
-        boundingBox={viewBox}
-        sizeBounds={new NumbersRange(0.2, 1)}
-        trackContent={
+      <div style={{ position: "relative", ...getBoxStyle(viewBox) }}>
+        <VirtualView
+          viewBox={viewBox}
+          coordinate={0}
+          itemSize={viewSize / DataRenderer.itemsSize}
+          renderItem={DataRenderer.renderItem}
+        />
+        <Slider
+          value={sliderValue}
+          onChange={setSliderValue}
+          sizeBounds={new NumbersRange(0.2, 1)}
+        >
           <div
             style={{
               ...stretchStyle,
@@ -75,15 +82,8 @@ const Template: ComponentStory<typeof VirtualView> = (args) => {
               border: "1px solid orange",
             }}
           />
-        }
-      >
-        <VirtualView
-          viewBox={viewBox}
-          coordinate={0}
-          itemSize={viewSize / DataRenderer.itemsSize}
-          renderItem={DataRenderer.renderItem}
-        />
-      </Slider>
+        </Slider>
+      </div>
     </>
   );
 };
@@ -133,5 +133,5 @@ class DataRenderer {
         </div>
       </div>
     );
-  }
+  };
 }

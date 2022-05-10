@@ -13,6 +13,10 @@ export class NumbersRange implements Iterable<number> {
     return new NumbersRange(start, Infinity);
   }
 
+  static normalizationBounds() {
+    return new NumbersRange(0, 1);
+  }
+
   constructor(public start: number, public end: number) {}
 
   get delta() {

@@ -13,7 +13,7 @@ interface IUpdateBoxParams {
 
   aspectRatio: number | null;
   sizeBounds: ISizeBounds;
-  // todo: outerBox
+  outerBox: BoundingBox;
 }
 
 export type ISizeBounds = Partial<Record<EBoxLength, NumbersRange>>;
@@ -25,6 +25,7 @@ export function updateBox({
   resizingPointTarget,
   aspectRatio,
   sizeBounds,
+  outerBox,
 }: IUpdateBoxParams): BoundingBox {
   // Изменение размера
   let nextBox = resizingPoint.resizeBox(prevBox, resizingPointTarget);
@@ -48,7 +49,17 @@ export function updateBox({
   }
 
   // Поправка расположения
-  return resizingPoint.keepTransformOrigin(prevBox, nextBox);
+  nextBox = resizingPoint.keepTransformOrigin(prevBox, nextBox);
+
+  const boxBeforeClip = nextBox;
+  nextBox = outerBox.clipInner(nextBox);
+
+  // todo: Упростить логику (делать одну проверку в конце на основе значения aspectRatio)
+  if (keepAspectRatio && !nextBox.isEqual(boxBeforeClip)) {
+    return prevBox;
+  }
+
+  return nextBox;
 }
 
 function constrainSize(box: BoundingBox, { width, height }: ISizeBounds) {

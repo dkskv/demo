@@ -1,5 +1,7 @@
 import { clamp } from "ramda";
 
+// todo: Удалить. Реализовать в каждом конкретном случае. Возможно, оставить только интерфейс
+
 interface INormalizable {
   /** todo: не знаю, как вывести возвращаемый тип по this */
   map(f: (a: number) => number): INormalizable;

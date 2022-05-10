@@ -12,6 +12,7 @@ export interface IDragParams extends Partial<IDragCallbacks> {
   element: HTMLElement | null;
 }
 
+// todo: Видимо, придется переносить useDragBox сюда (чтобы ограничивать в outerBox)
 /**
  * Подписаться на перемещение HTML элемента в координатах родителя,
  * относительно которого позиционируется перемещаемый элемент.
