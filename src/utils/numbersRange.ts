@@ -35,6 +35,10 @@ export class NumbersRange implements Iterable<number> {
     return new NumbersRange(this.start, value);
   }
 
+  shift(offset: number) {
+    return this.map(n => n + offset);
+  }
+
   /** Ограничить начало, опираясь на конец и длину диапазона */
   constrainStart({ start: minSize, end: maxSize }: NumbersRange) {
     return this.setStart(

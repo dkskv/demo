@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { ReactNode, useMemo } from "react";
 import makeStateful from "../../decorators/makeStateful";
 import NumbersRangeInput, {
   INumbersRangeInputProps,
@@ -11,7 +11,7 @@ import { useSmoothControl } from "../../decorators/useSmoothControl";
 
 interface IProps
   extends INumbersRangeInputProps,
-    Pick<ISliderProps, "boundingBox" | "containerContent" | "trackContent"> {
+    Pick<ISliderProps, "boundingBox" | "trackContent"> {
   bounds: NonNullable<INumbersRangeInputProps["bounds"]>;
   /** Если true, слайдер движется скачками по числовым отметкам */
   isDiscreteSlider?: boolean;
@@ -21,7 +21,7 @@ interface IProps
 // - перенести из components в demos
 // - использовать 2 useSmoothControl наверное плохая идея
 
-const NumberRangeInputWithSlider: React.VFC<IProps> = (props) => {
+const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
   const {
     value,
     onChange,
@@ -29,8 +29,8 @@ const NumberRangeInputWithSlider: React.VFC<IProps> = (props) => {
     boundingBox,
     sizeBounds = NumbersRange.endless(0),
     isDiscreteSlider = false,
-    containerContent,
-    trackContent
+    trackContent,
+    children
   } = props;
   const converter = useMemo(() => createConverter(bounds), [bounds]);
 
@@ -55,9 +55,10 @@ const NumberRangeInputWithSlider: React.VFC<IProps> = (props) => {
         onChange={handleSliderChange}
         sizeBounds={normalize(sizeBounds, bounds.size)}
         boundingBox={boundingBox}
-        containerContent={containerContent}
         trackContent={trackContent}
-      />
+      >
+        {children}
+      </Slider>
     </NumbersRangeInput>
   );
 };

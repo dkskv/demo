@@ -24,19 +24,18 @@ export interface ISliderProps
 
   orientation?: IOrientation;
 
-  containerContent?: React.ReactNode;
   trackContent?: React.ReactNode;
 }
 
-const Slider: React.VFC<ISliderProps> = ({
+const Slider: React.FC<ISliderProps> = ({
   value,
   onChange,
   boundingBox,
   sizeBounds = NumbersRange.infinite(),
   orientation = Orientations.horizontal,
   ThumbComponent = Thumb,
-  containerContent,
   trackContent,
+  children
 }) => {
   validateSliderRange(value);
 
@@ -90,7 +89,7 @@ const Slider: React.VFC<ISliderProps> = ({
 
   return (
     <div style={{ position: "relative", ...getBoxStyle(boundingBox) }}>
-      {containerContent}
+      {children}
       <div ref={setTrackRef} style={sliderTrackStyle(orientation, value)}>
         {trackContent}
       </div>

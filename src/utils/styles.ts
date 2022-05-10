@@ -1,3 +1,4 @@
+import { splitEvery, tail } from "ramda";
 import { BoundingBox } from "./boundingBox";
 import { Point } from "./point";
 
@@ -26,3 +27,16 @@ export const centererStyle = {
   justifyContent: "center",
   alignItems: "center",
 } as const;
+
+export const ellipsisStyle = {
+  overflow: "hidden",
+  whiteSpace: "nowrap",
+  textOverflow: "ellipsis"
+} as const;
+
+export function getRgbaColor(hexColor: `#${string}`, opacity: number): string {
+  const hexParts = splitEvery(2, tail(hexColor));
+  const [r, g, b] = hexParts.map(n => parseInt(n, 16));
+
+  return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+}

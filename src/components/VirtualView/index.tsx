@@ -1,6 +1,4 @@
-import { useEffect } from "react";
 import { BoundingBox } from "../../utils/boundingBox";
-import { noop } from "../../utils/common";
 import { NumbersRange } from "../../utils/numbersRange";
 import { IOrientation, Orientations } from "../../utils/orientation";
 import { getBoxStyle } from "../../utils/styles";
@@ -10,36 +8,22 @@ export interface IVirtualViewProps {
   coordinate: number;
   viewBox: BoundingBox;
   itemSize: number;
-  gutter: number;
-  count: number;
   renderItem(index: number): React.ReactNode;
   orientation?: IOrientation;
-  /** Оповещение об изменении диапазона допустимых координат */
-  onBoundsChange?(bounds: NumbersRange): void;
 }
 
 /** Карусель для отображения элементов */
 export const VirtualView: React.FC<IVirtualViewProps> = ({
-  gutter = 0,
   viewBox,
   itemSize,
   coordinate,
-  count,
   renderItem,
   orientation = Orientations.horizontal,
-  onBoundsChange = noop,
 }) => {
   const [viewRange, thicknessRange] = orientation.rangesOfBox(viewBox);
 
-  const slotSize = itemSize + gutter;
-  const maxCoordinate = slotSize * count - viewRange.size;
-
-  useEffect(() => {
-    onBoundsChange(new NumbersRange(0, maxCoordinate));
-  }, [onBoundsChange, maxCoordinate]);
-
   const viewAreaBounds = NumbersRange.createBySize(coordinate, viewRange.size);
-  const indexes = getRenderingIndexes(viewAreaBounds, slotSize, 1);
+  const indexes = getRenderingIndexes(viewAreaBounds, itemSize, 1);
 
   return (
     <div
@@ -51,7 +35,7 @@ export const VirtualView: React.FC<IVirtualViewProps> = ({
     >
       {indexes.map((index) => {
         const itemRange = NumbersRange.createBySize(
-          index * slotSize - coordinate,
+          index * itemSize - coordinate,
           itemSize
         );
         const itemBox = orientation.boxFromRanges(itemRange, thicknessRange);

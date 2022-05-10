@@ -32,13 +32,14 @@ abstract class DragListener {
 
     const handleMove = this.createMoveHandler(downEvent);
 
-    function handleUp(upEvent: MouseEvent) {
+    function handleStop(upEvent: MouseEvent) {
       onEnd(extractPressedKeys(upEvent));
       document.removeEventListener("mousemove", handleMove);
     }
 
     document.addEventListener("mousemove", handleMove);
-    document.addEventListener("mouseup", handleUp, { once: true });
+    document.addEventListener("mouseup", handleStop, { once: true });
+    document.addEventListener("mouseleave", handleStop, { once: true });
   }
 }
 
