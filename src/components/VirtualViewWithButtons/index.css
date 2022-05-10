@@ -1,9 +1,0 @@
-.container {
-  position: relative;
-
-  padding: 4px;
-  display: inline-flex;
-  background: grey;
-
-  width: max-content;
-}

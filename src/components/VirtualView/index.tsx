@@ -1,52 +1,70 @@
+import { useEffect } from "react";
+import { BoundingBox } from "../../utils/boundingBox";
+import { noop } from "../../utils/common";
+import { NumbersRange } from "../../utils/numbersRange";
 import { IOrientation, Orientations } from "../../utils/orientation";
-import "./index.css";
-import { expandEvenly, getIndexesRange, getItemStyle, getViewAreaStyle, rangeInclusive } from "./utils";
+import { getBoxStyle } from "../../utils/styles";
+import { getRenderingIndexes } from "./utils";
 
 export interface IVirtualViewProps {
-  position: number;
-  viewAreaSize: number;
+  coordinate: number;
+  viewBox: BoundingBox;
   itemSize: number;
-  gutter?: number;
+  gutter: number;
   count: number;
   renderItem(index: number): React.ReactNode;
   orientation?: IOrientation;
+  /** Оповещение об изменении диапазона допустимых координат */
+  onBoundsChange?(bounds: NumbersRange): void;
 }
 
-/** Отображение элементов только в зоне видимости */
-export const VirtualView: React.VFC<IVirtualViewProps> = ({
+/** Карусель для отображения элементов */
+export const VirtualView: React.FC<IVirtualViewProps> = ({
   gutter = 0,
-  viewAreaSize,
+  viewBox,
   itemSize,
-  position,
+  coordinate,
   count,
   renderItem,
-  orientation = Orientations.horizontal
+  orientation = Orientations.horizontal,
+  onBoundsChange = noop,
 }) => {
+  const [viewRange, thicknessRange] = orientation.rangesOfBox(viewBox);
+
   const slotSize = itemSize + gutter;
+  const maxCoordinate = slotSize * count - viewRange.size;
 
-  const maxPosition = slotSize * count;
+  useEffect(() => {
+    onBoundsChange(new NumbersRange(0, maxCoordinate));
+  }, [onBoundsChange, maxCoordinate]);
 
-  const overscanCount = 1;
-
-  const indexes = getIndexesRange(position, viewAreaSize, slotSize);
-  const expandedIndexes = expandEvenly(overscanCount, indexes);
+  const viewAreaBounds = NumbersRange.createBySize(coordinate, viewRange.size);
+  const indexes = getRenderingIndexes(viewAreaBounds, slotSize, 1);
 
   return (
     <div
-      className="ViewArea"
-      style={getViewAreaStyle(viewAreaSize, gutter, orientation)}
+      style={{
+        ...getBoxStyle(viewBox),
+        overflow: "hidden",
+        position: "relative",
+      }}
     >
-      {rangeInclusive(expandedIndexes.start, expandedIndexes.end).map(
-        (index) => (
+      {indexes.map((index) => {
+        const itemRange = NumbersRange.createBySize(
+          index * slotSize - coordinate,
+          itemSize
+        );
+        const itemBox = orientation.boxFromRanges(itemRange, thicknessRange);
+
+        return (
           <div
             key={index}
-            className="Item"
-            style={getItemStyle(itemSize, index * slotSize - position, orientation)}
+            style={{ position: "absolute", ...getBoxStyle(itemBox) }}
           >
             {renderItem(index)}
           </div>
-        )
-      )}
+        );
+      })}
     </div>
   );
 };

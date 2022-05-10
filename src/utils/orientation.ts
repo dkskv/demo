@@ -21,6 +21,7 @@ export interface IOrientation {
   lengthKey: EBoxLength,
   /** Стороны бокса, перпендикулярные оси ориентации */
   sides: readonly [EBoxSide, EBoxSide];
+  /** @deprecated */
   cssKeys: {
     length: keyof Pick<CSSProperties, "width" | "height">;
     thickness: IOrientation["cssKeys"]["length"];
@@ -29,7 +30,6 @@ export interface IOrientation {
       CSSProperties,
       "left" | "top" | "right" | "bottom"
     >;
-    gap: keyof Pick<CSSProperties, "rowGap" | "columnGap">;
   };
 }
 
@@ -49,7 +49,6 @@ export namespace Orientations {
       thickness: "height",
       coordinate: "left",
       normalCoordinate: "top",
-      gap: "columnGap",
     },
   };
 
@@ -68,7 +67,6 @@ export namespace Orientations {
       thickness: "width",
       coordinate: "top",
       normalCoordinate: "left",
-      gap: "rowGap",
     },
   };
 

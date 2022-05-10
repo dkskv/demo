@@ -57,6 +57,10 @@ export class NumbersRange implements Iterable<number> {
     return NumbersRange.createBySize(clamp(this.start, this.end - size, start), size);
   }
 
+  clampNumber(n: number) {
+    return clamp(this.start, this.end, n);
+  }
+
   /** Вернуть реальную позицию числа, нормированного внутри диапазона */
   denormalizeNumber(n: number) {
     return this.start + n * this.delta;

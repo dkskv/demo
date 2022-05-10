@@ -1,45 +1,24 @@
 import { range } from "ramda";
 import { NumbersRange } from "../../utils/numbersRange";
-import { IOrientation } from "../../utils/orientation";
 
-export function rangeInclusive(from: number, to: number) {
-  return range(from, to + 1);
+export function getRenderingIndexes(
+  bounds: NumbersRange,
+  slotSize: number,
+  overscanCount: number
+): number[] {
+  const { start, end } = expandEvenly(bounds, overscanCount);
+
+  return range(fits(start, slotSize), fits(end, slotSize) + 1);
 }
 
-function fits(x: number, valueOfDivision: number) {
+// todo: уже не понимаю, зачем нужна эта функция
+function fits(x: number, valueOfDivision: number): number {
   return Math.floor(x / valueOfDivision);
 }
 
-export function getIndexesRange(
-  x: number,
-  length: number,
-  slotSize: number
+function expandEvenly(
+  { start, end }: NumbersRange,
+  overscan: number
 ): NumbersRange {
-  return new NumbersRange(fits(x, slotSize), fits(x + length, slotSize))
-}
-
-export function expandEvenly(overscan: number, { start, end }: NumbersRange): NumbersRange {
-  return new NumbersRange(start - overscan, end + overscan)
-}
-
-export function getViewAreaStyle(
-  areaLength: number,
-  gutter: number,
-  orientation: IOrientation
-) {
-  return {
-    [orientation.cssKeys.length]: `${areaLength}px`,
-    [orientation.cssKeys.gap]: `${gutter}px`,
-  };
-}
-
-export function getItemStyle(
-  length: number,
-  coordinate: number,
-  orientation: IOrientation
-) {
-  return {
-    [orientation.cssKeys.length]: `${length}px`,
-    [orientation.cssKeys.coordinate]: `${coordinate}px`,
-  }; 
+  return new NumbersRange(start - overscan, end + overscan);
 }

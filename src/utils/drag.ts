@@ -2,84 +2,78 @@ import { IPressedKeys } from "./common";
 import { getOriginOnPage } from "./domElement";
 import { Point } from "./point";
 
-interface IMouseEvent
-  extends Pick<
-    MouseEvent,
-    | "preventDefault"
-    | "stopPropagation"
-    | "target"
-    | "pageX"
-    | "pageY"
-    | "altKey"
-    | "shiftKey"
-    | "ctrlKey"
-  > {}
-
 export interface IDragCallbacks {
   onStart(pressedKeys: IPressedKeys): void;
   onChange(a: Point, pressedKeys: IPressedKeys): void;
   onEnd(pressedKeys: IPressedKeys): void;
 }
 
-export class DragListener {
-  constructor(private element: Element, private callbacks: IDragCallbacks) {
+abstract class DragListener {
+  constructor(protected element: Element, protected callbacks: IDragCallbacks) {
     this.handleDown = this.handleDown.bind(this);
   }
 
-  /** Подписывает `callbacks` на намерение переместить элемент (в координатах страницы) */
+  /** Возвращает disposer, отменяющий прослушку новых перетаскиваний */
   public launch() {
     this.element.addEventListener("mousedown", this.handleDown);
+
+    return () => this.element.removeEventListener("mousedown", this.handleDown);
   }
 
-  /** Перестать слушать новые перетаскивания (обработка текущего не останавливается) */
-  public stop() {
-    this.element.removeEventListener("mousedown", this.handleDown);
-  }
+  protected abstract createMoveHandler(downEvent: MouseEvent): (moveEvent: MouseEvent) => void
 
   private handleDown(event: Event) {
-    const downEvent = event as unknown as IMouseEvent;
-
+    const downEvent = event as MouseEvent;
     downEvent.preventDefault();
     downEvent.stopPropagation();
 
-    const dragPointInsideElement = getMousePointInsideElement(
-      this.element,
-      downEvent
-    );
-
-    const { onStart, onChange, onEnd } = this.callbacks;
-
+    const { onStart, onEnd } = this.callbacks;
     onStart(extractPressedKeys(downEvent));
 
-    const handleMove = (moveEvent: MouseEvent) => {
-      const point = getMousePoint(moveEvent).subtract(dragPointInsideElement);
-      onChange(point, extractPressedKeys(moveEvent));
-    };
+    const handleMove = this.createMoveHandler(downEvent);
 
-    const handleUp = (upEvent: MouseEvent) => {
+    function handleUp(upEvent: MouseEvent) {
       onEnd(extractPressedKeys(upEvent));
-
       document.removeEventListener("mousemove", handleMove);
-    };
+    }
 
     document.addEventListener("mousemove", handleMove);
     document.addEventListener("mouseup", handleUp, { once: true });
   }
 }
 
+/** Подписывает на координаты элемента (на странице) */
+export class DragCoordinatesListener extends DragListener {
+  protected createMoveHandler(downEvent: MouseEvent) {
+    const offset = getEventInnerCoordinates(downEvent);
+
+    return (moveEvent: MouseEvent) => {
+      const point = getMousePoint(moveEvent).subtract(offset);
+      this.callbacks.onChange(point, extractPressedKeys(moveEvent));
+    }
+  }
+}
+
+/** Подписывает на последовательные смещения координат */
+export class DragMovementListener extends DragListener {
+  protected createMoveHandler() {
+    return (moveEvent: MouseEvent) => {
+      const point = new Point(moveEvent.movementX, moveEvent.movementY);
+      this.callbacks.onChange(point, extractPressedKeys(moveEvent));
+    }
+  }
+}
+
 /** Получить координаты точки захвата внутри элемента */
-function getMousePointInsideElement(
-  element: Element,
-  mouseEvent: IMouseEvent
-): Point {
-  const elementOrigin = getOriginOnPage(element);
+function getEventInnerCoordinates(mouseEvent: MouseEvent): Point {
+  const targetOrigin = getOriginOnPage(mouseEvent.currentTarget as Element);
   const mousePoint = getMousePoint(mouseEvent);
 
-  return mousePoint.subtract(elementOrigin);
+  return mousePoint.subtract(targetOrigin);
 }
 
 /** Координаты мыши на странице */
-function getMousePoint(event: IMouseEvent) {
+function getMousePoint(event: MouseEvent) {
   /** todo: Почему не clientX? */
   return new Point(event.pageX, event.pageY);
 }
@@ -88,6 +82,6 @@ function extractPressedKeys({
   altKey,
   shiftKey,
   ctrlKey,
-}: IMouseEvent): IPressedKeys {
+}: MouseEvent): IPressedKeys {
   return { altKey, shiftKey, ctrlKey };
 }
