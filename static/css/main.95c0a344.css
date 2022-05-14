@@ -1,0 +1,15 @@
+.Draggable {
+    position: absolute;
+    cursor: pointer;
+    /* transform: translate(-50%, -25%) */
+}
+.Thumb {
+    opacity: 0.8;
+    background-color: white;
+    height: 20px;
+    width: 20px;
+    border-radius: 3px;
+    border: 1px solid grey;
+}
+
+/*# sourceMappingURL=main.95c0a344.css.map*/
