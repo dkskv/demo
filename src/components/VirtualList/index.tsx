@@ -4,7 +4,7 @@ import { IOrientation, Orientations } from "../../utils/orientation";
 import { getBoxStyle } from "../../utils/styles";
 import { getRenderingIndexes } from "./utils";
 
-export interface IVirtualViewProps {
+export interface IVirtualListProps {
   coordinate: number;
   viewBox: BoundingBox;
   itemSize: number;
@@ -12,8 +12,8 @@ export interface IVirtualViewProps {
   orientation?: IOrientation;
 }
 
-/** Карусель для отображения элементов */
-export const VirtualView: React.FC<IVirtualViewProps> = ({
+/** Контейнер для отображения элементов */
+export const VirtualList: React.FC<IVirtualListProps> = ({
   viewBox,
   itemSize,
   coordinate,
@@ -22,7 +22,7 @@ export const VirtualView: React.FC<IVirtualViewProps> = ({
 }) => {
   const [viewRange, thicknessRange] = orientation.rangesOfBox(viewBox);
 
-  const viewAreaBounds = NumbersRange.createBySize(coordinate, viewRange.size);
+  const viewAreaBounds = NumbersRange.createByDelta(coordinate, viewRange.size);
   const indexes = getRenderingIndexes(viewAreaBounds, itemSize, 1);
 
   return (
@@ -34,10 +34,10 @@ export const VirtualView: React.FC<IVirtualViewProps> = ({
       }}
     >
       {indexes.map((index) => {
-        const itemRange = NumbersRange.createBySize(
+        const itemRange = NumbersRange.createByDelta(
           index * itemSize - coordinate,
           itemSize
-        );
+        ); 
         const itemBox = orientation.boxFromRanges(itemRange, thicknessRange);
 
         return (

@@ -115,14 +115,11 @@ export class BoundingBox {
     return BoundingBox.createByDimensions(0, 0, this.dx, this.dy);
   }
 
-  constrainDx(bounds: NumbersRange) {
-    const dx = clamp(bounds.start, bounds.end, this.dx);
-    return BoundingBox.createByDimensions(this.x0, this.y0, dx, this.dy);
-  }
+  constrainSize(dxBounds: NumbersRange, dyBounds: NumbersRange) {
+    const dx = dxBounds.clampNumber(this.dx);
+    const dy = dyBounds.clampNumber(this.dy);
 
-  constrainDy(bounds: NumbersRange) {
-    const dy = clamp(bounds.start, bounds.end, this.dy);
-    return BoundingBox.createByDimensions(this.x0, this.y0, this.dx, dy);
+    return BoundingBox.createByDimensions(this.x0, this.y0, dx, dy);
   }
 
   shiftDeltas(offsetX: number, offsetY: number) {
@@ -131,6 +128,13 @@ export class BoundingBox {
       this.y0,
       this.dx + offsetX,
       this.dy + offsetY
+    );
+  }
+
+  scale(k: number) {
+    return BoundingBox.createByRanges(
+      this.xsRange.scale(k),
+      this.ysRange.scale(k)
     );
   }
 
@@ -162,7 +166,7 @@ export class BoundingBox {
       xsRange.normalizeNumber(inner.x1),
       xsRange.normalizeNumber(inner.x2),
       ysRange.normalizeNumber(inner.y1),
-      ysRange.normalizeNumber(inner.y2),
+      ysRange.normalizeNumber(inner.y2)
     );
   }
 
@@ -173,7 +177,7 @@ export class BoundingBox {
       xsRange.denormalizeNumber(inner.x1),
       xsRange.denormalizeNumber(inner.x2),
       ysRange.denormalizeNumber(inner.y1),
-      ysRange.denormalizeNumber(inner.y2),
+      ysRange.denormalizeNumber(inner.y2)
     );
   }
 
@@ -189,6 +193,10 @@ export class BoundingBox {
 
   private get deltasVector() {
     return new Point(this.dx, this.dy);
+  }
+
+  private placeByInnerOrigin(origin: Point, p: Point) {
+    return this.shift(p.subtract(this.denormalizePoint(origin)));
   }
 
   isEqual({ x1, x2, y1, y2 }: BoundingBox) {

@@ -23,7 +23,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "deploy": "npm run build && gh-pages -d build",
+    "deploy": "yarn build-storybook && gh-pages -d storybook-static",
     "sb": "start-storybook -p 6006 -s public",
     "build-storybook": "build-storybook -s public"
   },

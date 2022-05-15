@@ -1,8 +1,8 @@
 import { clamp } from "ramda";
 
 export class NumbersRange implements Iterable<number> {
-  static createBySize(start: number, size: number) {
-    return new NumbersRange(start, start + size);
+  static createByDelta(start: number, delta: number) {
+    return new NumbersRange(start, start + delta);
   }
 
   static infinite() {
@@ -40,20 +40,20 @@ export class NumbersRange implements Iterable<number> {
   }
 
   shift(offset: number) {
-    return this.map(n => n + offset);
+    return this.map((n) => n + offset);
   }
 
-  /** Ограничить начало, опираясь на конец и длину диапазона */
-  constrainStart({ start: minSize, end: maxSize }: NumbersRange) {
-    return this.setStart(
-      clamp(this.end - maxSize, this.end - minSize, this.start)
-    );
-  }
+  constrainSize(
+    origin: number,
+    { start: minSize, end: maxSize }: NumbersRange
+  ) {
+    const prevOriginCoordinate = this.denormalizeNumber(origin);
 
-  /** Ограничить конец, опираясь на начало и длину диапазона */
-  constrainEnd({ start: minSize, end: maxSize }: NumbersRange) {
-    return this.setEnd(
-      clamp(this.start + minSize, this.start + maxSize, this.end)
+    const delta = clamp(minSize, maxSize, this.delta);
+
+    return NumbersRange.createByDelta(this.start, delta).placeByInnerOrigin(
+      origin,
+      prevOriginCoordinate
     );
   }
 
@@ -61,8 +61,11 @@ export class NumbersRange implements Iterable<number> {
     return inner.map((a) => clamp(this.start, this.end, a));
   }
 
-  clampInner({ start, size }: NumbersRange) {
-    return NumbersRange.createBySize(clamp(this.start, this.end - size, start), size);
+  clampInner({ start, delta }: NumbersRange) {
+    return NumbersRange.createByDelta(
+      clamp(this.start, this.end - delta, start),
+      delta
+    );
   }
 
   clampNumber(n: number) {
@@ -79,7 +82,18 @@ export class NumbersRange implements Iterable<number> {
     return (n - this.start) / this.delta;
   }
 
-  isEqual({start, end}: NumbersRange) {
+  /** Изменить размер в k раз */
+  scale(k: number) {
+    const offset = this.size * k;
+    return new NumbersRange(this.start + offset, this.end - offset);
+  }
+
+  /** Поместить в координату, используя в качестве origin нормированную координату */
+  private placeByInnerOrigin(origin: number, x: number) {
+    return this.shift(x - this.denormalizeNumber(origin));
+  }
+
+  isEqual({ start, end }: NumbersRange) {
     return this.start === start && this.end === end;
   }
 

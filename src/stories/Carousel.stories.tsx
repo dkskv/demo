@@ -1,7 +1,7 @@
 import { ComponentMeta, ComponentStory } from "@storybook/react";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useDragMovement } from "../components/Draggable/hooks";
-import { VirtualView } from "../components/VirtualView";
+import { VirtualList } from "../components/VirtualList";
 import { useCallbackRef } from "../hooks";
 import { BoundingBox } from "../utils/boundingBox";
 import { NumbersRange } from "../utils/numbersRange";
@@ -14,17 +14,20 @@ import {
   stretchStyle,
 } from "../utils/styles";
 import Slider from "../components/Slider";
+import { useWheel } from "../decorators/useWheel";
+import { WheelScalingK } from "../utils/constants";
+import { VirtualGrid } from "../components/VirtualGrid";
+import ResizableControl from "../components/ResizableControl";
 
 export default {
   title: "Demo/Carousel",
-  component: VirtualView,
+  component: VirtualList,
   parameters: {},
-} as ComponentMeta<typeof VirtualView>;
+} as ComponentMeta<typeof VirtualList>;
 
-const viewBox = BoundingBox.createByDimensions(0, 0, 500, 70);
+const Template: ComponentStory<typeof VirtualList> = (args) => {
+  const viewBox = BoundingBox.createByDimensions(0, 0, 500, 70);
 
-const Template: ComponentStory<typeof VirtualView> = (args) => {
-  // const [boundsRange, setBoundsRange] = useState<NumbersRange>();
   const [sliderValue, setSliderValue] = useState<NumbersRange>(
     new NumbersRange(0, 0.3)
   );
@@ -32,6 +35,8 @@ const Template: ComponentStory<typeof VirtualView> = (args) => {
 
   const viewSize = viewBox.dx;
   const totalSize = viewSize / sliderValue.size;
+
+  const sizeBounds = useMemo(() => new NumbersRange(0.2, 1), []);
 
   const handleDrag = useCallback(
     (delta: Point) => {
@@ -45,6 +50,24 @@ const Template: ComponentStory<typeof VirtualView> = (args) => {
 
   useDragMovement({ element, onChange: handleDrag });
 
+  const handleWheel = useCallback(
+    (delta: number) => {
+      setSliderValue((prevValue) => {
+        const bounds = NumbersRange.normalizationBounds();
+
+        return bounds.clipInner(
+          prevValue.scale(delta * WheelScalingK).constrainSize(0.5, sizeBounds)
+        );
+      });
+    },
+    [sizeBounds]
+  );
+
+  useWheel(element, handleWheel);
+
+  const renderItem = (columnIndex: number) =>
+    CellRenderer.renderItem(0, columnIndex);
+
   return (
     <>
       <div
@@ -56,24 +79,24 @@ const Template: ComponentStory<typeof VirtualView> = (args) => {
           cursor: "grab",
         }}
       >
-        <VirtualView
+        <VirtualList
           viewBox={viewBox}
           coordinate={sliderValue.start * totalSize}
-          itemSize={totalSize / DataRenderer.itemsSize}
-          renderItem={DataRenderer.renderItem}
+          itemSize={totalSize / CellRenderer.columnsCount}
+          renderItem={renderItem}
         />
       </div>
       <div style={{ position: "relative", ...getBoxStyle(viewBox) }}>
-        <VirtualView
+        <VirtualList
           viewBox={viewBox}
           coordinate={0}
-          itemSize={viewSize / DataRenderer.itemsSize}
-          renderItem={DataRenderer.renderItem}
+          itemSize={viewSize / CellRenderer.columnsCount}
+          renderItem={renderItem}
         />
         <Slider
           value={sliderValue}
           onChange={setSliderValue}
-          sizeBounds={new NumbersRange(0.2, 1)}
+          sizeBounds={sizeBounds}
         >
           <div
             style={{
@@ -88,9 +111,86 @@ const Template: ComponentStory<typeof VirtualView> = (args) => {
   );
 };
 
-export const WithButtons = Template.bind({});
+export const WithSlider = Template.bind({});
 
-class DataRenderer {
+export const WithResizable: ComponentStory<typeof VirtualList> = (args) => {
+  const [controlValue, setControlValue] = useState<BoundingBox>(
+    BoundingBox.createByDimensions(0, 0, 0.2, 0.2)
+  );
+  const [element, setElement] = useCallbackRef();
+
+  function handleWheel(delta: number) {
+    setControlValue((prevValue) => {
+      return prevValue.scale(delta * WheelScalingK);
+    });
+  }
+
+  useWheel(element, handleWheel);
+
+  const viewBox = BoundingBox.createByDimensions(0, 0, 500, 500);
+  const totalSizeVector = new Point(
+    viewBox.dx / controlValue.dx,
+    viewBox.dy / controlValue.dy
+  );
+
+  const handleDrag = function (delta: Point) {
+    setControlValue((prevValue) =>
+      prevValue.shift(delta.div(totalSizeVector).negate())
+    );
+  };
+
+  useDragMovement({ element, onChange: handleDrag });
+
+  return (
+    <>
+      <div
+        ref={setElement}
+        style={{
+          position: "relative",
+          display: "inline-block",
+          background: "orange",
+          userSelect: "none",
+          cursor: "grab",
+        }}
+      >
+        <VirtualGrid
+          viewBox={viewBox}
+          dx={totalSizeVector.x / CellRenderer.columnsCount}
+          dy={totalSizeVector.y / CellRenderer.rowsCount}
+          coordinates={controlValue.origin.mul(totalSizeVector)}
+          renderItem={CellRenderer.renderItem}
+        />
+      </div>
+      <div
+        style={{
+          position: "relative",
+          display: "inline-block",
+          background: "blue",
+          userSelect: "none",
+        }}
+      >
+        <VirtualGrid
+          viewBox={viewBox}
+          dx={viewBox.dx / CellRenderer.columnsCount}
+          dy={viewBox.dy / CellRenderer.rowsCount}
+          coordinates={new Point(0, 0)}
+          renderItem={CellRenderer.renderItem}
+        />
+        <ResizableControl value={controlValue} onChange={setControlValue}>
+          <div
+            style={{
+              ...stretchStyle,
+              background: getRgbaColor("#FFFFFF", 0.3),
+              border: "1px solid orange",
+            }}
+          />
+        </ResizableControl>
+      </div>
+    </>
+  );
+};
+
+class CellRenderer {
   private static items = [
     "lavender",
     "thistle",
@@ -111,10 +211,15 @@ class DataRenderer {
     "darkSlateBlue",
   ];
 
-  static itemsSize = this.items.length;
+  static columnsCount = this.items.length;
+  static rowsCount = 20;
 
-  static renderItem = (index: number) => {
-    const color = this.items[index];
+  static renderItem = (rowIndex: number = 0, columnIndex: number) => {
+    if (rowIndex < 0 || rowIndex >= this.rowsCount) {
+      return null;
+    }
+
+    const color = this.items[columnIndex];
 
     return (
       <div

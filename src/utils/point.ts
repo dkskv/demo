@@ -62,6 +62,10 @@ export class Point {
     return new Point(this.x, clamp(min, max, this.y));
   }
 
+  negate() {
+    return this.mulK(-1);
+  }
+
   /** Получить точку, симметричную данной относительно другой точки */
   reflectAroundPoint(p: Point) {
     return p.subtract(this.subtract(p));
