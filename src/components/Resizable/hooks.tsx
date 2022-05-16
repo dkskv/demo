@@ -9,7 +9,7 @@ import { ISizeBounds, updateBox } from "../../utils/boxResize";
 import { useActualRef } from "../../decorators/useActualRef";
 import { IDragCallbacks } from "../../utils/drag";
 import { IDragParams, useDrag } from "../Draggable/hooks";
-import { getBoxOnPage } from "../../utils/domElement";
+import { getBoxOnPage } from "../../utils/dom";
 
 export interface IResizeParams extends Partial<
 { 

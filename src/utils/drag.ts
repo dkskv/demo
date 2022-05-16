@@ -1,5 +1,5 @@
 import { IPressedKeys } from "./common";
-import { getOriginOnPage } from "./domElement";
+import { getMouseOffsetPoint, getMousePoint } from "./dom";
 import { Point } from "./point";
 
 export interface IDragCallbacks {
@@ -46,7 +46,7 @@ abstract class DragListener {
 /** Подписывает на координаты элемента (на странице) */
 export class DragCoordinatesListener extends DragListener {
   protected createMoveHandler(downEvent: MouseEvent) {
-    const offset = getEventInnerCoordinates(downEvent);
+    const offset = getMouseOffsetPoint(downEvent);
 
     return (moveEvent: MouseEvent) => {
       const point = getMousePoint(moveEvent).subtract(offset);
@@ -63,20 +63,6 @@ export class DragMovementListener extends DragListener {
       this.callbacks.onChange(point, extractPressedKeys(moveEvent));
     }
   }
-}
-
-/** Получить координаты точки захвата внутри элемента */
-function getEventInnerCoordinates(mouseEvent: MouseEvent): Point {
-  const targetOrigin = getOriginOnPage(mouseEvent.currentTarget as Element);
-  const mousePoint = getMousePoint(mouseEvent);
-
-  return mousePoint.subtract(targetOrigin);
-}
-
-/** Координаты мыши на странице */
-function getMousePoint(event: MouseEvent) {
-  /** todo: Почему не clientX? */
-  return new Point(event.pageX, event.pageY);
 }
 
 function extractPressedKeys({

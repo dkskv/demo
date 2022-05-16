@@ -1,15 +1,22 @@
 import { useCallback, useEffect } from "react";
+import { getBoxOnPage, getMouseOffsetPoint } from "../utils/dom";
+import { Point } from "../utils/point";
 
-export function useWheel(
+export function useScale(
   element: Element | null,
-  onChange: (delta: number) => void
+  onChange: (delta: number, point: Point) => void
 ) {
   const handleChange = useCallback(
     (event: Event) => {
       event.stopPropagation();
       event.preventDefault();
 
-      onChange((event as WheelEvent).deltaY);
+      const { deltaY } = event as WheelEvent;
+
+      const targetBox = getBoxOnPage(event.currentTarget as Element);
+      const offsetPoint = getMouseOffsetPoint(event as WheelEvent);
+
+      onChange(deltaY, targetBox.normalizePoint(offsetPoint));
     },
     [onChange]
   );

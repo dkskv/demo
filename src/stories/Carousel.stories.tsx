@@ -14,7 +14,7 @@ import {
   stretchStyle,
 } from "../utils/styles";
 import Slider from "../components/Slider";
-import { useWheel } from "../decorators/useWheel";
+import { useScale } from "../decorators/useScale";
 import { WheelScalingK } from "../utils/constants";
 import { VirtualGrid } from "../components/VirtualGrid";
 import ResizableControl from "../components/ResizableControl";
@@ -50,20 +50,25 @@ const Template: ComponentStory<typeof VirtualList> = (args) => {
 
   useDragMovement({ element, onChange: handleDrag });
 
-  const handleWheel = useCallback(
-    (delta: number) => {
+  const handleScale = useCallback(
+    (delta: number, point: Point) => {
       setSliderValue((prevValue) => {
         const bounds = NumbersRange.normalizationBounds();
 
+        const k = delta * WheelScalingK;
+
         return bounds.clipInner(
-          prevValue.scale(delta * WheelScalingK).constrainSize(0.5, sizeBounds)
+          prevValue
+            .scale(k)
+            .constrainSize(sizeBounds)
+            .moveTo(prevValue.denormalizeNumber(point.x), point.x)
         );
       });
     },
     [sizeBounds]
   );
 
-  useWheel(element, handleWheel);
+  useScale(element, handleScale);
 
   const renderItem = (columnIndex: number) =>
     CellRenderer.renderItem(0, columnIndex);
@@ -117,15 +122,24 @@ export const WithResizable: ComponentStory<typeof VirtualList> = (args) => {
   const [controlValue, setControlValue] = useState<BoundingBox>(
     BoundingBox.createByDimensions(0, 0, 0.2, 0.2)
   );
+
+  const outer = BoundingBox.createByDimensions(0, 0, 1, 1);
+
+  const lengthBounds = new NumbersRange(0.2, 1);
+
   const [element, setElement] = useCallbackRef();
 
-  function handleWheel(delta: number) {
+  function handleScale(delta: number, p: Point) {
     setControlValue((prevValue) => {
-      return prevValue.scale(delta * WheelScalingK);
+      return prevValue
+        .scale(delta * WheelScalingK)
+        .constrainSize(lengthBounds, lengthBounds)
+        .moveTo(prevValue.denormalizePoint(p), p)
+        .clampByOuter(outer);
     });
   }
 
-  useWheel(element, handleWheel);
+  useScale(element, handleScale);
 
   const viewBox = BoundingBox.createByDimensions(0, 0, 500, 500);
   const totalSizeVector = new Point(
@@ -135,7 +149,7 @@ export const WithResizable: ComponentStory<typeof VirtualList> = (args) => {
 
   const handleDrag = function (delta: Point) {
     setControlValue((prevValue) =>
-      prevValue.shift(delta.div(totalSizeVector).negate())
+      prevValue.shift(delta.div(totalSizeVector).negate()).clampByOuter(outer)
     );
   };
 
@@ -176,7 +190,11 @@ export const WithResizable: ComponentStory<typeof VirtualList> = (args) => {
           coordinates={new Point(0, 0)}
           renderItem={CellRenderer.renderItem}
         />
-        <ResizableControl value={controlValue} onChange={setControlValue}>
+        <ResizableControl
+          value={controlValue}
+          onChange={setControlValue}
+          sizeBounds={{ width: lengthBounds, height: lengthBounds }}
+        >
           <div
             style={{
               ...stretchStyle,
@@ -223,13 +241,13 @@ class CellRenderer {
 
     return (
       <div
-        style={{ ...stretchStyle, padding: `${8}px`, boxSizing: "border-box" }}
+        style={{ ...stretchStyle, padding: `${8}%`, boxSizing: "border-box" }}
       >
         <div
           style={{
             ...centererStyle,
             ...stretchStyle,
-            padding: `${8}px`,
+            padding: `${8}%`,
             boxSizing: "border-box",
             backgroundColor: color,
           }}

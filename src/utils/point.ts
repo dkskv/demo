@@ -1,7 +1,7 @@
 import { clamp } from "ramda";
 
 export class Point {
-  static get origin() {
+  static get nullish() {
     return new Point(0, 0);
   }
 

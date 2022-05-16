@@ -32,3 +32,17 @@ export function getOffsetBox(element: HTMLElement) {
 
   return parent ? getBoxOnPage(parent).resetOrigin() : BoundingBox.infinite();
 }
+
+/** Получить координаты мыши внутри `currentTarget` */
+export function getMouseOffsetPoint(mouseEvent: MouseEvent): Point {
+  const targetOrigin = getOriginOnPage(mouseEvent.currentTarget as Element);
+  const mousePoint = getMousePoint(mouseEvent);
+
+  return mousePoint.subtract(targetOrigin);
+}
+
+/** Координаты мыши на странице */
+export function getMousePoint(event: MouseEvent) {
+  /** todo: Почему не clientX? */
+  return new Point(event.pageX, event.pageY);
+}

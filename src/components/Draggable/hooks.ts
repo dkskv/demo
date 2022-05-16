@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { noop } from "../../utils/common";
-import { getPointOnPage } from "../../utils/domElement";
+import { getPointOnPage } from "../../utils/dom";
 import {
   DragCoordinatesListener,
   DragMovementListener,

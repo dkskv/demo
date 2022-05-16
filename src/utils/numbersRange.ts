@@ -43,18 +43,10 @@ export class NumbersRange implements Iterable<number> {
     return this.map((n) => n + offset);
   }
 
-  constrainSize(
-    origin: number,
-    { start: minSize, end: maxSize }: NumbersRange
-  ) {
-    const prevOriginCoordinate = this.denormalizeNumber(origin);
+  constrainSize(bounds: NumbersRange) {
+    const delta = bounds.clampNumber(this.delta);
 
-    const delta = clamp(minSize, maxSize, this.delta);
-
-    return NumbersRange.createByDelta(this.start, delta).placeByInnerOrigin(
-      origin,
-      prevOriginCoordinate
-    );
+    return NumbersRange.createByDelta(this.start, delta);
   }
 
   clipInner(inner: NumbersRange) {
@@ -88,8 +80,8 @@ export class NumbersRange implements Iterable<number> {
     return new NumbersRange(this.start + offset, this.end - offset);
   }
 
-  /** Поместить в координату, используя в качестве origin нормированную координату */
-  private placeByInnerOrigin(origin: number, x: number) {
+  /** Разместить в точке */
+  moveTo(x: number, origin = 0) {
     return this.shift(x - this.denormalizeNumber(origin));
   }
 

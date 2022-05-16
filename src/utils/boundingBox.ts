@@ -100,14 +100,19 @@ export class BoundingBox {
     );
   }
 
-  /** Смещает координату левого верхнего угла */
-  shift(offsets: Point): BoundingBox {
-    return this.moveTo(this.origin.add(offsets));
+  clampByOuter(outer: BoundingBox) {
+    return outer.clampInner(this);
   }
 
-  /** Устанавливает координату левого верхнего угла */
-  moveTo({ x, y }: Point) {
-    return BoundingBox.createByDimensions(x, y, this.dx, this.dy);
+  /** Смещает координату левого верхнего угла */
+  shift(offsets: Point): BoundingBox {
+    const p = this.origin.add(offsets);
+    return BoundingBox.createByDimensions(p.x, p.y, this.dx, this.dy)
+  }
+
+  /** Устанавливает координату бокса */
+  moveTo(p: Point, origin = Point.nullish) {
+    return this.shift(p.subtract(this.denormalizePoint(origin)));
   }
 
   /** Перемещаем бокс в начало координат */
@@ -136,11 +141,6 @@ export class BoundingBox {
       this.xsRange.scale(k),
       this.ysRange.scale(k)
     );
-  }
-
-  /** Получить бокс в координатах относительно переданной точки */
-  placeRelatively(origin: Point) {
-    return this.moveTo(this.origin.subtract(origin));
   }
 
   /** Соотношение сторон (ширина / высота) */
@@ -193,10 +193,6 @@ export class BoundingBox {
 
   private get deltasVector() {
     return new Point(this.dx, this.dy);
-  }
-
-  private placeByInnerOrigin(origin: Point, p: Point) {
-    return this.shift(p.subtract(this.denormalizePoint(origin)));
   }
 
   isEqual({ x1, x2, y1, y2 }: BoundingBox) {

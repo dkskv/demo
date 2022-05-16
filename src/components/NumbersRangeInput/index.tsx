@@ -19,8 +19,10 @@ const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
 }) => {
   const handleChangeStart = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = Number(event.target.value);
+
       onChange(
-        range.setStart(Number(event.target.value)).constrainSize(0, sizeBounds)
+        range.setStart(value).constrainSize(sizeBounds).moveTo(range.start)
       );
     },
     [range, sizeBounds, onChange]
@@ -28,8 +30,10 @@ const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
 
   const handleChangeEnd = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = Number(event.target.value);
+
       onChange(
-        range.setEnd(Number(event.target.value)).constrainSize(1, sizeBounds)
+        range.setEnd(value).constrainSize(sizeBounds)
       );
     },
     [range, sizeBounds, onChange]

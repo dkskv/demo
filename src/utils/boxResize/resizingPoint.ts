@@ -49,13 +49,7 @@ export class ResizingPoint extends Point {
     /** Исходное значение `origin` (реальные координаты) */
     const prevOrigin = prevBox.denormalizePoint(origin);
 
-    /** Координаты, в которые сместился `origin` после трансформирования */
-    const nextOrigin = nextBox.denormalizePoint(origin);
-
-    /** Вектор смещения `origin` */
-    const originOffset = prevOrigin.subtract(nextOrigin);
-
     /** Возвращаем `origin` в исходное положение */
-    return nextBox.shift(originOffset);
+    return nextBox.moveTo(prevOrigin, origin);
   }
 }

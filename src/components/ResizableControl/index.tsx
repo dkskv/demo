@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { BoundingBox } from "../../utils/boundingBox";
 import { IPressedKeys } from "../../utils/common";
-import { getOffsetBox } from "../../utils/domElement";
+import { getOffsetBox } from "../../utils/dom";
 import Resizable, { IResizableProps } from "../Resizable";
 import { denormalizeSizeBounds } from "./utils";
 
