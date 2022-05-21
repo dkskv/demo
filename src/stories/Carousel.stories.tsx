@@ -121,34 +121,55 @@ const Template: ComponentStory<typeof VirtualList> = (args) => {
 
 export const WithSlider = Template.bind({});
 
-// - Не устанавливаем скорость в состояние, а хранить ее в ref и передавать в колбек
-// - Использовать requestAnimationFrame и dt
-function useImpulse() {
+function useSlowdown() {
   const [speed, setSpeed] = useState(0);
-  const intervalRef = useRef<NodeJS.Timer>();
+  const request = useRef<number | null>(null);
+  const k = useRef<number>(0);
+  // const prevTimestamp = useRef<number | null>();
 
-  const slowdown = useCallback((k: number) => {
-    intervalRef.current && clearInterval(intervalRef.current);
-
-    intervalRef.current = setInterval(() => {
+  const slow = useCallback(function () {
+    request.current = requestAnimationFrame((timestamp: number) => {
       setSpeed((prevSpeed) => {
-        const nextSpeed = prevSpeed * k;
+        // const dt = timestamp - (prevTimestamp.current ?? timestamp);
+        // prevTimestamp.current = timestamp;
+
+        const nextSpeed = prevSpeed * k.current;
 
         if (Math.abs(nextSpeed) < 0.1) {
-          intervalRef.current && clearInterval(intervalRef.current);
+          request.current = null;
           return 0;
         }
 
+        slow();
         return nextSpeed;
       });
     });
   }, []);
 
-  useEffect(() => {
-    return () => intervalRef.current && clearInterval(intervalRef.current);
+  const handleChange = useCallback(
+    (value: number) => {
+      setSpeed(value);
+
+      if (request.current === null) {
+        slow();
+      }
+    },
+    [slow]
+  );
+
+  const setK = useCallback((value: number) => {
+    k.current = value;
   }, []);
 
-  return [speed, setSpeed, slowdown] as const;
+  useEffect(
+    () =>
+      function () {
+        request.current && cancelAnimationFrame(request.current);
+      },
+    []
+  );
+
+  return [speed, handleChange, setK] as const;
 }
 
 export const WithMomentum: ComponentStory<typeof VirtualList> = (args) => {
@@ -159,7 +180,7 @@ export const WithMomentum: ComponentStory<typeof VirtualList> = (args) => {
   const [value, setValue] = useState<number>(0);
   const [element, setElement] = useCallbackRef();
 
-  const [speed, setSpeed, slowdown] = useImpulse();
+  const [speed, setSpeed, slowdown] = useSlowdown();
 
   const isGrabRef = useRef(false);
 
@@ -220,24 +241,28 @@ export const WithMomentum: ComponentStory<typeof VirtualList> = (args) => {
           position: "relative",
         }}
       >
-        {speed > 0 && (<div
-          style={{
-            ...getBoxStyle(
-              BoundingBox.createByDimensions(250, 0, (250 * speed) / 20, 10)
-            ),
-            background: "purple",
-            position: "absolute",
-          }}
-        />)}
-        {speed < 0 && (<div
-          style={{
-            ...getBoxStyle(
-              new BoundingBox(250 + (250 * speed) / 20, 250, 0, 10)
-            ),
-            background: "purple",
-            position: "absolute",
-          }}
-        />)}
+        {speed > 0 && (
+          <div
+            style={{
+              ...getBoxStyle(
+                BoundingBox.createByDimensions(250, 0, (250 * speed) / 20, 10)
+              ),
+              background: "purple",
+              position: "absolute",
+            }}
+          />
+        )}
+        {speed < 0 && (
+          <div
+            style={{
+              ...getBoxStyle(
+                new BoundingBox(250 + (250 * speed) / 20, 250, 0, 10)
+              ),
+              background: "purple",
+              position: "absolute",
+            }}
+          />
+        )}
       </div>
     </>
   );
