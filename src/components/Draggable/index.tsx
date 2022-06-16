@@ -12,7 +12,9 @@ interface IProps extends Partial<IDragCallbacks> {
   onChange: IDragCallbacks["onChange"];
   /** Установить origin элемента в центр */
   isCentered?: boolean;
-};
+
+  style?: React.CSSProperties;
+}
 
 export const Draggable: React.FC<IProps> = ({
   value,
@@ -21,6 +23,7 @@ export const Draggable: React.FC<IProps> = ({
   onEnd,
   isCentered = false,
   children,
+  style,
 }) => {
   const [element, setRef] = useCallbackRef();
 
@@ -31,7 +34,12 @@ export const Draggable: React.FC<IProps> = ({
   return (
     <div
       ref={setRef}
-      style={{ ...getPointStyle(value), position: "absolute", transform }}
+      style={{
+        ...getPointStyle(value),
+        position: "absolute",
+        transform,
+        ...style,
+      }}
     >
       {React.Children.only(children)}
     </div>

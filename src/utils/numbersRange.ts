@@ -85,6 +85,10 @@ export class NumbersRange implements Iterable<number> {
     return this.shift(x - this.denormalizeNumber(origin));
   }
 
+  includes(x: number) {
+    return this.start <= x && x <= this.end;
+  }
+
   isEqual({ start, end }: NumbersRange) {
     return this.start === start && this.end === end;
   }

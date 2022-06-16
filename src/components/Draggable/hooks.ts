@@ -26,8 +26,19 @@ export function useDrag({
   /** Обертка, преобразующая координаты внутри страницы к координатам внутри offsetParent */
   const handleChange: IDragCallbacks["onChange"] = useCallback(
     (point, pressedKeys) => {
-      const offset = getPointOnPage(element!.offsetParent!);
+      if (!element) {
+        return;
+      }
 
+      const { offsetParent } = element;
+
+      if (!offsetParent) {
+        console.error("Не найден offsetParent");
+        onChange(point, pressedKeys);
+        return;
+      }
+
+      const offset = getPointOnPage(offsetParent);
       onChange(point.subtract(offset), pressedKeys);
     },
     [element, onChange]
@@ -54,7 +65,11 @@ export function useDragMovement({
 }: IDragParams) {
   useEffect(() => {
     if (element) {
-      const listener = new DragMovementListener(element, { onChange, onStart, onEnd });
+      const listener = new DragMovementListener(element, {
+        onChange,
+        onStart,
+        onEnd,
+      });
 
       return listener.launch();
     }
