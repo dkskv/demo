@@ -3,6 +3,10 @@ import { NumbersRange } from "./numbersRange";
 import { Point } from "./point";
 
 export class BoundingBox {
+  static fromOrigin(dx: number, dy: number) {
+    return new BoundingBox(0, dx, 0, dy);
+  }
+
   static createByDimensions(x0: number, y0: number, dx: number, dy: number) {
     return new BoundingBox(x0, x0 + dx, y0, y0 + dy);
   }
@@ -107,10 +111,10 @@ export class BoundingBox {
   /** Смещает координату левого верхнего угла */
   shift(offsets: Point): BoundingBox {
     const p = this.origin.add(offsets);
-    return BoundingBox.createByDimensions(p.x, p.y, this.dx, this.dy)
+    return BoundingBox.createByDimensions(p.x, p.y, this.dx, this.dy);
   }
 
-  /** Устанавливает координату бокса */
+  /** Устанавливает координаты бокса */
   moveTo(p: Point, origin = Point.nullish) {
     return this.shift(p.subtract(this.denormalizePoint(origin)));
   }
