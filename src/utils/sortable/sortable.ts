@@ -9,43 +9,35 @@ export interface ISortableItem {
 
 /** Изменить порядок элементов в соответствии с перемещаемым элементом */
 export function order(items: ISortableItem[], movable: ISortableItem) {
-  const insertionIndex = items.findIndex((current) => {
-    const { ysRange } = current.box;
-    const boxCenterY = ysRange.denormalizeNumber(0.5);
-
-    const { y1, y2 } = movable.box;
-
-    // Запас.
-    const n = 3;
-
-    // Вытеснение верхней стороной
-    if (
-      ysRange.includes(y1) &&
-      y1 < boxCenterY + n /* && activeIndex > index */
-    ) {
-      return true;
-    }
-
-    // Вытеснение нижней стороной
-    if (
-      ysRange.includes(y2) &&
-      y2 > boxCenterY + n /* && activeIndex < index */
-    ) {
-      return true;
-    }
-
-    return false;
-  });
-
-  if (insertionIndex === -1) {
-    // todo: также обработать ситуацию, когда movable за пределами
-    return items;
-  }
-
   // todo: оптимизировать
   const movableIndex = items.findIndex(({ key }) => key === movable.key);
+  const dir = Math.sign(movable.box.y0 - items[movableIndex].box.y0);
+  let shiftedIndex = movableIndex;
 
-  return positionEntriesInChain(move(movableIndex, insertionIndex, items));
+  while (true) {
+    if (shiftedIndex < 0) {
+      shiftedIndex = 0;
+      break;
+    }
+
+    if (shiftedIndex > items.length - 1) {
+      shiftedIndex = items.length - 1;
+      break;
+    }
+
+    const { ysRange } = items[shiftedIndex].box;
+    const boxCenterY = ysRange.denormalizeNumber(0.5);
+    const { y1, y2 } = movable.box;
+
+    if ((dir === -1 && y1 < boxCenterY) || (dir === 1 && y2 > boxCenterY)) {
+      shiftedIndex += dir;
+    } else {
+      shiftedIndex -= dir;
+      break;
+    }
+  }
+
+  return positionEntriesInChain(move(movableIndex, shiftedIndex, items));
 }
 
 // todo: переименовать
