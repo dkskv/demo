@@ -1,4 +1,5 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { prop, sortBy } from "ramda";
 import { useCallback, useState } from "react";
 import { Draggable } from "../components/Draggable";
 import { BoundingBox } from "../utils/boundingBox";
@@ -22,7 +23,7 @@ const colors = ["red", "blue", "green", "purple"];
 const initialState: ISortableItem[] = positionEntriesInChain(
   colors.map((color, index) => {
     // const height = 50 + Math.random() * 100;
-    const height = sizes[index];
+    const height: number = sizes[index];
 
     return {
       key: color,
@@ -46,10 +47,6 @@ export const Only: ComponentStory<any> = (args) => {
   const handleEnd = useCallback((key: string) => {
     setActiveKey(null);
     setActivePoint(null);
-
-    // setValues((obj) => {
-
-    // });
   }, []);
 
   return (
@@ -60,7 +57,7 @@ export const Only: ComponentStory<any> = (args) => {
         position: "relative",
       }}
     >
-      {values.map(({ key, box }) => {
+      {sortBy(prop("key"), values).map(({ key, box }) => {
         const isActive = key === activeKey;
 
         let value: Point;
@@ -73,6 +70,7 @@ export const Only: ComponentStory<any> = (args) => {
 
         return (
           <Draggable
+            key={key}
             value={value}
             onChange={(p) => handleChange(key, box.moveTo(p))}
             onEnd={() => handleEnd(key)}
