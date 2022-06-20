@@ -2,6 +2,7 @@ import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { prop, propEq, sortBy, sum } from "ramda";
 import { useCallback, useState } from "react";
 import { Draggable } from "../components/Draggable";
+import { useTemporarySet } from "../decorators/useTemporarySet";
 import { BoundingBox } from "../utils/boundingBox";
 import { Point } from "../utils/point";
 import {
@@ -32,6 +33,9 @@ const initialState: ISortableItem[] = positionInChain(
 );
 
 export const Only: ComponentStory<any> = () => {
+  /** Отпущенные элементы, не завершившие анимацию перемещения */
+  const completedItems = useTemporarySet<string>();
+
   const [values, setValues] = useState(initialState);
   const [movingItem, setMovingItem] =
     useState<{ key: string; point: Point } | null>(null);
@@ -41,15 +45,21 @@ export const Only: ComponentStory<any> = () => {
 
     setValues((values) => {
       const sourceIndex = values.findIndex(propEq("key", key));
-      const action = { sourceIndex, point };
 
-      return reorder(action, values);
+      return reorder({ sourceIndex, point }, values);
     });
   }, []);
 
-  const handleEnd = useCallback((key: string) => {
-    setMovingItem(null);
-  }, []);
+  const transitionDuration = 300;
+
+  const handleEnd = useCallback(
+    (key: string) => {
+      setMovingItem(null);
+
+      completedItems.add(key, transitionDuration);
+    },
+    [completedItems]
+  );
 
   return (
     <div
@@ -61,22 +71,26 @@ export const Only: ComponentStory<any> = () => {
     >
       {sortBy(prop("key"), values).map(({ key, box }) => {
         const isActive = movingItem?.key === key;
+        const currentPoint =
+          isActive && movingItem.point ? movingItem.point : box.origin;
 
-        let value: Point;
-
-        if (isActive) {
-          value = movingItem.point ?? box.origin;
-        } else {
-          value = box.origin;
-        }
+        const isCompleted = completedItems.has(key);
+        const zIndex = isActive ? 2 : isCompleted ? 1 : 0;
 
         return (
           <Draggable
             key={key}
-            value={value}
+            value={currentPoint}
             onChange={(point) => handleChange(key, point)}
             onEnd={() => handleEnd(key)}
-            style={isActive ? undefined : { transition: "top 300ms ease" }}
+            style={
+              isActive
+                ? undefined
+                : {
+                    transitionDuration: `${transitionDuration}ms`,
+                    transitionProperty: "top left",
+                  }
+            }
           >
             <div
               style={{
@@ -84,7 +98,7 @@ export const Only: ComponentStory<any> = () => {
                 background: key,
                 cursor: "pointer",
                 position: "absolute",
-                zIndex: isActive ? 1 : 0,
+                zIndex,
               }}
             />
           </Draggable>
