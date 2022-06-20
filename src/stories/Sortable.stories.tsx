@@ -1,16 +1,15 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { prop, propEq, sortBy, sum } from "ramda";
-import { useCallback, useState } from "react";
-import { Draggable } from "../components/Draggable";
+import { useCallback, useMemo, useState } from "react";
+import { DraggableBox } from "../components/DraggableBox";
 import { useTemporarySet } from "../decorators/useTemporarySet";
 import { BoundingBox } from "../utils/boundingBox";
-import { Point } from "../utils/point";
 import {
   ISortableItem,
   positionInChain,
   reorder,
 } from "../utils/sortable/sortable";
-import { getBoxStyle } from "../utils/styles";
+import { getBoxStyle, stretchStyle } from "../utils/styles";
 
 export default {
   title: "Demo/Sortable",
@@ -33,20 +32,22 @@ const initialState: ISortableItem[] = positionInChain(
 );
 
 export const Only: ComponentStory<any> = () => {
-  /** Отпущенные элементы, не завершившие анимацию перемещения */
+  /**
+   * Отпущенные элементы, не завершившие анимацию перемещения
+   * todo: переименовать
+   */
   const completedItems = useTemporarySet<string>();
 
   const [values, setValues] = useState(initialState);
-  const [movingItem, setMovingItem] =
-    useState<{ key: string; point: Point } | null>(null);
+  const [movingItem, setMovingItem] = useState<ISortableItem | null>(null);
 
-  const handleChange = useCallback((key: string, point: Point) => {
-    setMovingItem({ key, point });
+  const handleChange = useCallback((key: string, box: BoundingBox) => {
+    setMovingItem({ key, box });
 
     setValues((values) => {
       const sourceIndex = values.findIndex(propEq("key", key));
 
-      return reorder({ sourceIndex, point }, values);
+      return reorder({ sourceIndex, point: box.origin }, values);
     });
   }, []);
 
@@ -61,6 +62,13 @@ export const Only: ComponentStory<any> = () => {
     [completedItems]
   );
 
+  /* 
+    Сохранение порядка элементов для React, чтобы получить правильную анимацию. 
+    Без сортировки элементы резко меняют позицию, несмотря на CSS `transition`.
+    todo: Попробовать избавиться.
+  */
+  const sortedValues = useMemo(() => sortBy(prop("key"), values), [values]);
+
   return (
     <div
       style={{
@@ -69,19 +77,16 @@ export const Only: ComponentStory<any> = () => {
         position: "relative",
       }}
     >
-      {sortBy(prop("key"), values).map(({ key, box }) => {
+      {sortedValues.map(({ key, box }) => {
         const isActive = movingItem?.key === key;
-        const currentPoint =
-          isActive && movingItem.point ? movingItem.point : box.origin;
-
         const isCompleted = completedItems.has(key);
         const zIndex = isActive ? 2 : isCompleted ? 1 : 0;
 
         return (
-          <Draggable
+          <DraggableBox
             key={key}
-            value={currentPoint}
-            onChange={(point) => handleChange(key, point)}
+            value={isActive ? movingItem.box : box}
+            onChange={(box) => handleChange(key, box)}
             onEnd={() => handleEnd(key)}
             style={
               isActive
@@ -94,14 +99,14 @@ export const Only: ComponentStory<any> = () => {
           >
             <div
               style={{
-                ...getBoxStyle(box.resetOrigin()),
+                ...stretchStyle,
                 background: key,
                 cursor: "pointer",
                 position: "absolute",
                 zIndex,
               }}
             />
-          </Draggable>
+          </DraggableBox>
         );
       })}
     </div>

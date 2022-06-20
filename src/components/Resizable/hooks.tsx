@@ -104,10 +104,13 @@ export function useResize(params: IResizeParams): React.ReactNode {
 
 interface IDragBoxParams extends Omit<IDragParams, "onChange"> {
   onChange(box: BoundingBox, pressedKeys: IPressedKeys): void;
-  outerBox: BoundingBox;
+  outerBox?: BoundingBox;
 }
 
-/** useDrag с измененным типом onChange: передает бокс вместо точки */
+/**
+ * useDrag с измененным типом onChange: передает бокс вместо точки.
+ * todo: вынести из Resizable.
+ */
 export function useDragBox(params: IDragBoxParams) {
   const { element, onChange } = params;
   const paramsRef = useActualRef(params);
@@ -116,7 +119,7 @@ export function useDragBox(params: IDragBoxParams) {
     const { outerBox } = paramsRef.current;
     const box = getBoxOnPage(element!).moveTo(point);
 
-    onChange(outerBox.clampInner(box), pressedKeys);
+    onChange(outerBox ? outerBox.clampInner(box) : box, pressedKeys);
   }, [element, onChange, paramsRef]);
 
   return useDrag({...params, onChange: handleChange });
