@@ -16,6 +16,7 @@ interface IProps extends Partial<IDragCallbacks> {
   style?: React.CSSProperties;
 }
 
+// todo: рассмотреть вариант удаления с заменой на DraggableBox
 export const Draggable: React.FC<IProps> = ({
   value,
   onChange,

@@ -1,10 +1,11 @@
 import React, { RefCallback, useCallback, useState } from "react";
 import makeStateful from "../../decorators/makeStateful";
 import { BoundingBox } from "../../utils/boundingBox";
-import { IResizeParams, useDragBox, useResize } from "./hooks";
+import { IResizeParams, useResize } from "./hooks";
 import { resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
 import { getBoxStyle } from "../../utils/styles";
 import { Thumb } from "../Thumb";
+import { useDragBox } from "../DraggableBox/hooks";
 
 export interface IResizableProps
   extends Pick<

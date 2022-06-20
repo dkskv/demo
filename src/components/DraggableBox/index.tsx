@@ -4,7 +4,7 @@ import { BoundingBox } from "../../utils/boundingBox";
 import { IPressedKeys } from "../../utils/common";
 import { IDragCallbacks } from "../../utils/drag";
 import { getBoxStyle } from "../../utils/styles";
-import { useDragBox } from "../Resizable/hooks";
+import { useDragBox } from "./hooks";
 
 interface IProps extends Partial<Pick<IDragCallbacks, "onStart" | "onEnd">> {
   value: BoundingBox;
