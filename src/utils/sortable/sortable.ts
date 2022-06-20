@@ -7,12 +7,29 @@ export interface ISortableItem {
   box: BoundingBox;
 }
 
+export interface IMovingAction {
+  sourceIndex: number;
+  point: Point;
+}
+
 /** Изменить порядок элементов в соответствии с перемещаемым элементом */
-export function order(items: ISortableItem[], movable: ISortableItem) {
-  // todo: оптимизировать
-  const movableIndex = items.findIndex(({ key }) => key === movable.key);
-  const dir = Math.sign(movable.box.y0 - items[movableIndex].box.y0);
-  let shiftedIndex = movableIndex;
+export function reorder(action: IMovingAction, items: ISortableItem[]) {
+  const targetIndex = defineTargetIndex(action, items);
+
+  return moveItem(action.sourceIndex, targetIndex, items);
+}
+
+export function defineTargetIndex(
+  { point, sourceIndex }: IMovingAction,
+  items: ISortableItem[]
+): number {
+  const sourceBox = items[sourceIndex].box;
+  const actionBox = sourceBox.moveTo(point);
+
+  /** Направление поиска новой позиции перемещаемого элемента */
+  const dir = Math.sign(point.y - sourceBox.y0);
+
+  let shiftedIndex = sourceIndex;
 
   while (true) {
     if (shiftedIndex < 0) {
@@ -25,11 +42,10 @@ export function order(items: ISortableItem[], movable: ISortableItem) {
       break;
     }
 
-    const { ysRange } = items[shiftedIndex].box;
-    const boxCenterY = ysRange.denormalizeNumber(0.5);
-    const { y1, y2 } = movable.box;
+    const boxCy = getBoxCy(items[shiftedIndex].box);
+    const { y1, y2 } = actionBox;
 
-    if ((dir === -1 && y1 < boxCenterY) || (dir === 1 && y2 > boxCenterY)) {
+    if ((dir === -1 && y1 < boxCy) || (dir === 1 && y2 > boxCy)) {
       shiftedIndex += dir;
     } else {
       shiftedIndex -= dir;
@@ -37,24 +53,28 @@ export function order(items: ISortableItem[], movable: ISortableItem) {
     }
   }
 
-  return positionEntriesInChain(move(movableIndex, shiftedIndex, items));
+  return shiftedIndex;
 }
 
-// todo: переименовать
-export function positionEntriesInChain(entries: ISortableItem[]) {
-  const boxes = positionInChain(entries.map(({ box }) => box));
-  return entries.map(({ key }, index) => ({ key, box: boxes[index] }));
+/** Получить `y` координату центра бокса */
+function getBoxCy(box: BoundingBox) {
+  return box.ysRange.denormalizeNumber(0.5);
 }
 
-/** Компактно разместить боксы в цепочку друг за другом */
+/** Переместить элемент в заданную позицию */
+function moveItem(from: number, to: number, items: ISortableItem[]) {
+  return positionInChain(move(from, to, items));
+}
+
+/** Компактно разместить элементы в цепочку друг за другом */
 export function positionInChain(
-  items: BoundingBox[] /*, startIndex: number, endIndex: number */
+  items: ISortableItem[] /*, startIndex: number, endIndex: number */
 ) {
-  const nextItems: BoundingBox[] = [];
+  const nextItems: ISortableItem[] = [];
   let lastY = 0;
 
-  for (const box of items) {
-    nextItems.push(box.moveTo(new Point(box.x0, lastY)));
+  for (const { key, box } of items) {
+    nextItems.push({ key, box: box.moveTo(new Point(box.x0, lastY)) });
 
     lastY += box.height;
   }

@@ -4,7 +4,7 @@ import { Point } from "./point";
 
 export class BoundingBox {
   static fromOrigin(dx: number, dy: number) {
-    return new BoundingBox(0, dx, 0, dy);
+    return BoundingBox.createByDimensions(0, 0, dx, dy);
   }
 
   static createByDimensions(x0: number, y0: number, dx: number, dy: number) {

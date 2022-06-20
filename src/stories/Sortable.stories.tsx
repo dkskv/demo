@@ -1,13 +1,13 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { prop, sortBy } from "ramda";
+import { prop, propEq, sortBy, sum } from "ramda";
 import { useCallback, useState } from "react";
 import { Draggable } from "../components/Draggable";
 import { BoundingBox } from "../utils/boundingBox";
 import { Point } from "../utils/point";
 import {
   ISortableItem,
-  order,
-  positionEntriesInChain,
+  positionInChain,
+  reorder,
 } from "../utils/sortable/sortable";
 import { getBoxStyle } from "../utils/styles";
 
@@ -20,9 +20,8 @@ const width = 200;
 
 const sizes = [50, 150, 150, 150];
 const colors = ["red", "blue", "green", "purple"];
-const initialState: ISortableItem[] = positionEntriesInChain(
+const initialState: ISortableItem[] = positionInChain(
   colors.map((color, index) => {
-    // const height = 50 + Math.random() * 100;
     const height: number = sizes[index];
 
     return {
@@ -32,38 +31,41 @@ const initialState: ISortableItem[] = positionEntriesInChain(
   })
 );
 
-export const Only: ComponentStory<any> = (args) => {
+export const Only: ComponentStory<any> = () => {
   const [values, setValues] = useState(initialState);
+  const [movingItem, setMovingItem] =
+    useState<{ key: string; point: Point } | null>(null);
 
-  const [activeKey, setActiveKey] = useState<string | null>(null);
-  const [activePoint, setActivePoint] = useState<Point | null>(null);
+  const handleChange = useCallback((key: string, point: Point) => {
+    setMovingItem({ key, point });
 
-  const handleChange = useCallback((activeKey: string, box: BoundingBox) => {
-    setActiveKey(activeKey);
-    setActivePoint(box.origin);
-    setValues((values) => order(values, { key: activeKey, box }));
+    setValues((values) => {
+      const sourceIndex = values.findIndex(propEq("key", key));
+      const action = { sourceIndex, point };
+
+      return reorder(action, values);
+    });
   }, []);
 
   const handleEnd = useCallback((key: string) => {
-    setActiveKey(null);
-    setActivePoint(null);
+    setMovingItem(null);
   }, []);
 
   return (
     <div
       style={{
-        ...getBoxStyle(BoundingBox.createByDimensions(0, 0, width, 400)),
+        ...getBoxStyle(BoundingBox.createByDimensions(0, 0, width, sum(sizes))),
         background: "grey",
         position: "relative",
       }}
     >
       {sortBy(prop("key"), values).map(({ key, box }) => {
-        const isActive = key === activeKey;
+        const isActive = movingItem?.key === key;
 
         let value: Point;
 
         if (isActive) {
-          value = activePoint ?? box.origin;
+          value = movingItem.point ?? box.origin;
         } else {
           value = box.origin;
         }
@@ -72,7 +74,7 @@ export const Only: ComponentStory<any> = (args) => {
           <Draggable
             key={key}
             value={value}
-            onChange={(p) => handleChange(key, box.moveTo(p))}
+            onChange={(point) => handleChange(key, point)}
             onEnd={() => handleEnd(key)}
             style={isActive ? undefined : { transition: "top 300ms ease" }}
           >

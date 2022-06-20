@@ -1,54 +1,43 @@
-import { move } from "ramda";
+import { path } from "ramda";
 import { BoundingBox } from "../boundingBox";
 import { Point } from "../point";
-import { ISortableItem, order, positionInChain } from "./sortable";
+import { defineTargetIndex, positionInChain } from "./sortable";
 
 describe("positionInChain", () => {
-  it("case 1", () => {
-    const b1 = BoundingBox.fromOrigin(0, 20);
-    const b2 = BoundingBox.fromOrigin(0, 40);
-    const b3 = BoundingBox.fromOrigin(0, 20);
+  function testPositioning(heights: number[], expectedYs: number[]) {
+    const items = heights.map((h) => ({
+      key: String(),
+      box: BoundingBox.fromOrigin(0, h),
+    }));
 
-    expect(positionInChain([b1, b2, b3])).toEqual([
-      b1,
-      b2.moveTo(new Point(0, 20)),
-      b3.moveTo(new Point(0, 60)),
-    ]);
+    const ys = positionInChain(items).map(path(["box", "y0"]));
+
+    expect(ys).toEqual(expectedYs);
+  }
+
+  it("case 1", () => {
+    testPositioning([20, 40, 20], [0, 20, 60]);
   });
 
   it("case 2", () => {
-    const b1 = BoundingBox.fromOrigin(0, 20);
-    const b2 = BoundingBox.fromOrigin(0, 0);
-    const b3 = BoundingBox.fromOrigin(0, Infinity);
-
-    expect(positionInChain([b1, b2, b3])).toEqual([
-      b1,
-      b2.moveTo(new Point(0, 20)),
-      b3.moveTo(new Point(0, 20)),
-    ]);
+    testPositioning([20, 0, 1000], [0, 20, 20]);
   });
 });
 
-describe("order", () => {
+describe("defineTargetIndex", () => {
   const items = [
-    { key: "0", box: BoundingBox.createByDimensions(0, 0, 0, 20) },
-    { key: "1", box: BoundingBox.createByDimensions(0, 20, 0, 40) },
-    { key: "2", box: BoundingBox.createByDimensions(0, 60, 0, 20) },
-    { key: "3", box: BoundingBox.createByDimensions(0, 80, 0, 50) },
-    { key: "4", box: BoundingBox.createByDimensions(0, 130, 0, 10) },
-  ];
+    BoundingBox.createByDimensions(0, 0, 0, 20),
+    BoundingBox.createByDimensions(0, 20, 0, 40),
+    BoundingBox.createByDimensions(0, 60, 0, 20),
+    BoundingBox.createByDimensions(0, 80, 0, 50),
+    BoundingBox.createByDimensions(0, 130, 0, 10),
+  ].map((box) => ({ key: String(), box }));
 
-  function testMoving(index: number, targetIndex: number, y: number) {
-    function extractKeys(items: ISortableItem[]) {
-      return items.map(({ key }) => key);
-    }
+  function testMoving(sourceIndex: number, expectedIndex: number, y: number) {
+    const action = { sourceIndex, point: new Point(0, y) };
+    const resultIndex = defineTargetIndex(action, items);
 
-    const { key, box } = items[index];
-    const movableBox = box.moveTo(new Point(0, y));
-
-    expect(extractKeys(order(items, { key, box: movableBox }))).toEqual(
-      extractKeys(move(index, targetIndex, items))
-    );
+    expect(resultIndex).toEqual(expectedIndex);
   }
 
   it("case 1", () => {
