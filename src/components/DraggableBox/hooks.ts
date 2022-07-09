@@ -17,17 +17,16 @@ interface IDragBoxParams extends Omit<IDragParams, "onChange"> {
  * todo: вынести из Resizable.
  */
 export function useDragBox(params: IDragBoxParams) {
-  const { element, onChange } = params;
   const paramsRef = useActualRef(params);
 
   const handleChange: IDragCallbacks["onChange"] = useCallback(
     (point, pressedKeys) => {
-      const { outerBox } = paramsRef.current;
+      const { outerBox, element, onChange } = paramsRef.current;
       const box = getBoxOnPage(element!).moveTo(point);
 
       onChange(outerBox ? outerBox.clampInner(box) : box, pressedKeys);
     },
-    [element, onChange, paramsRef]
+    [paramsRef]
   );
 
   return useDrag({ ...params, onChange: handleChange });

@@ -10,6 +10,9 @@ import {
 export interface IDragParams extends Partial<IDragCallbacks> {
   /** Перемещаемый элемент */
   element: HTMLElement | null;
+
+  /** Оповещать об изменении координат элемента относительно его `offsetParent` */
+  isInOwnCoordinates?: boolean;
 }
 
 // todo: Видимо, придется переносить useDragBox сюда (чтобы ограничивать в outerBox)
@@ -22,9 +25,10 @@ export function useDrag({
   onChange = noop,
   onStart = noop,
   onEnd = noop,
+  isInOwnCoordinates = true,
 }: IDragParams) {
   /** Обертка, преобразующая координаты внутри страницы к координатам внутри offsetParent */
-  const handleChange: IDragCallbacks["onChange"] = useCallback(
+  const handleChangeInOwnCoordinates: IDragCallbacks["onChange"] = useCallback(
     (point, pressedKeys) => {
       if (!element) {
         return;
@@ -43,6 +47,10 @@ export function useDrag({
     },
     [element, onChange]
   );
+
+  const handleChange = isInOwnCoordinates
+    ? handleChangeInOwnCoordinates
+    : onChange;
 
   useEffect(() => {
     if (element) {

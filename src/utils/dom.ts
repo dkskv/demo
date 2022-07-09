@@ -33,6 +33,10 @@ export function getOffsetBox(element: HTMLElement) {
   return parent ? getBoxOnPage(parent).resetOrigin() : BoundingBox.infinite();
 }
 
+// export function getPosition(element: HTMLElement) {
+//   return new Point(element.offsetLeft, element.offsetTop);
+// }
+
 /** Получить координаты мыши внутри `currentTarget` */
 export function getMouseOffsetPoint(mouseEvent: MouseEvent): Point {
   const targetOrigin = getOriginOnPage(mouseEvent.currentTarget as Element);

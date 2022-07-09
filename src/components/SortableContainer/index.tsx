@@ -12,6 +12,7 @@ interface IProps {
   /** Время анимации в ms */
   transitionDuration?: number;
   style?: React.CSSProperties;
+
   /** Item renderer */
   children(item: ISortableItem): React.ReactNode;
 }
@@ -25,7 +26,7 @@ export const SortableContainer: React.FC<IProps> = ({
 }) => {
   /**
    * Отпущенные элементы, не завершившие анимацию перемещения.
-   * todo: переименовать.
+   * todo: переименовать в droppingItems.
    */
   const completedItems = useTemporarySet<string>();
 

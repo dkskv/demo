@@ -147,6 +147,21 @@ export class BoundingBox {
     );
   }
 
+  /** Определить площадь пересечения двух боксов */
+  intersectionArea(box: BoundingBox) {
+    const left = Math.max(this.x1, box.x1);
+    const bottom = Math.min(this.y2, box.y2);
+    const right = Math.min(this.x2, box.x2);
+    const top = Math.max(this.y1, box.y1);
+
+    const width = right - left;
+    const height = bottom - top;
+
+    if (width < 0 || height < 0) return 0;
+
+    return width * height;
+  }
+
   /** Соотношение сторон (ширина / высота) */
   get aspectRatio() {
     return this.dx / this.dy;
