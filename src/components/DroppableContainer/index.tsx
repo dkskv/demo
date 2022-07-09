@@ -1,34 +1,34 @@
+import { update } from "ramda";
 import { useCallback, useEffect, useState } from "react";
 import { BoundingBox } from "../../utils/boundingBox";
-import { getBoxStyle } from "../../utils/styles";
+import { IObservable } from "../../utils/emitter";
+import { getBoxStyle, stretchStyle } from "../../utils/styles";
 import { DraggableBox } from "../DraggableBox";
 
 // todo: Возможно, вынести, также использовать в Sortable
-interface IMovable {
+export interface IMovable {
   key: string;
   box: BoundingBox;
 }
 
-interface IObservable<T> {
-  subscribe(f: (value: T) => void): void;
-}
-
 interface IDroppableContainerProps {
-  onMove(item: IMovable): void;
-  onDrop(item: IMovable): boolean; // потерян ли
+  id: string;
+
+  onMove(id: string, item: IMovable): void;
+  onDrop(id: string, item: IMovable): boolean; // потерян ли
 
   // Подписка на события внешнего элемента
 
-  overlapObservable: IObservable<IMovable>;
+  // overlapObservable: IObservable<IMovable>;
   dropObservable: IObservable<IMovable>;
 }
 
 // - Анимацией занимается целевой контейнер
 // - Обработкой перетаскивания и рендером перетаскиваемого занимается исходный контейнер
 export const DroppableContainer: React.VFC<IDroppableContainerProps> = ({
+  id,
   onDrop,
   onMove,
-  overlapObservable,
   dropObservable,
 }) => {
   // todo: возможно, создать хук, н-р, useDrop
@@ -45,10 +45,6 @@ export const DroppableContainer: React.VFC<IDroppableContainerProps> = ({
     dropObservable.subscribe(handleDrop);
   }, [dropObservable, handleDrop]);
 
-  useEffect(() => {
-    overlapObservable.subscribe(handleOverlap);
-  }, [overlapObservable, handleOverlap]);
-
   const [items, setItems] = useState<IMovable[]>([
     { key: "0", box: BoundingBox.createByDimensions(0, 0, 200, 200) },
   ]);
@@ -58,14 +54,12 @@ export const DroppableContainer: React.VFC<IDroppableContainerProps> = ({
       setItems((prevState) => {
         const index = prevState.findIndex(({ key }) => key === item.key);
 
-        prevState[index] = item;
-
-        return prevState;
+        return update(index, item, prevState);
       });
 
-      onMove(item);
+      onMove(id, item);
     },
-    [onMove]
+    [id, onMove]
   );
 
   return (
@@ -77,10 +71,15 @@ export const DroppableContainer: React.VFC<IDroppableContainerProps> = ({
     >
       {items.map((item) => (
         <DraggableBox
+          key={item.key}
           value={item.box}
           onChange={(box) => handleMove({ ...item, box })}
         >
-          {item.key}
+          <div
+            style={{ ...stretchStyle, background: "orange", cursor: "pointer" }}
+          >
+            {item.key}
+          </div>
         </DraggableBox>
       ))}
     </div>

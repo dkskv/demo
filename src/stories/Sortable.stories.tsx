@@ -1,9 +1,11 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
-import { without, zipWith } from "ramda";
+import { zipWith } from "ramda";
 import { useCallback, useEffect, useState } from "react";
 import { DraggableBox } from "../components/DraggableBox";
+import { DroppableContainer, IMovable } from "../components/DroppableContainer";
 import { SortableContainer } from "../components/SortableContainer";
 import { BoundingBox } from "../utils/boundingBox";
+import { Emitter } from "../utils/emitter";
 import { Point } from "../utils/point";
 import { ISortableItem, positionInChain } from "../utils/sortable/sortable";
 import { getBoxStyle, stretchStyle } from "../utils/styles";
@@ -143,6 +145,37 @@ export const Double: ComponentStory<any> = () => {
         {activeOuterIndex === 1 && db}
       </div>
       {activeOuterIndex === -1 && db}
+    </div>
+  );
+};
+
+export const Double2: ComponentStory<any> = () => {
+  const emitters = {
+    "1": new Emitter<IMovable>(),
+    "2": new Emitter<IMovable>(),
+  };
+
+  const handleMove = useCallback((id: string, item: IMovable) => {
+    // как-то определить факт, что item наведен на конкретный контейнер?
+    // usePosition?
+  }, []);
+  // Тут выполнять проверку, потерял ли контейнер свой элемент
+  const handleDrop = useCallback((id: string, item: IMovable) => false, []);
+
+  return (
+    <div style={{ display: "flex", columnGap: 300, position: "relative" }}>
+      <DroppableContainer
+        id="1"
+        dropObservable={emitters["1"]}
+        onMove={handleMove}
+        onDrop={handleDrop}
+      />
+      <DroppableContainer
+        id="2"
+        dropObservable={emitters["2"]}
+        onMove={handleMove}
+        onDrop={handleDrop}
+      />
     </div>
   );
 };
