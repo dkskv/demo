@@ -1,6 +1,6 @@
 import { ComponentMeta, ComponentStory } from "@storybook/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useDragMovement } from "../components/Draggable/hooks";
+import { useDragMovement } from "../decorators/dnd";
 import { VirtualList } from "../components/VirtualList";
 import { useCallbackRef } from "../hooks";
 import { BoundingBox } from "../utils/boundingBox";

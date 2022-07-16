@@ -19,6 +19,8 @@ export interface IDndElement {
 
 interface IResponse {
   canDrop: boolean;
+
+  // isOutsideSource: boolean;
 }
 
 interface IInputEventHandler {

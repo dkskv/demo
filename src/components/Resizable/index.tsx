@@ -5,7 +5,7 @@ import { IResizeParams, useResize } from "./hooks";
 import { resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
 import { getBoxStyle } from "../../utils/styles";
 import { Thumb } from "../Thumb";
-import { useDragBox } from "../DraggableBox/hooks";
+import { useDragBox } from "../../decorators/dnd";
 
 export interface IResizableProps
   extends Pick<

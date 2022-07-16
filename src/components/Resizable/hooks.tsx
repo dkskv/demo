@@ -7,19 +7,14 @@ import { ResizingPoint } from "../../utils/boxResize/resizingPoint";
 import { IResizeThumbKey, resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
 import { ISizeBounds, updateBox } from "../../utils/boxResize";
 import { useActualRef } from "../../decorators/useActualRef";
-import { IDragCallbacks } from "../../utils/drag";
-import { IDragParams, useDrag } from "../Draggable/hooks";
-import { getBoxOnPage } from "../../utils/dom";
+import { IDragBoxCallback, IDragBoxCallbacks } from "../../decorators/dnd";
+import { IDragCallback } from "../../utils/drag";
 
-export interface IResizeParams extends Partial<
-{ 
-  onStart(pressedKeys: IPressedKeys): void;
-  onEnd(pressedKeys: IPressedKeys): void;}
-  > {
+export interface IResizeParams extends Partial<IDragBoxCallbacks> {
   /** Текущее состояние бокса */
   box: BoundingBox;
 
-  onChange(box: BoundingBox, pressedKeys: IPressedKeys): void;
+  onChange: IDragBoxCallback;
 
   // Ограничения
 
@@ -52,11 +47,16 @@ export function useResize(params: IResizeParams): React.ReactNode {
   const aspectRatioRef = useRef<number | null>(null);
   const paramsRef = useActualRef(params);
 
-  const handleStart: typeof onStart = useCallback((pressedKeys) => {
-    aspectRatioRef.current = paramsRef.current.box.aspectRatio;
-
-    onStart?.(pressedKeys);
+  const handleStart: IDragCallback = useCallback((_, pk) => {
+    const { box } = paramsRef.current;
+    aspectRatioRef.current = box.aspectRatio;
+    onStart?.(box, pk);
   }, [paramsRef, onStart]);
+
+  const handleEnd: IDragCallback = useCallback((_, pk) => {
+    const { box } = paramsRef.current;
+    onEnd?.(box, pk);
+  }, [paramsRef, onEnd]);
 
   const handleChangeSize = useCallback(
     (
@@ -90,11 +90,11 @@ export function useResize(params: IResizeParams): React.ReactNode {
         key={String(key)}
         isCentered={true}
         value={box.denormalizePoint(resizingPoint)}
-        onChange={(point, options) =>
-          handleChangeSize(resizingPoint, point, options)
+        onChange={(point, pressedKeys) =>
+          handleChangeSize(resizingPoint, point, pressedKeys)
         }
         onStart={handleStart}
-        onEnd={onEnd}
+        onEnd={handleEnd}
       >
         <ThumbComponent />
       </Draggable>

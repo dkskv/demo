@@ -4,7 +4,7 @@ import { useCallbackRef } from "../../hooks";
 import { getPointStyle } from "../../utils/styles";
 import { IDragCallbacks } from "../../utils/drag";
 import { Point } from "../../utils/point";
-import { useDrag } from "./hooks";
+import { useDrag } from "../../decorators/dnd";
 import "./index.css";
 
 interface IProps extends Partial<IDragCallbacks> {
@@ -16,11 +16,10 @@ interface IProps extends Partial<IDragCallbacks> {
   style?: React.CSSProperties;
 }
 
-// todo: рассмотреть вариант удаления с заменой на DraggableBox
 export const Draggable: React.FC<IProps> = ({
   value,
-  onChange,
   onStart,
+  onChange,
   onEnd,
   isCentered = false,
   children,
@@ -28,7 +27,7 @@ export const Draggable: React.FC<IProps> = ({
 }) => {
   const [element, setRef] = useCallbackRef();
 
-  useDrag({ element, onChange, onStart, onEnd });
+  useDrag({ element, onStart, onChange, onEnd });
 
   const transform = isCentered ? "translate(-50%, -50%)" : undefined;
 
