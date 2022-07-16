@@ -1,4 +1,3 @@
-import { remove, update } from "ramda";
 import { LegacyRef, useCallback, useState } from "react";
 import { IDndElement, useDndConnection } from "../../decorators/dndConnection";
 import { BoundingBox } from "../../utils/boundingBox";
@@ -7,7 +6,7 @@ import { DraggableBox } from "../DraggableBox";
 
 interface IDroppableContainerProps {
   id: string;
-  initialItems: IDndElement[];
+  initialItems: Record<string, BoundingBox>;
 }
 
 export const DroppableContainer: React.VFC<IDroppableContainerProps> = ({
@@ -20,9 +19,7 @@ export const DroppableContainer: React.VFC<IDroppableContainerProps> = ({
 
   const handleDropIn = useCallback((item: IDndElement) => {
     // Делаем анимацию через setTimeout, монтируем элемент
-    setItems((items) => {
-      return [item, ...items];
-    });
+    setItems((state) => ({ ...state, [item.key]: item.box }));
 
     return { canDrop: true };
   }, []);
@@ -32,36 +29,35 @@ export const DroppableContainer: React.VFC<IDroppableContainerProps> = ({
     onDropIn: handleDropIn,
   });
 
-  const [items, setItems] = useState<IDndElement[]>(initialItems);
+  const [items, setItems] = useState(initialItems);
 
   const handleDrag = useCallback(
     (item: IDndElement) => {
       onDrag(id, item);
 
-      setItems((prevState) => {
-        const index = prevState.findIndex(({ key }) => key === item.key);
-
-        return update(index, item, prevState);
-      });
+      setItems((state) => ({ ...state, [item.key]: item.box }));
     },
     [id, onDrag]
   );
 
-  // todo: срабатывает спустя 1-2 секунды после размонтирования. Зачем?
   const handleDrop = useCallback(
-    (item: IDndElement) => {
-      // todo: приходит неактуальный item!
-
-      setItems((prevState) => {
-        const index = prevState.findIndex(({ key }) => key === item.key);
-
-        if (!~index) {
-          return prevState;
+    (key: keyof typeof items) => {
+      setItems((state) => {
+        if (!state[key]) {
+          console.error(
+            "дублирующийся вызов после размонтирования DraggableBox"
+          );
+          return state;
         }
 
-        const { canDrop } = onDrop(id, prevState[index]);
+        const { canDrop } = onDrop(id, { key, box: state[key] });
 
-        return canDrop ? remove(index, 1, prevState) : prevState;
+        if (canDrop) {
+          const { [key]: _, ...rest } = state;
+          return rest;
+        }
+
+        return state;
       });
     },
     [id, onDrop]
@@ -76,12 +72,12 @@ export const DroppableContainer: React.VFC<IDroppableContainerProps> = ({
       }}
       ref={ref as LegacyRef<HTMLDivElement>}
     >
-      {items.map((item) => (
+      {Object.entries(items).map(([key, box]) => (
         <DraggableBox
-          key={item.key}
-          value={item.box}
-          onChange={(box) => handleDrag({ ...item, box })}
-          onEnd={() => handleDrop(item)}
+          key={key}
+          value={box}
+          onChange={(box) => handleDrag({ key, box })}
+          onEnd={() => handleDrop(key)}
           style={{ zIndex: 1 }}
         >
           <div
@@ -91,7 +87,7 @@ export const DroppableContainer: React.VFC<IDroppableContainerProps> = ({
               cursor: "pointer",
             }}
           >
-            {item.key}
+            {key}
           </div>
         </DraggableBox>
       ))}
