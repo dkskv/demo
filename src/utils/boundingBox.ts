@@ -3,6 +3,10 @@ import { NumbersRange } from "./numbersRange";
 import { Point } from "./point";
 
 export class BoundingBox {
+  static square(x0: number, y0: number, a: number) {
+    return this.createByDimensions(x0, y0, a, a);
+  }
+
   static fromOrigin(dx: number, dy: number) {
     return BoundingBox.createByDimensions(0, 0, dx, dy);
   }
@@ -108,9 +112,10 @@ export class BoundingBox {
     return outer.clampInner(this);
   }
 
-  /** Смещает координату левого верхнего угла */
+  /** Смещает координаты левого верхнего угла */
   shift(offsets: Point): BoundingBox {
     const p = this.origin.add(offsets);
+
     return BoundingBox.createByDimensions(p.x, p.y, this.dx, this.dy);
   }
 
@@ -212,6 +217,16 @@ export class BoundingBox {
 
   private get deltasVector() {
     return new Point(this.dx, this.dy);
+  }
+
+  placeOutside(box: BoundingBox) {
+    return box.shift(this.origin);
+  }
+
+  placeInside(box: BoundingBox) {
+    const origin = box.origin.subtract(this.origin);
+
+    return box.moveTo(origin);
   }
 
   isEqual({ x1, x2, y1, y2 }: BoundingBox) {
