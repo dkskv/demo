@@ -22,6 +22,7 @@ export abstract class DragListener {
   constructor(protected element: Element) {
     this.handleDown = this.handleDown.bind(this);
     this.handleMove = this.handleMove.bind(this);
+    this.handleEnd = this.handleEnd.bind(this);
   }
 
   public setCallbacks(callbacks: IDragCallbacks) {
@@ -32,9 +33,14 @@ export abstract class DragListener {
   public launch() {
     this.element.addEventListener("mousedown", this.handleDown);
 
-    return () => {
-      this.element.removeEventListener("mousedown", this.handleDown);
-    };
+    return () => this.dispose();
+  }
+
+  private dispose() {
+    this.element.removeEventListener("mousedown", this.handleDown);
+    document.removeEventListener("mousemove", this.handleMove);
+    document.removeEventListener("mouseup", this.handleEnd);
+    document.removeEventListener("mouseleave", this.handleEnd);
   }
 
   protected abstract handleStart(downEvent: MouseEvent): void;
@@ -48,14 +54,9 @@ export abstract class DragListener {
 
     this.handleStart(downEvent);
 
-    const handleEnd = (upEvent: MouseEvent) => {
-      this.handleEnd(upEvent);
-      document.removeEventListener("mousemove", this.handleMove);
-    };
-
     document.addEventListener("mousemove", this.handleMove);
-    document.addEventListener("mouseup", handleEnd, { once: true });
-    document.addEventListener("mouseleave", handleEnd, { once: true });
+    document.addEventListener("mouseup", this.handleEnd, { once: true });
+    document.addEventListener("mouseleave", this.handleEnd, { once: true });
   }
 }
 
@@ -80,6 +81,7 @@ export class DragCoordinatesListener extends DragListener {
 
   protected handleEnd(upEvent: MouseEvent) {
     this.callbacks.onEnd(getMousePoint(upEvent), extractPressedKeys(upEvent));
+    document.removeEventListener("mousemove", this.handleMove);
   }
 }
 
@@ -96,6 +98,7 @@ export class DragMovementListener extends DragListener {
 
   protected handleEnd(upEvent: MouseEvent) {
     this.callbacks.onEnd(Point.nullish, extractPressedKeys(upEvent));
+    document.removeEventListener("mousemove", this.handleMove);
   }
 }
 
