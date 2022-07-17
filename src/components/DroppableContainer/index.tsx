@@ -1,5 +1,6 @@
 import { LegacyRef, useCallback, useState } from "react";
 import { IDndElement, useDndConnection } from "../../decorators/dndConnection";
+import { useTemporarySet } from "../../decorators/useTemporarySet";
 import { BoundingBox } from "../../utils/boundingBox";
 import { getBoxStyle, stretchStyle } from "../../utils/styles";
 import { DraggableBox } from "../DraggableBox";
@@ -13,16 +14,34 @@ export const DroppableContainer: React.VFC<IDroppableContainerProps> = ({
   id,
   initialItems,
 }) => {
+  const dur = 300;
+  const { add, has } = useTemporarySet<string>();
+
   const handleDragIn = useCallback((item: IDndElement) => {
     return { canDrop: true };
   }, []);
 
-  const handleDropIn = useCallback((item: IDndElement) => {
-    // Делаем анимацию через setTimeout, монтируем элемент
-    setItems((state) => ({ ...state, [item.key]: item.box }));
+  const placeSmoothly = useCallback(
+    (key: keyof typeof items) => {
+      add(key, dur);
 
-    return { canDrop: true };
-  }, []);
+      setTimeout(() => {
+        setItems((state) => ({ ...state, [key]: state[key].resetOrigin() }));
+      });
+    },
+    [add]
+  );
+
+  const handleDropIn = useCallback(
+    (item: IDndElement) => {
+      setItems((state) => ({ ...state, [item.key]: item.box }));
+
+      placeSmoothly(item.key);
+
+      return { canDrop: true };
+    },
+    [placeSmoothly]
+  );
 
   const { ref, onDrag, onDrop } = useDndConnection(id, {
     onDragIn: handleDragIn,
@@ -43,13 +62,6 @@ export const DroppableContainer: React.VFC<IDroppableContainerProps> = ({
   const handleDrop = useCallback(
     (key: keyof typeof items) => {
       setItems((state) => {
-        if (!state[key]) {
-          console.error(
-            "дублирующийся вызов после размонтирования DraggableBox"
-          );
-          return state;
-        }
-
         const { canDrop } = onDrop(id, { key, box: state[key] });
 
         if (canDrop) {
@@ -57,10 +69,12 @@ export const DroppableContainer: React.VFC<IDroppableContainerProps> = ({
           return rest;
         }
 
+        placeSmoothly(key);
+
         return state;
       });
     },
-    [id, onDrop]
+    [id, onDrop, placeSmoothly]
   );
 
   return (
@@ -78,7 +92,12 @@ export const DroppableContainer: React.VFC<IDroppableContainerProps> = ({
           value={box}
           onChange={(box) => handleDrag({ key, box })}
           onEnd={() => handleDrop(key)}
-          style={{ zIndex: 1 }}
+          style={{
+            zIndex: 1,
+            userSelect: "none",
+            transitionDuration: has(key) ? `${dur}ms` : undefined,
+            transitionProperty: "top left",
+          }}
         >
           <div
             style={{
