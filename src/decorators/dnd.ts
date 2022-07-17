@@ -1,10 +1,11 @@
-import { identity } from "ramda";
-import { useCallback, useEffect } from "react";
+import { identity, mapObjIndexed } from "ramda";
+import { useCallback, useEffect, useMemo } from "react";
 import { BoundingBox } from "../utils/boundingBox";
 import { IPressedKeys, noop } from "../utils/common";
 import { getBoxOnPage, getPointOnPage } from "../utils/dom";
 import {
   DragCoordinatesListener,
+  DragListener,
   DragMovementListener,
   IDragCallback,
   IDragCallbacks,
@@ -19,23 +20,28 @@ export interface IDragParams extends Partial<IDragCallbacks> {
   isInOwnCoordinates?: boolean;
 }
 
+function useDndListener(
+  Listener: { new (element: Element): DragListener },
+  element: Element | null,
+  callbacks: IDragCallbacks
+) {
+  const instance = useMemo(
+    () => element && new Listener(element),
+    [Listener, element]
+  );
+
+  useEffect(() => instance?.launch(), [instance]);
+
+  instance?.setCallbacks(callbacks);
+}
+
 export function useDragMovement({
   element,
   onChange = noop,
   onStart = noop,
   onEnd = noop,
 }: IDragParams) {
-  useEffect(() => {
-    if (element) {
-      const listener = new DragMovementListener(element, {
-        onChange,
-        onStart,
-        onEnd,
-      });
-
-      return listener.launch();
-    }
-  }, [element, onChange, onStart, onEnd]);
+  useDndListener(DragMovementListener, element, { onStart, onChange, onEnd });
 }
 
 export function useDrag({
@@ -71,17 +77,11 @@ export function useDrag({
 
   const wrapper = isInOwnCoordinates ? offsetParentDecorator : identity;
 
-  useEffect(() => {
-    if (element) {
-      const listener = new DragCoordinatesListener(element, {
-        onStart: wrapper(onStart),
-        onChange: wrapper(onChange),
-        onEnd: wrapper(onEnd),
-      });
-
-      return listener.launch();
-    }
-  }, [element, wrapper, onChange, onStart, onEnd]);
+  useDndListener(
+    DragCoordinatesListener,
+    element,
+    mapObjIndexed(wrapper, { onStart, onChange, onEnd })
+  );
 }
 
 export interface IDragBoxCallback {
@@ -110,7 +110,7 @@ export function useDragBox({
 }: IDragBoxParams) {
   const paramsRef = useActualRef(rest);
 
-  const wrapper = useCallback(
+  const addBoxWrapper = useCallback(
     (dndCallback: IDragBoxCallback): IDragCallback => {
       return (point, pressedKeys) => {
         const { outerBox, element } = paramsRef.current;
@@ -124,8 +124,6 @@ export function useDragBox({
 
   return useDrag({
     ...rest,
-    onStart: wrapper(onStart),
-    onChange: wrapper(onChange),
-    onEnd: wrapper(onEnd),
+    ...mapObjIndexed(addBoxWrapper, { onStart, onChange, onEnd }),
   });
 }

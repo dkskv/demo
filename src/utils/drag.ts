@@ -1,4 +1,4 @@
-import { IPressedKeys } from "./common";
+import { IPressedKeys, noop } from "./common";
 import { getMouseOffsetPoint, getMousePoint } from "./dom";
 import { Point } from "./point";
 
@@ -12,17 +12,29 @@ export interface IDragCallbacks {
   onEnd: IDragCallback;
 }
 
-abstract class DragListener {
-  constructor(protected element: Element, protected callbacks: IDragCallbacks) {
+export abstract class DragListener {
+  protected callbacks: IDragCallbacks = {
+    onStart: noop,
+    onChange: noop,
+    onEnd: noop,
+  };
+
+  constructor(protected element: Element) {
     this.handleDown = this.handleDown.bind(this);
     this.handleMove = this.handleMove.bind(this);
+  }
+
+  public setCallbacks(callbacks: IDragCallbacks) {
+    this.callbacks = callbacks;
   }
 
   /** Возвращает disposer, отменяющий прослушку начала новых перетаскиваний */
   public launch() {
     this.element.addEventListener("mousedown", this.handleDown);
 
-    return () => this.element.removeEventListener("mousedown", this.handleDown);
+    return () => {
+      this.element.removeEventListener("mousedown", this.handleDown);
+    };
   }
 
   protected abstract handleStart(downEvent: MouseEvent): void;
