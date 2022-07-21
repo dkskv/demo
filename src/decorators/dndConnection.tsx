@@ -65,7 +65,7 @@ interface IDndContext extends IOutputConnection {
   unregister(key: string): void;
 }
 
-const responseFromVoid: IConnectorResponse = {
+export const responseFromVoid: IConnectorResponse = {
   canDrop: false,
   isOutside: true,
 };
@@ -177,7 +177,7 @@ export const DndConnector: React.FC = ({ children }) => {
       forgetDndElement(item.key);
 
       const response = targetContainer
-        ? targetContainer.onDragIn({
+        ? targetContainer.onDropIn({
             ...item,
             box: getBoxOnPage(targetContainer.element).placeInside(
               itemBoxOnPage
