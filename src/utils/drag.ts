@@ -68,19 +68,21 @@ export class DragCoordinatesListener extends DragListener {
   protected handleStart(downEvent: MouseEvent) {
     this.offset = getMouseOffsetPoint(downEvent);
 
-    this.callbacks.onStart(
-      getMousePoint(downEvent),
-      extractPressedKeys(downEvent)
-    );
+    const point = getMousePoint(downEvent).subtract(this.offset);
+
+    this.callbacks.onStart(point, extractPressedKeys(downEvent));
   }
 
   protected handleMove(moveEvent: MouseEvent) {
     const point = getMousePoint(moveEvent).subtract(this.offset);
+
     this.callbacks.onChange(point, extractPressedKeys(moveEvent));
   }
 
   protected handleEnd(upEvent: MouseEvent) {
-    this.callbacks.onEnd(getMousePoint(upEvent), extractPressedKeys(upEvent));
+    const point = getMousePoint(upEvent).subtract(this.offset);
+
+    this.callbacks.onEnd(point, extractPressedKeys(upEvent));
     document.removeEventListener("mousemove", this.handleMove);
   }
 }
