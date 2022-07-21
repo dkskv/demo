@@ -1,4 +1,13 @@
-import { always, append, find, propEq, reject } from "ramda";
+import {
+  always,
+  append,
+  both,
+  complement,
+  find,
+  identical,
+  propEq,
+  reject,
+} from "ramda";
 import {
   createContext,
   useContext,
@@ -17,24 +26,27 @@ export interface IDndElement {
   box: BoundingBox;
 }
 
-interface IResponse {
+interface IContainerResponse {
   canDrop: boolean;
+}
 
-  // isOutsideSource: boolean;
+interface IConnectorResponse extends IContainerResponse {
+  isOutside: boolean;
 }
 
 interface IInputEventHandler {
-  (a: IDndElement): IResponse;
+  (a: IDndElement): IContainerResponse;
 }
 
 /** Подписка на входящие элементы. Callback'и возвращают разрешение на вход */
 interface IInputConnection {
   onDragIn: IInputEventHandler;
   onDropIn: IInputEventHandler;
+  onDragOut(key: string): void;
 }
 
 interface IOutputEventHandler {
-  (key: string, a: IDndElement): IResponse;
+  (key: string, a: IDndElement): IConnectorResponse;
 }
 
 /** Оповещение об исходящих элементах. Callback'и возвращают разрешение на выход */
@@ -53,12 +65,25 @@ interface IDndContext extends IOutputConnection {
   unregister(key: string): void;
 }
 
-const defaultResponse: IResponse = { canDrop: false };
+const responseFromVoid: IConnectorResponse = {
+  canDrop: false,
+  isOutside: true,
+};
 
-export function useDndConnection(key: string, input: IInputConnection) {
+const DndContext = createContext<IDndContext>({
+  register: noop,
+  unregister: noop,
+  onDrag: always(responseFromVoid),
+  onDrop: always(responseFromVoid),
+});
+
+export function useDndConnection<T extends Element = Element>(
+  key: string,
+  input: IInputConnection
+) {
   const { onDrag, onDrop, register, unregister } = useContext(DndContext);
 
-  const ref = useRef<Element>();
+  const ref = useRef<T>(null);
 
   // todo: доделать
   useEffect(() => {
@@ -70,18 +95,6 @@ export function useDndConnection(key: string, input: IInputConnection) {
   }, []);
 
   return { ref, onDrag, onDrop } as const;
-}
-
-const DndContext = createContext<IDndContext>({
-  register: noop,
-  unregister: noop,
-  onDrag: always(defaultResponse),
-  onDrop: always(defaultResponse),
-});
-
-function isContainerOverlapWith(box: BoundingBox) {
-  return ({ element }: IDndContainer) =>
-    getBoxOnPage(element).intersectionArea(box) > 0;
 }
 
 /** Компонент выступает в роли сервера между контейнерами, которые хотят обменяться элементами */
@@ -113,53 +126,68 @@ export const DndConnector: React.FC = ({ children }) => {
         item.box
       );
 
+      const isNotSourceContainer = complement(identical(sourceContainer));
+      const isContainerOverlapWithItem = isContainerOverlapWith(itemBoxOnPage);
+
       const targetContainer = containers.find(
-        isContainerOverlapWith(itemBoxOnPage)
+        both(isNotSourceContainer, isContainerOverlapWithItem)
       );
 
-      return sourceContainer === targetContainer
-        ? { itemBoxOnPage }
-        : { targetContainer, itemBoxOnPage };
+      return {
+        targetContainer,
+        itemBoxOnPage,
+        isOutside: !isContainerOverlapWithItem(sourceContainer),
+      };
     },
     [containers]
   );
 
+  const [handleVisit, forgetDndElement] = useDragOutNotifier();
+
   const onDrag = useCallback(
     (containerKey: string, item: IDndElement) => {
-      const { itemBoxOnPage, targetContainer } = handleDndEvent(
+      const { itemBoxOnPage, targetContainer, isOutside } = handleDndEvent(
         containerKey,
         item
       );
 
-      if (!targetContainer) {
-        return defaultResponse;
-      }
+      handleVisit(item.key, targetContainer);
 
-      return targetContainer.onDragIn({
-        ...item,
-        box: getBoxOnPage(targetContainer.element).placeInside(itemBoxOnPage),
-      });
+      const response = targetContainer
+        ? targetContainer.onDragIn({
+            ...item,
+            box: getBoxOnPage(targetContainer.element).placeInside(
+              itemBoxOnPage
+            ),
+          })
+        : responseFromVoid;
+
+      return { ...response, isOutside };
     },
-    [handleDndEvent]
+    [handleDndEvent, handleVisit]
   );
 
   const onDrop = useCallback(
     (containerKey: string, item: IDndElement) => {
-      const { itemBoxOnPage, targetContainer } = handleDndEvent(
+      const { itemBoxOnPage, targetContainer, isOutside } = handleDndEvent(
         containerKey,
         item
       );
 
-      if (!targetContainer) {
-        return defaultResponse;
-      }
+      forgetDndElement(item.key);
 
-      return targetContainer.onDropIn({
-        ...item,
-        box: getBoxOnPage(targetContainer.element).placeInside(itemBoxOnPage),
-      });
+      const response = targetContainer
+        ? targetContainer.onDragIn({
+            ...item,
+            box: getBoxOnPage(targetContainer.element).placeInside(
+              itemBoxOnPage
+            ),
+          })
+        : responseFromVoid;
+
+      return { ...response, isOutside };
     },
-    [handleDndEvent]
+    [handleDndEvent, forgetDndElement]
   );
 
   const value = useMemo<IDndContext>(
@@ -169,3 +197,34 @@ export const DndConnector: React.FC = ({ children }) => {
 
   return <DndContext.Provider value={value}>{children}</DndContext.Provider>;
 };
+
+function isContainerOverlapWith(box: BoundingBox) {
+  return ({ element }: IDndContainer) =>
+    getBoxOnPage(element).intersectionArea(box) > 0;
+}
+
+function useDragOutNotifier() {
+  const visitedRef = useRef(new Map<string, IDndContainer | undefined>());
+  const visited = visitedRef.current;
+
+  const handleVisit = useCallback(
+    (itemKey: string, container: IDndContainer | undefined) => {
+      const previous = visited.get(itemKey);
+      visited.set(itemKey, container);
+
+      if (!previous || previous === container) {
+        return;
+      }
+
+      previous.onDragOut(itemKey);
+    },
+    [visited]
+  );
+
+  const forgetDndElement = useCallback(
+    (itemKey: string) => visited.delete(itemKey),
+    [visited]
+  );
+
+  return [handleVisit, forgetDndElement] as const;
+}
