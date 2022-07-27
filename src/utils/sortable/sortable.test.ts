@@ -1,7 +1,40 @@
 import { path } from "ramda";
 import { BoundingBox } from "../boundingBox";
 import { Point } from "../point";
-import { defineTargetIndex, positionInChain } from "./sortable";
+import {
+  defineInsertionIndex,
+  defineTargetIndex,
+  positionInChain,
+} from "./sortable";
+
+describe("defineInsertionIndex", () => {
+  const items = [
+    BoundingBox.square(0, 0, 20),
+    BoundingBox.square(0, 20, 40),
+    BoundingBox.square(0, 60, 20),
+    BoundingBox.square(0, 80, 50),
+    BoundingBox.square(0, 130, 10),
+  ].map((box) => ({ key: String(), box }));
+
+  function testCase(box: BoundingBox, expectedIndex: number) {
+    expect(defineInsertionIndex({ key: "", box }, items)).toBe(expectedIndex);
+  }
+
+  const cases = [
+    [BoundingBox.square(0, -10, 10), 0],
+    [BoundingBox.square(0, 4, 10), 0],
+    [BoundingBox.square(0, 22, 16), 1],
+    [BoundingBox.square(0, 65, 20), 3],
+    [BoundingBox.square(0, 126, 10), 4],
+    [BoundingBox.square(0, 130, 30), 5],
+  ] as const;
+
+  cases.forEach(([box, expectedIndex], caseIndex) => {
+    it(`case ${caseIndex + 1}`, () => {
+      testCase(box, expectedIndex);
+    });
+  });
+});
 
 describe("positionInChain", () => {
   function testPositioning(heights: number[], expectedYs: number[]) {

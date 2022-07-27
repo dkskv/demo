@@ -1,4 +1,4 @@
-import { move } from "ramda";
+import { insert, last, move } from "ramda";
 import { BoundingBox } from "../boundingBox";
 import { Point } from "../point";
 
@@ -17,6 +17,37 @@ export function reorder(action: IMovingAction, items: ISortableItem[]) {
   const targetIndex = defineTargetIndex(action, items);
 
   return moveItem(action.sourceIndex, targetIndex, items);
+}
+
+// todo: Оптимизировать (возможно, использовать бинарный поиск)
+export function insertNear(item: ISortableItem, items: ISortableItem[]) {
+  const index = defineInsertionIndex(item, items);
+
+  return positionInChain(
+    insert(index, { ...item, box: item.box.resetOrigin() }, items)
+  );
+}
+
+export function defineInsertionIndex(
+  item: ISortableItem,
+  items: ISortableItem[]
+) {
+  const points = items.length
+    ? [
+        Point.nullish,
+        ...items.map(({ box }) => box.denormalizePoint(new Point(0, 1))),
+      ]
+    : [];
+
+  const itemPoint = item.box.center;
+
+  return points.reduce(
+    (minIndex, point, index) =>
+      itemPoint.distance(points[minIndex]) > itemPoint.distance(point)
+        ? index
+        : minIndex,
+    0
+  );
 }
 
 export function defineTargetIndex(
