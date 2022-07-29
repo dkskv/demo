@@ -79,7 +79,7 @@ const DndContext = createContext<IDndContext>({
 
 export function useDndConnection<T extends Element = Element>(
   key: string,
-  input: IInputConnection
+  input: Partial<IInputConnection>
 ) {
   const { onDrag, onDrop, register, unregister } = useContext(DndContext);
 
@@ -88,7 +88,13 @@ export function useDndConnection<T extends Element = Element>(
   // todo: доделать
   useEffect(() => {
     if (ref.current) {
-      register({ key, element: ref.current, ...input });
+      const {
+        onDragIn = always(responseFromVoid),
+        onDropIn = always(responseFromVoid),
+        onDragOut = noop,
+      } = input;
+
+      register({ key, element: ref.current, onDragIn, onDropIn, onDragOut });
 
       return () => unregister(key);
     }
