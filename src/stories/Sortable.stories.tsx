@@ -1,6 +1,6 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { zipWith } from "ramda";
-import { ConnectedSortableContainer } from "../components/ConnectedSortableContainer";
+import { SortableContainer } from "../components/SortableContainer";
 import { DndConnector } from "../decorators/dndConnection";
 import { BoundingBox } from "../utils/boundingBox";
 import { ISortableItem, positionInChain } from "../utils/sortable/sortable";
@@ -47,7 +47,7 @@ export const Double3: ComponentStory<any> = () => {
   return (
     <div style={{ display: "flex", columnGap: 300, position: "relative" }}>
       <DndConnector>
-        <ConnectedSortableContainer
+        <SortableContainer
           id="first"
           items={items}
           transitionDuration={300}
@@ -55,8 +55,8 @@ export const Double3: ComponentStory<any> = () => {
           style={{ background: "grey" }}
         >
           {renderer}
-        </ConnectedSortableContainer>
-        <ConnectedSortableContainer
+        </SortableContainer>
+        <SortableContainer
           id="second"
           items={items2}
           transitionDuration={300}
@@ -64,7 +64,7 @@ export const Double3: ComponentStory<any> = () => {
           style={{ background: "grey" }}
         >
           {renderer}
-        </ConnectedSortableContainer>
+        </SortableContainer>
       </DndConnector>
     </div>
   );

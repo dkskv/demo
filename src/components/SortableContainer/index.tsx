@@ -27,7 +27,7 @@ interface IProps {
   children(item: ISortableItem): React.ReactNode;
 }
 
-export const ConnectedSortableContainer: React.FC<IProps> = ({
+export const SortableContainer: React.FC<IProps> = ({
   id,
   box,
   items: initialItems,
