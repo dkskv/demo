@@ -1,4 +1,4 @@
-import { insert, last, move } from "ramda";
+import { insert, move } from "ramda";
 import { BoundingBox } from "../boundingBox";
 import { Point } from "../point";
 
@@ -16,16 +16,14 @@ export interface IMovingAction {
 export function reorder(action: IMovingAction, items: ISortableItem[]) {
   const targetIndex = defineTargetIndex(action, items);
 
-  return moveItem(action.sourceIndex, targetIndex, items);
+  return move(action.sourceIndex, targetIndex, items);
 }
 
 // todo: Оптимизировать (возможно, использовать бинарный поиск)
 export function insertNear(item: ISortableItem, items: ISortableItem[]) {
   const index = defineInsertionIndex(item, items);
 
-  return positionInChain(
-    insert(index, { ...item, box: item.box.resetOrigin() }, items)
-  );
+  return insert(index, item, items);
 }
 
 export function defineInsertionIndex(
@@ -90,11 +88,6 @@ export function defineTargetIndex(
 /** Получить `y` координату центра бокса */
 function getBoxCy(box: BoundingBox) {
   return box.ysRange.denormalizeNumber(0.5);
-}
-
-/** Переместить элемент в заданную позицию */
-function moveItem(from: number, to: number, items: ISortableItem[]) {
-  return positionInChain(move(from, to, items));
 }
 
 /** Компактно разместить элементы в цепочку друг за другом */
