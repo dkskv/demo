@@ -1,7 +1,6 @@
 import { ComponentStory, ComponentMeta } from "@storybook/react";
 import { zipWith } from "ramda";
-import { DroppableContainer } from "../components/DroppableContainer";
-import { SortableContainer } from "../components/SortableContainer";
+import { ConnectedSortableContainer } from "../components/ConnectedSortableContainer";
 import { DndConnector } from "../decorators/dndConnection";
 import { BoundingBox } from "../utils/boundingBox";
 import { ISortableItem, positionInChain } from "../utils/sortable/sortable";
@@ -34,40 +33,38 @@ function renderer({ key }: ISortableItem) {
   );
 }
 
-export const Only: ComponentStory<any> = () => {
+export const Double3: ComponentStory<any> = () => {
   const items = getItems(
     ["red", "blue", "green", "purple"],
     [50, 150, 150, 150]
   );
 
-  return (
-    <SortableContainer
-      items={items}
-      transitionDuration={300}
-      box={BoundingBox.createByDimensions(0, 0, width, 600)}
-      style={{ background: "grey" }}
-    >
-      {renderer}
-    </SortableContainer>
+  const items2 = getItems(
+    ["orange", "black", "yellow", "deepskyblue"],
+    [50, 150, 150, 150]
   );
-};
 
-const initialItems1 = {
-  test_1: BoundingBox.square(0, 0, 50),
-  test_2: BoundingBox.square(0, 300, 50),
-};
-
-const initialItems2 = {
-  test_3: BoundingBox.square(0, 0, 50),
-  test_4: BoundingBox.square(0, 300, 50),
-};
-
-export const Double2: ComponentStory<any> = () => {
   return (
     <div style={{ display: "flex", columnGap: 300, position: "relative" }}>
       <DndConnector>
-        <DroppableContainer id="first" initialItems={initialItems1} />
-        <DroppableContainer id="second" initialItems={initialItems2} />
+        <ConnectedSortableContainer
+          id="first"
+          items={items}
+          transitionDuration={300}
+          box={BoundingBox.createByDimensions(0, 0, width, 600)}
+          style={{ background: "grey" }}
+        >
+          {renderer}
+        </ConnectedSortableContainer>
+        <ConnectedSortableContainer
+          id="second"
+          items={items2}
+          transitionDuration={300}
+          box={BoundingBox.createByDimensions(0, 0, width, 600)}
+          style={{ background: "grey" }}
+        >
+          {renderer}
+        </ConnectedSortableContainer>
       </DndConnector>
     </div>
   );
