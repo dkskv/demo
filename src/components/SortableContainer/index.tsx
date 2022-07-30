@@ -41,10 +41,10 @@ export const SortableContainer: React.FC<IProps> = ({
     useActiveSortableItem(transitionDuration);
 
   const handleDragIn = useCallback(
-    (item: ISortableItem) => {
+    (item: ISortableItem, isFirstEvent: boolean) => {
       setActiveItem(item);
 
-      manager.has(item.key) ? manager.relocate(item) : manager.insert(item);
+      isFirstEvent ? manager.insert(item) : manager.relocate(item);
       manager.align();
 
       return responseFromVoid;

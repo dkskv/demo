@@ -34,14 +34,10 @@ interface IConnectorResponse extends IContainerResponse {
   isOutside: boolean;
 }
 
-interface IInputEventHandler {
-  (a: IDndElement): IContainerResponse;
-}
-
 /** Подписка на входящие элементы. Callback'и возвращают разрешение на вход */
 interface IInputConnection {
-  onDragIn: IInputEventHandler;
-  onDropIn: IInputEventHandler;
+  onDragIn(a: IDndElement, isFirstEvent: boolean): IContainerResponse;
+  onDropIn(a: IDndElement): IContainerResponse;
   onDragOut(key: string): void;
 }
 
@@ -194,7 +190,9 @@ function useDndNotifier() {
       const previous = visited.get(item.key);
       visited.set(item.key, container);
 
-      if (previous && previous !== container) {
+      const isContainerChanged = previous !== container;
+
+      if (isContainerChanged && previous) {
         previous.onDragOut(item.key);
       }
 
@@ -206,7 +204,10 @@ function useDndNotifier() {
         item.box
       );
 
-      return container.onDragIn(replaceBox(item, relativeItemBox));
+      return container.onDragIn(
+        replaceBox(item, relativeItemBox),
+        isContainerChanged
+      );
     },
     [visited]
   );
