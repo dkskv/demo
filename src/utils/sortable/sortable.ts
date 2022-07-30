@@ -98,7 +98,7 @@ export function positionInChain(
   let lastY = 0;
 
   for (const { key, box } of items) {
-    nextItems.push({ key, box: box.moveTo(new Point(box.x0, lastY)) });
+    nextItems.push({ key, box: box.moveTo(new Point(0, lastY)) });
 
     lastY += box.height;
   }
