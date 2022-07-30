@@ -57,12 +57,11 @@ interface IOutputConnection {
 
 interface IDndContainer extends IInputConnection {
   key: string;
-  element: Element; // мб все-таки ref?
+  element: Element;
 }
 
 interface IDndContext extends IOutputConnection {
-  register(a: IDndContainer): void;
-  unregister(key: string): void;
+  register(a: IDndContainer): () => void;
 }
 
 export const responseFromVoid: IConnectorResponse = {
@@ -70,18 +69,19 @@ export const responseFromVoid: IConnectorResponse = {
   isOutside: true,
 };
 
+const voidHandler = always(responseFromVoid);
+
 const DndContext = createContext<IDndContext>({
-  register: noop,
-  unregister: noop,
-  onDrag: always(responseFromVoid),
-  onDrop: always(responseFromVoid),
+  register: always(noop),
+  onDrag: voidHandler,
+  onDrop: voidHandler,
 });
 
 export function useDndConnection<T extends Element = Element>(
   key: string,
   input: Partial<IInputConnection>
 ) {
-  const { onDrag, onDrop, register, unregister } = useContext(DndContext);
+  const { onDrag, onDrop, register } = useContext(DndContext);
 
   const ref = useRef<T>(null);
 
@@ -89,14 +89,18 @@ export function useDndConnection<T extends Element = Element>(
   useEffect(() => {
     if (ref.current) {
       const {
-        onDragIn = always(responseFromVoid),
-        onDropIn = always(responseFromVoid),
+        onDragIn = voidHandler,
+        onDropIn = voidHandler,
         onDragOut = noop,
       } = input;
 
-      register({ key, element: ref.current, onDragIn, onDropIn, onDragOut });
-
-      return () => unregister(key);
+      return register({
+        key,
+        element: ref.current,
+        onDragIn,
+        onDropIn,
+        onDragOut,
+      });
     }
   }, []);
 
@@ -107,15 +111,13 @@ export function useDndConnection<T extends Element = Element>(
 export const DndConnector: React.FC = ({ children }) => {
   const [containers, setContainers] = useState<IDndContainer[]>([]);
 
-  const register = useCallback(
-    (item: IDndContainer) => setContainers(append(item)),
-    []
-  );
+  const register = useCallback((item: IDndContainer) => {
+    setContainers(append(item));
 
-  const unregister = useCallback(
-    (key: string) => setContainers(reject(propEq("key", key))),
-    []
-  );
+    const unregister = () => setContainers(reject(propEq("key", item.key)));
+
+    return unregister;
+  }, []);
 
   /** Возвращает независимо позиционированный бокс для перемещаемого элемента и целевой контейнер */
   const handleDndEvent = useCallback(
@@ -133,104 +135,107 @@ export const DndConnector: React.FC = ({ children }) => {
       );
 
       const isNotSourceContainer = complement(identical(sourceContainer));
-      const isContainerOverlapWithItem = isContainerOverlapWith(itemBoxOnPage);
+      const isContainerOverlapBox = isContainerOverlapWith(itemBoxOnPage);
 
       const targetContainer = containers.find(
-        both(isNotSourceContainer, isContainerOverlapWithItem)
+        both(isNotSourceContainer, isContainerOverlapBox)
       );
 
       return {
         targetContainer,
-        itemBoxOnPage,
-        isOutside: !isContainerOverlapWithItem(sourceContainer),
+        itemOnPage: replaceBox(item, itemBoxOnPage),
+        isOutside: !isContainerOverlapBox(sourceContainer),
       };
     },
     [containers]
   );
 
-  const [handleVisit, forgetDndElement] = useDragOutNotifier();
+  const { notifyAboutDrag, notifyAboutDrop } = useDndNotifier();
 
   const onDrag = useCallback(
     (containerKey: string, item: IDndElement) => {
-      const { itemBoxOnPage, targetContainer, isOutside } = handleDndEvent(
+      const { itemOnPage, targetContainer, isOutside } = handleDndEvent(
         containerKey,
         item
       );
 
-      handleVisit(item.key, targetContainer);
-
-      const response = targetContainer
-        ? targetContainer.onDragIn({
-            ...item,
-            box: getBoxOnPage(targetContainer.element).placeInside(
-              itemBoxOnPage
-            ),
-          })
-        : responseFromVoid;
-
-      return { ...response, isOutside };
+      return { ...notifyAboutDrag(itemOnPage, targetContainer), isOutside };
     },
-    [handleDndEvent, handleVisit]
+    [handleDndEvent, notifyAboutDrag]
   );
 
   const onDrop = useCallback(
     (containerKey: string, item: IDndElement) => {
-      const { itemBoxOnPage, targetContainer, isOutside } = handleDndEvent(
+      const { itemOnPage, targetContainer, isOutside } = handleDndEvent(
         containerKey,
         item
       );
 
-      forgetDndElement(item.key);
-
-      const response = targetContainer
-        ? targetContainer.onDropIn({
-            ...item,
-            box: getBoxOnPage(targetContainer.element).placeInside(
-              itemBoxOnPage
-            ),
-          })
-        : responseFromVoid;
-
-      return { ...response, isOutside };
+      return { ...notifyAboutDrop(itemOnPage, targetContainer), isOutside };
     },
-    [handleDndEvent, forgetDndElement]
+    [handleDndEvent, notifyAboutDrop]
   );
 
   const value = useMemo<IDndContext>(
-    () => ({ register, unregister, onDrag, onDrop }),
-    [register, unregister, onDrag, onDrop]
+    () => ({ register, onDrag, onDrop }),
+    [register, onDrag, onDrop]
   );
 
   return <DndContext.Provider value={value}>{children}</DndContext.Provider>;
 };
+
+/** В ответ на dnd-событие оповещает затронутые контейнеры */
+function useDndNotifier() {
+  const visitedRef = useRef(new Map<string, IDndContainer | undefined>());
+  const visited = visitedRef.current;
+
+  const notifyAboutDrag = useCallback(
+    (item: IDndElement, container: IDndContainer | undefined) => {
+      const previous = visited.get(item.key);
+      visited.set(item.key, container);
+
+      if (previous && previous !== container) {
+        previous.onDragOut(item.key);
+      }
+
+      if (!container) {
+        return responseFromVoid;
+      }
+
+      const relativeItemBox = getBoxOnPage(container.element).placeInside(
+        item.box
+      );
+
+      return container.onDragIn(replaceBox(item, relativeItemBox));
+    },
+    [visited]
+  );
+
+  const notifyAboutDrop = useCallback(
+    (item: IDndElement, container: IDndContainer | undefined) => {
+      visited.delete(item.key);
+
+      if (!container) {
+        return responseFromVoid;
+      }
+
+      const relativeItemBox = getBoxOnPage(container.element).placeInside(
+        item.box
+      );
+
+      return container.onDropIn(replaceBox(item, relativeItemBox));
+    },
+    [visited]
+  );
+
+  return { notifyAboutDrag, notifyAboutDrop } as const;
+}
 
 function isContainerOverlapWith(box: BoundingBox) {
   return ({ element }: IDndContainer) =>
     getBoxOnPage(element).intersectionArea(box) > 0;
 }
 
-function useDragOutNotifier() {
-  const visitedRef = useRef(new Map<string, IDndContainer | undefined>());
-  const visited = visitedRef.current;
-
-  const handleVisit = useCallback(
-    (itemKey: string, container: IDndContainer | undefined) => {
-      const previous = visited.get(itemKey);
-      visited.set(itemKey, container);
-
-      if (!previous || previous === container) {
-        return;
-      }
-
-      previous.onDragOut(itemKey);
-    },
-    [visited]
-  );
-
-  const forgetDndElement = useCallback(
-    (itemKey: string) => visited.delete(itemKey),
-    [visited]
-  );
-
-  return [handleVisit, forgetDndElement] as const;
+function replaceBox(item: IDndElement, box: BoundingBox) {
+  return { ...item, box };
 }
