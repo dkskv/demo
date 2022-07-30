@@ -34,7 +34,13 @@ export function useTemporarySet<T>() {
     [forceUpdate]
   );
 
-  const has = useCallback((value: T) => collectionRef.current.has(value), []);
+  const getAddingIndex = useCallback((value: T) => {
+    return collectionRef.current.has(value)
+      ? Array.from(collectionRef.current.values()).indexOf(value)
+      : -1;
+  }, []);
 
-  return { add, has };
+  const getSize = useCallback(() => collectionRef.current.size, []);
+
+  return { add, getAddingIndex, getSize };
 }
