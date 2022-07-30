@@ -37,7 +37,7 @@ export const SortableContainer: React.FC<IProps> = ({
 }) => {
   const [items, manager] = useSortableItems(initialItems);
 
-  const { activeItem, setActiveItem, successfullyDrop, getOverlapIndex } =
+  const { activeItem, setActiveItem, dropActiveItem, getOverlapIndex } =
     useActiveSortableItem(transitionDuration);
 
   const handleDragIn = useCallback(
@@ -54,11 +54,11 @@ export const SortableContainer: React.FC<IProps> = ({
 
   const handleDropIn = useCallback(
     (item: ISortableItem) => {
-      successfullyDrop(item.key);
+      dropActiveItem(item.key);
 
       return { canDrop: true };
     },
-    [successfullyDrop]
+    [dropActiveItem]
   );
 
   const handleDragOut = useCallback(
@@ -93,7 +93,7 @@ export const SortableContainer: React.FC<IProps> = ({
     (item: ISortableItem) => {
       const { canDrop, isOutside } = onDrop(id, item);
 
-      successfullyDrop(item.key);
+      dropActiveItem(item.key);
 
       if (canDrop) {
         manager.remove(item.key);
@@ -112,7 +112,7 @@ export const SortableContainer: React.FC<IProps> = ({
       manager.relocate(item);
       manager.align();
     },
-    [successfullyDrop, onDrop, id, manager]
+    [dropActiveItem, onDrop, id, manager]
   );
 
   /* 

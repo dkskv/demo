@@ -79,7 +79,7 @@ export function useActiveSortableItem(droppingDuration: number) {
     getSize,
   } = useTemporarySet<string>();
 
-  const successfullyDrop = useCallback(
+  const dropActiveItem = useCallback(
     (key: string) => {
       setActiveItem(null);
       addDroppingItem(key, droppingDuration);
@@ -103,7 +103,7 @@ export function useActiveSortableItem(droppingDuration: number) {
   return {
     activeItem,
     setActiveItem,
-    successfullyDrop,
+    dropActiveItem,
     getOverlapIndex,
   } as const;
 }
