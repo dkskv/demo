@@ -17,23 +17,23 @@ const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
   onChange,
   children,
 }) => {
-  const handleChangeStart = useCallback(
+  const handleChangeStartValue = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = Number(event.target.value);
 
       onChange(
-        range.setStart(value).constrainSize(sizeBounds).moveTo(range.start)
+        range.setStart(value).constrainSize(sizeBounds).moveTo(range.end, 1)
       );
     },
     [range, sizeBounds, onChange]
   );
 
-  const handleChangeEnd = useCallback(
+  const handleChangeEndValue = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = Number(event.target.value);
 
       onChange(
-        range.setEnd(value).constrainSize(sizeBounds)
+        range.setEnd(value).constrainSize(sizeBounds).moveTo(range.start, 0)
       );
     },
     [range, sizeBounds, onChange]
@@ -44,7 +44,7 @@ const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
     <div style={{ display: "flex", columnGap: "12px" }}>
       <input
         type="number"
-        onChange={handleChangeStart}
+        onChange={handleChangeStartValue}
         value={range.start}
         min={bounds.start}
         max={bounds.end}
@@ -52,7 +52,7 @@ const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
       {children}
       <input
         type="number"
-        onChange={handleChangeEnd}
+        onChange={handleChangeEndValue}
         value={range.end}
         min={bounds.start}
         max={bounds.end}
