@@ -45,6 +45,15 @@ export function useSmoothControl<ControlValue, Value>({
     [converter, isChanged, onChange]
   );
 
+  const handleControlEnd = useCallback(
+    (value: ControlValue) => {
+      setControlValue(
+        converter.fromDestination(converter.toDestination(value))
+      );
+    },
+    [converter]
+  );
+
   const handleChange = useCallback(
     (value: Value) => {
       onChange(value);
@@ -53,9 +62,10 @@ export function useSmoothControl<ControlValue, Value>({
     [converter, onChange]
   );
 
-  const outputControlValue = isDiscrete
-    ? converter.fromDestination(value)
-    : controlValue;
-
-  return [outputControlValue, handleControlChange, handleChange] as const;
+  return {
+    controlValue: isDiscrete ? converter.fromDestination(value) : controlValue,
+    handleControlChange,
+    handleControlEnd,
+    handleChange,
+  } as const;
 }

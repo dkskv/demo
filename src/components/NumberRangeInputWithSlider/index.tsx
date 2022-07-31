@@ -19,10 +19,6 @@ interface IProps extends INumbersRangeInputProps {
   sliderWrapper: ReactElement;
 }
 
-// todo:
-// - перенести из components в demos
-// - использовать 2 useSmoothControl наверное плохая идея
-
 const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
   const {
     value,
@@ -35,27 +31,27 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
   } = props;
   const converter = useMemo(() => createConverter(bounds), [bounds]);
 
-  const [sliderValue, handleSliderChange, handleInputChange] = useSmoothControl(
-    {
+  const { controlValue, handleControlChange, handleControlEnd, handleChange } =
+    useSmoothControl({
       value,
       onChange,
       converter,
       isDiscrete: isDiscreteSlider,
-    }
-  );
+    });
 
   return (
     <NumbersRangeInput
       value={value}
-      onChange={handleInputChange}
+      onChange={handleChange}
       bounds={bounds}
       sizeBounds={sizeBounds}
     >
       {React.cloneElement(sliderWrapper, {
         children: (
           <Slider
-            value={sliderValue}
-            onChange={handleSliderChange}
+            value={controlValue}
+            onChange={handleControlChange}
+            onEnd={handleControlEnd}
             sizeBounds={normalize(sizeBounds, bounds.size)}
           >
             {children}
