@@ -29,7 +29,14 @@ const getItems = (colors: string[], sizes: number[]) =>
 
 function renderer({ key }: ISortableItem) {
   return (
-    <div style={{ ...stretchStyle, background: key, cursor: "pointer" }} />
+    <div
+      style={{
+        ...stretchStyle,
+        background: key,
+        cursor: "pointer",
+        opacity: 0.5,
+      }}
+    />
   );
 }
 
