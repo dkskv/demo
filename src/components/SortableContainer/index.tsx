@@ -1,10 +1,6 @@
 import { prop, sortBy } from "ramda";
-import { useCallback, useMemo } from "react";
-import {
-  IDndElement,
-  responseFromVoid,
-  useDndConnection,
-} from "../../decorators/dndConnection";
+import { useCallback, useMemo, useState } from "react";
+import { IDndElement, useDndConnection } from "../../decorators/dndConnection";
 import {
   useActiveSortableItem,
   useSortableItems,
@@ -39,6 +35,7 @@ export const SortableContainer: React.FC<IProps> = ({
 
   const { activeItem, setActiveItem, dropActiveItem, getOverlapIndex } =
     useActiveSortableItem(transitionDuration);
+  const [isActiveHidden, setIsActiveHidden] = useState(false);
 
   const handleDragIn = useCallback(
     (item: ISortableItem, isFirstEvent: boolean) => {
@@ -47,7 +44,7 @@ export const SortableContainer: React.FC<IProps> = ({
       isFirstEvent ? manager.insert(item) : manager.relocate(item);
       manager.align();
 
-      return responseFromVoid;
+      return { canDrop: true };
     },
     [manager, setActiveItem]
   );
@@ -79,8 +76,9 @@ export const SortableContainer: React.FC<IProps> = ({
 
   const handleChange = useCallback(
     (item: ISortableItem) => {
-      const { isOutside } = onDrag(id, item);
+      const { isOutside, canDrop } = onDrag(id, item);
 
+      setIsActiveHidden(canDrop);
       setActiveItem(item);
 
       isOutside ? manager.lower(item.key) : manager.relocate(item);
@@ -93,6 +91,7 @@ export const SortableContainer: React.FC<IProps> = ({
     (item: ISortableItem) => {
       const { canDrop, isOutside } = onDrop(id, item);
 
+      setIsActiveHidden(false);
       dropActiveItem(item.key);
 
       if (canDrop) {
@@ -130,7 +129,10 @@ export const SortableContainer: React.FC<IProps> = ({
       {sortedItems.map((item) => {
         const { key, box } = item;
         const isActive = activeItem?.key === key;
-        const commonStyle = { zIndex: getOverlapIndex(key) };
+
+        const commonStyle = {
+          zIndex: getOverlapIndex(key),
+        } as const;
 
         return (
           <DraggableBox
@@ -140,7 +142,10 @@ export const SortableContainer: React.FC<IProps> = ({
             onEnd={(box) => handleEnd({ key, box })}
             style={
               isActive
-                ? commonStyle
+                ? {
+                    ...commonStyle,
+                    visibility: isActiveHidden ? "hidden" : "visible",
+                  }
                 : {
                     ...commonStyle,
                     transitionDuration: `${transitionDuration}ms`,
