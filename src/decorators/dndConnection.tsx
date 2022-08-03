@@ -30,10 +30,6 @@ interface IContainerResponse {
   canDrop: boolean;
 }
 
-interface IConnectorResponse extends IContainerResponse {
-  isOutside: boolean;
-}
-
 /** Подписка на входящие элементы. Callback'и возвращают разрешение на вход */
 interface IInputConnection {
   onDragIn(a: IDndElement, isFirstEvent: boolean): IContainerResponse;
@@ -41,14 +37,24 @@ interface IInputConnection {
   onDragOut(key: string): void;
 }
 
-interface IOutputEventHandler {
-  (key: string, a: IDndElement): IConnectorResponse;
+interface IDropResponse extends IContainerResponse {
+  isOutside: boolean;
+}
+
+interface IDragResponse extends IDropResponse {}
+
+interface IDropHandler {
+  (containerKey: string, a: IDndElement): IDropResponse;
+}
+
+interface IDragHandler {
+  (containerKey: string, a: IDndElement): IDragResponse;
 }
 
 /** Оповещение об исходящих элементах. Callback'и возвращают разрешение на выход */
 interface IOutputConnection {
-  onDrag: IOutputEventHandler;
-  onDrop: IOutputEventHandler;
+  onDrag: IDragHandler;
+  onDrop: IDropHandler;
 }
 
 interface IDndContainer extends IInputConnection {
@@ -60,17 +66,23 @@ interface IDndContext extends IOutputConnection {
   register(a: IDndContainer): () => void;
 }
 
-export const responseFromVoid: IConnectorResponse = {
+const dragResponseFromVoid: IDragResponse = {
   canDrop: false,
   isOutside: true,
 };
 
-const voidHandler = always(responseFromVoid);
+const dropResponseFromVoid: IDropResponse = {
+  canDrop: false,
+  isOutside: true,
+};
+
+const voidResponse: IContainerResponse = { canDrop: false };
+const voidContainerHandler = always(voidResponse);
 
 const DndContext = createContext<IDndContext>({
   register: always(noop),
-  onDrag: voidHandler,
-  onDrop: voidHandler,
+  onDrag: always(dragResponseFromVoid),
+  onDrop: always(dropResponseFromVoid),
 });
 
 export function useDndConnection<T extends Element = Element>(
@@ -85,8 +97,8 @@ export function useDndConnection<T extends Element = Element>(
   useEffect(() => {
     if (ref.current) {
       const {
-        onDragIn = voidHandler,
-        onDropIn = voidHandler,
+        onDragIn = voidContainerHandler,
+        onDropIn = voidContainerHandler,
         onDragOut = noop,
       } = input;
 
@@ -197,7 +209,7 @@ function useDndNotifier() {
       }
 
       if (!container) {
-        return responseFromVoid;
+        return dragResponseFromVoid;
       }
 
       const relativeItemBox = getBoxOnPage(container.element).placeInside(
@@ -217,7 +229,7 @@ function useDndNotifier() {
       visited.delete(item.key);
 
       if (!container) {
-        return responseFromVoid;
+        return dropResponseFromVoid;
       }
 
       const relativeItemBox = getBoxOnPage(container.element).placeInside(
