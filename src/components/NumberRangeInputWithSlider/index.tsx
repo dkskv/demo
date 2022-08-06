@@ -50,6 +50,7 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
       onChange={handleChange}
       bounds={bounds}
       sizeBounds={sizeBounds}
+      orientation={orientation}
     >
       <div
         style={{
