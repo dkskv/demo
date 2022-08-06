@@ -1,23 +1,20 @@
 import { ComponentStory } from "@storybook/react";
 import { useState } from "react";
 import NumberRangeInputWithSlider from "../components/NumberRangeInputWithSlider";
+import { Space } from "../components/Space";
 import { NumbersRange } from "../utils/numbersRange";
 import { Orientations } from "../utils/orientation";
+import { prop } from "ramda";
 
 export default { title: "Demo" };
 
 export const Sliders: ComponentStory<typeof NumberRangeInputWithSlider> =
   () => {
     const [orientation, setOrientation] = useState(Orientations.vertical);
-
     const [smooth, setSmooth] = useState(false);
 
     const handleRotate = () => {
-      setOrientation((prev) =>
-        prev === Orientations.horizontal
-          ? Orientations.vertical
-          : Orientations.horizontal
-      );
+      setOrientation(prop("opposite"));
     };
 
     const sliderBox = orientation.boxFromRanges(
@@ -28,8 +25,8 @@ export const Sliders: ComponentStory<typeof NumberRangeInputWithSlider> =
     const commonProps = { sliderBox, isSmoothSlider: smooth, orientation };
 
     return (
-      <div style={{ display: "flex", rowGap: "40px", flexDirection: "column" }}>
-        <div style={{ display: "flex", columnGap: "20px" }}>
+      <Space size={40} orientation={Orientations.vertical}>
+        <Space size={20}>
           <button onClick={handleRotate}>Rotate</button>
           <span>
             <input
@@ -40,16 +37,8 @@ export const Sliders: ComponentStory<typeof NumberRangeInputWithSlider> =
             />
             Smooth
           </span>
-        </div>
-        <div
-          style={{
-            display: "flex",
-            [orientation === Orientations.horizontal ? "rowGap" : "columnGap"]:
-              "40px",
-            flexDirection:
-              orientation === Orientations.horizontal ? "column" : "row",
-          }}
-        >
+        </Space>
+        <Space size={40} orientation={orientation.opposite}>
           <NumberRangeInputWithSlider
             {...commonProps}
             initialValue={new NumbersRange(1, 7)}
@@ -65,7 +54,7 @@ export const Sliders: ComponentStory<typeof NumberRangeInputWithSlider> =
             initialValue={new NumbersRange(1, 7)}
             bounds={new NumbersRange(-10, 10)}
           />
-        </div>
-      </div>
+        </Space>
+      </Space>
     );
   };
