@@ -1,6 +1,7 @@
 import { BoundingBox } from "../boundingBox";
 import { Point } from "../point";
 
+// todo: переименовать на ResizingHandle
 /** Точка, меняющая размеры бокса (координаты точки нормированы) */
 export class ResizingPoint extends Point {
   private get mirroredPoint(): Point {

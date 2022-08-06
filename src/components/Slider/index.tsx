@@ -6,7 +6,10 @@ import ResizableControl, { IResizableControlProps } from "../ResizableControl";
 import { IPressedKeys, noop } from "../../utils/common";
 
 export interface ISliderProps
-  extends Pick<IResizableControlProps, "ThumbComponent"> {
+  extends Omit<
+    IResizableControlProps,
+    "value" | "onChange" | "onStart" | "onEnd" | "sizeBounds"
+  > {
   /** Нормированный диапазон (в пределах от 0 до 1) */
   value: NumbersRange;
   onChange(value: NumbersRange): void;

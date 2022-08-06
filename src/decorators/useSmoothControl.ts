@@ -9,8 +9,8 @@ interface IParams<ControlValue, Value> {
   onChange(value: Value): void;
   /** Конвертер из альтернативного значения в целевое */
   converter: IConverter<ControlValue, Value>;
-  /** Должно ли значение control'а меняться только при изменении целевого значения */
-  isDiscrete?: boolean;
+
+  isSmooth: boolean;
   /**
    * @deprecated Функция сравнения двух целевых значений, чтобы не вызывать callback,
    * если изменения альтернативного значения не повлияло на целевое
@@ -23,7 +23,7 @@ export function useSmoothControl<ControlValue, Value>({
   value,
   onChange,
   converter,
-  isDiscrete = false,
+  isSmooth,
   isChanged = equals,
 }: IParams<ControlValue, Value>) {
   const [controlValue, setControlValue] = useState(
@@ -63,7 +63,7 @@ export function useSmoothControl<ControlValue, Value>({
   );
 
   return {
-    controlValue: isDiscrete ? converter.fromDestination(value) : controlValue,
+    controlValue: isSmooth ? controlValue : converter.fromDestination(value),
     handleControlChange,
     handleControlEnd,
     handleChange,

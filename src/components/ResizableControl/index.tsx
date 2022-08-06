@@ -1,12 +1,12 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback } from "react";
 import { BoundingBox } from "../../utils/boundingBox";
 import { IPressedKeys, noop } from "../../utils/common";
-import { getOffsetBox } from "../../utils/dom";
 import Resizable, { IResizableProps } from "../Resizable";
 import { denormalizeSizeBounds } from "./utils";
 
-export interface IResizableControlProps
-  extends Omit<IResizableProps, "callbackRef" | "outerBox"> {}
+export interface IResizableControlProps extends IResizableProps {
+  outerBox: NonNullable<IResizableProps["outerBox"]>;
+}
 
 /** Resizable элемент, представленный в нормализованном виде */
 const ResizableControl: React.FC<IResizableControlProps> = ({
@@ -15,16 +15,9 @@ const ResizableControl: React.FC<IResizableControlProps> = ({
   onStart = noop,
   onEnd = noop,
   sizeBounds = {},
+  outerBox,
   ...rest
 }) => {
-  const [element, setElement] = useState<HTMLElement | null>(null);
-
-  /** Бокс, по которому производится нормализация */
-  const outerBox = useMemo(
-    () => (element ? getOffsetBox(element) : BoundingBox.infinite()),
-    [element]
-  );
-
   const handleChange = useNormalizedCallback(onChange, outerBox);
   const handleStart = useNormalizedCallback(onStart, outerBox);
   const handleEnd = useNormalizedCallback(onEnd, outerBox);
@@ -32,13 +25,12 @@ const ResizableControl: React.FC<IResizableControlProps> = ({
   return (
     <Resizable
       {...rest}
-      callbackRef={setElement}
-      outerBox={outerBox}
       value={outerBox.denormalizeInner(value)}
       onChange={handleChange}
       onStart={handleStart}
       onEnd={handleEnd}
       sizeBounds={denormalizeSizeBounds(sizeBounds, outerBox)}
+      outerBox={outerBox}
     />
   );
 };

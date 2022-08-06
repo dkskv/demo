@@ -1,4 +1,4 @@
-import React, { RefCallback, useCallback, useState } from "react";
+import React, { useState } from "react";
 import makeStateful from "../../decorators/makeStateful";
 import { BoundingBox } from "../../utils/boundingBox";
 import { IResizeParams, useResize } from "./hooks";
@@ -20,14 +20,11 @@ export interface IResizableProps
   > {
   value: BoundingBox;
   onChange: IResizeParams["onChange"];
-
-  callbackRef?: RefCallback<HTMLElement>;
 }
 
 const Resizable: React.FC<IResizableProps> = ({
   value,
   onChange,
-  callbackRef,
   onStart,
   onEnd,
   sizeBounds = {},
@@ -38,14 +35,6 @@ const Resizable: React.FC<IResizableProps> = ({
   children,
 }) => {
   const [element, setElement] = useState<HTMLElement | null>(null);
-
-  const handleRefChange = useCallback(
-    (el: HTMLDivElement) => {
-      setElement(el);
-      callbackRef?.(el);
-    },
-    [callbackRef]
-  );
 
   useDragBox({ element, outerBox, onChange, onStart, onEnd });
 
@@ -64,7 +53,7 @@ const Resizable: React.FC<IResizableProps> = ({
   return (
     <>
       <div
-        ref={handleRefChange}
+        ref={setElement}
         style={{ ...getBoxStyle(value), position: "absolute" }}
       >
         {React.Children.only(children)}

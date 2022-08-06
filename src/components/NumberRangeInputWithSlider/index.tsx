@@ -1,22 +1,25 @@
-import { useMemo } from "react";
+import { CSSProperties, useMemo } from "react";
 import makeStateful from "../../decorators/makeStateful";
 import NumbersRangeInput, {
   INumbersRangeInputProps,
 } from "../NumbersRangeInput";
-import Slider from "../Slider";
+import Slider, { ISliderProps } from "../Slider";
 import { createConverter } from "./utils";
 import { NumbersRange } from "../../utils/numbersRange";
 import { normalize } from "../../utils/normalization";
 import { useSmoothControl } from "../../decorators/useSmoothControl";
-import { ReactElement } from "react";
 import React from "react";
+import { getBoxStyle, stretchStyle } from "../../utils/styles";
+import { Orientations } from "../../utils/orientation";
+import { BoundingBox } from "../../utils/boundingBox";
 
-interface IProps extends INumbersRangeInputProps {
+interface IProps
+  extends INumbersRangeInputProps,
+    Omit<ISliderProps, "outerBox"> {
   bounds: NonNullable<INumbersRangeInputProps["bounds"]>;
-  /** Если true, слайдер движется скачками по числовым отметкам */
-  isDiscreteSlider?: boolean;
-
-  sliderWrapper: ReactElement;
+  isSmoothSlider?: boolean;
+  sliderBox: BoundingBox;
+  sliderStyle?: CSSProperties;
 }
 
 const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
@@ -25,9 +28,11 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
     onChange,
     bounds,
     sizeBounds = NumbersRange.endless(0),
-    isDiscreteSlider = false,
-    sliderWrapper,
-    children,
+    isSmoothSlider = false,
+    sliderBox,
+    sliderStyle,
+    orientation = Orientations.horizontal,
+    children = <div style={{ ...stretchStyle, background: "purple" }} />,
   } = props;
   const converter = useMemo(() => createConverter(bounds), [bounds]);
 
@@ -36,7 +41,7 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
       value,
       onChange,
       converter,
-      isDiscrete: isDiscreteSlider,
+      isSmooth: isSmoothSlider,
     });
 
   return (
@@ -46,18 +51,25 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
       bounds={bounds}
       sizeBounds={sizeBounds}
     >
-      {React.cloneElement(sliderWrapper, {
-        children: (
-          <Slider
-            value={controlValue}
-            onChange={handleControlChange}
-            onEnd={handleControlEnd}
-            sizeBounds={normalize(sizeBounds, bounds.size)}
-          >
-            {children}
-          </Slider>
-        ),
-      })}
+      <div
+        style={{
+          background: "lavender",
+          ...sliderStyle,
+          ...getBoxStyle(sliderBox),
+          position: "relative",
+        }}
+      >
+        <Slider
+          value={controlValue}
+          onChange={handleControlChange}
+          onEnd={handleControlEnd}
+          sizeBounds={normalize(sizeBounds, bounds.size)}
+          orientation={orientation}
+          outerBox={sliderBox}
+        >
+          {children}
+        </Slider>
+      </div>
     </NumbersRangeInput>
   );
 };

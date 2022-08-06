@@ -105,6 +105,7 @@ const Template: ComponentStory<typeof VirtualList> = (args) => {
           value={sliderValue}
           onChange={setSliderValue}
           sizeBounds={sizeBounds}
+          outerBox={viewBox}
         >
           <div
             style={{
@@ -346,6 +347,7 @@ export const WithResizable: ComponentStory<typeof VirtualList> = (args) => {
           value={controlValue}
           onChange={setControlValue}
           sizeBounds={{ width: lengthBounds, height: lengthBounds }}
+          outerBox={viewBox}
         >
           <div
             style={{
