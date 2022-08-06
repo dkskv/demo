@@ -34,6 +34,7 @@ export interface IOrientation {
   cssValues: {
     direction: CSSProperties["flexDirection"];
   };
+  opposite: IOrientation;
 }
 
 export namespace Orientations {
@@ -52,10 +53,13 @@ export namespace Orientations {
       thickness: "height",
       coordinate: "left",
       normalCoordinate: "top",
-      gap: "rowGap",
+      gap: "columnGap",
     },
     cssValues: {
       direction: "row",
+    },
+    get opposite() {
+      return Orientations.vertical;
     },
   };
 
@@ -74,10 +78,13 @@ export namespace Orientations {
       thickness: "width",
       coordinate: "top",
       normalCoordinate: "left",
-      gap: "columnGap",
+      gap: "rowGap",
     },
     cssValues: {
       direction: "column",
+    },
+    get opposite() {
+      return Orientations.horizontal;
     },
   };
 
