@@ -18,10 +18,9 @@ export interface IOrientation {
     parallelRange: NumbersRange,
     normalRange: NumbersRange
   ): BoundingBox;
-  lengthKey: EBoxLength,
+  lengthKey: EBoxLength;
   /** Стороны бокса, перпендикулярные оси ориентации */
   sides: readonly [EBoxSide, EBoxSide];
-  /** @deprecated */
   cssKeys: {
     length: keyof Pick<CSSProperties, "width" | "height">;
     thickness: IOrientation["cssKeys"]["length"];
@@ -30,6 +29,10 @@ export interface IOrientation {
       CSSProperties,
       "left" | "top" | "right" | "bottom"
     >;
+    gap: keyof Pick<CSSProperties, "rowGap" | "columnGap">;
+  };
+  cssValues: {
+    direction: CSSProperties["flexDirection"];
   };
 }
 
@@ -49,6 +52,10 @@ export namespace Orientations {
       thickness: "height",
       coordinate: "left",
       normalCoordinate: "top",
+      gap: "rowGap",
+    },
+    cssValues: {
+      direction: "row",
     },
   };
 
@@ -67,6 +74,10 @@ export namespace Orientations {
       thickness: "width",
       coordinate: "top",
       normalCoordinate: "left",
+      gap: "columnGap",
+    },
+    cssValues: {
+      direction: "column",
     },
   };
 
