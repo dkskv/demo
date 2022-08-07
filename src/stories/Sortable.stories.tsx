@@ -1,4 +1,4 @@
-import { ComponentStory, ComponentMeta } from "@storybook/react";
+import { ComponentStory } from "@storybook/react";
 import { zipWith } from "ramda";
 import { SortableContainer } from "../components/SortableContainer";
 import { DndConnector } from "../decorators/dndConnection";
@@ -6,14 +6,11 @@ import { BoundingBox } from "../utils/boundingBox";
 import { ISortableItem, positionInChain } from "../utils/sortable/sortable";
 import { stretchStyle } from "../utils/styles";
 
-export default {
-  title: "Demo/Sortable",
-  parameters: {},
-} as ComponentMeta<any>;
+export default { title: "Demo" };
 
 const width = 200;
 
-const getItems = (colors: string[], sizes: number[]) =>
+const generateItems = (colors: string[], sizes: number[]) =>
   positionInChain(
     zipWith(
       (color, height) => {
@@ -27,7 +24,7 @@ const getItems = (colors: string[], sizes: number[]) =>
     )
   );
 
-function renderer({ key }: ISortableItem) {
+function renderItem({ key }: ISortableItem) {
   return (
     <div
       style={{
@@ -40,13 +37,13 @@ function renderer({ key }: ISortableItem) {
   );
 }
 
-export const Double3: ComponentStory<any> = () => {
-  const items = getItems(
+export const SortableContainers: ComponentStory<any> = () => {
+  const items = generateItems(
     ["red", "blue", "green", "purple"],
     [50, 150, 150, 150]
   );
 
-  const items2 = getItems(
+  const items2 = generateItems(
     ["orange", "black", "yellow", "deepskyblue"],
     [50, 150, 150, 150]
   );
@@ -61,7 +58,7 @@ export const Double3: ComponentStory<any> = () => {
           box={BoundingBox.createByDimensions(0, 0, width, 600)}
           style={{ background: "grey" }}
         >
-          {renderer}
+          {renderItem}
         </SortableContainer>
         <SortableContainer
           id="second"
@@ -70,7 +67,7 @@ export const Double3: ComponentStory<any> = () => {
           box={BoundingBox.createByDimensions(0, 0, width, 600)}
           style={{ background: "grey" }}
         >
-          {renderer}
+          {renderItem}
         </SortableContainer>
       </DndConnector>
     </div>
