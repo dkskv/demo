@@ -1,5 +1,6 @@
 import { ComponentStory } from "@storybook/react";
 import { useCallback, useEffect, useState } from "react";
+import { Checkbox } from "../components/Checkbox";
 import { Grid } from "../components/Grid";
 import Resizable from "../components/Resizable";
 import { Space } from "../components/Space";
@@ -57,24 +58,16 @@ export const ResizableBox: ComponentStory<typeof Resizable> = () => {
   return (
     <Space size={40} orientation={Orientations.vertical}>
       <Space size={20}>
-        <span>
-          <input
-            type="checkbox"
-            onChange={({ target: { checked } }) => {
-              setIsGridEnabled(checked);
-            }}
-          />
-          Grid
-        </span>
-        <span>
-          <input
-            type="checkbox"
-            onChange={({ target: { checked } }) => {
-              setIsLockedRatio(checked);
-            }}
-          />
-          Lock ratio
-        </span>
+        <Checkbox
+          value={isGridEnabled}
+          onChange={setIsGridEnabled}
+          label="Enable grid"
+        />
+        <Checkbox
+          value={isLockedRatio}
+          onChange={setIsLockedRatio}
+          label="Lock ratio"
+        />
       </Space>
       <div
         style={{
