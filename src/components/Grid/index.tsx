@@ -23,8 +23,19 @@ export const Grid: React.VFC<IProps> = ({ step, thickness, color, id }) => {
     { step, thickness },
   ] as const;
 
+  const offset = -thickness / 2;
+
   return (
-    <svg key={id} id={id} style={stretchStyle}>
+    <svg
+      key={id}
+      id={id}
+      style={{
+        position: "absolute",
+        left: offset,
+        top: offset,
+        ...stretchStyle,
+      }}
+    >
       <defs>
         {zipWith(
           (orientation, pattern) =>
