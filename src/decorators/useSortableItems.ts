@@ -1,4 +1,4 @@
-import { move, propEq, remove } from "ramda";
+import { move, propEq, remove, sum } from "ramda";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Emitter } from "../utils/emitter";
 import {
@@ -49,6 +49,10 @@ class SortableManager extends Emitter<ISortableItem[]> {
   align() {
     this.items = positionInChain(this.items);
     this.notify();
+  }
+
+  get totalHeight() {
+    return sum(this.items.map(({ box }) => box.height));
   }
 
   private findIndex(key: string) {

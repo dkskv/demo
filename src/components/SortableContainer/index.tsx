@@ -39,6 +39,8 @@ export const SortableContainer: React.FC<IProps> = ({
 
   const handleDragIn = useCallback(
     (item: ISortableItem, isFirstEvent: boolean) => {
+      // const isAllow = manager.totalHeight + item.box.height <=
+
       setActiveItem(item);
 
       isFirstEvent ? manager.insert(item) : manager.relocate(item);
