@@ -16,8 +16,6 @@ import {
 import Slider from "../components/Slider";
 import { useScale } from "../decorators/useScale";
 import { WheelScalingK } from "../utils/constants";
-import { VirtualGrid } from "../components/VirtualGrid";
-import ResizableControl from "../components/ResizableControl";
 import { clamp } from "ramda";
 
 export default {
@@ -266,99 +264,6 @@ export const WithMomentum: ComponentStory<typeof VirtualList> = (args) => {
         )}
       </div>
     </>
-  );
-};
-
-export const WithResizable: ComponentStory<typeof VirtualList> = (args) => {
-  const renderer = useCellRenderer();
-
-  const [controlValue, setControlValue] = useState<BoundingBox>(
-    BoundingBox.createByDimensions(0, 0, 0.2, 0.2)
-  );
-
-  const outer = BoundingBox.createByDimensions(0, 0, 1, 1);
-
-  const lengthBounds = new NumbersRange(0.2, 1);
-
-  const [element, setElement] = useCallbackRef();
-
-  function handleScale(delta: number, p: Point) {
-    setControlValue((prevValue) => {
-      return prevValue
-        .scale(delta * WheelScalingK)
-        .constrainSize(lengthBounds, lengthBounds)
-        .moveTo(prevValue.denormalizePoint(p), p)
-        .clampByOuter(outer);
-    });
-  }
-
-  useScale(element, handleScale);
-
-  const viewBox = BoundingBox.createByDimensions(0, 0, 500, 500);
-  const totalSizeVector = new Point(
-    viewBox.dx / controlValue.dx,
-    viewBox.dy / controlValue.dy
-  );
-
-  const handleDrag = function (delta: Point) {
-    setControlValue((prevValue) =>
-      prevValue.shift(delta.div(totalSizeVector).negate()).clampByOuter(outer)
-    );
-  };
-
-  useDragMovement({ element, onChange: handleDrag });
-
-  return (
-    <div style={{ display: "flex" }}>
-      <div
-        ref={setElement}
-        style={{
-          position: "relative",
-          display: "inline-block",
-          background: "orange",
-          userSelect: "none",
-          cursor: "grab",
-        }}
-      >
-        <VirtualGrid
-          viewBox={viewBox}
-          dx={totalSizeVector.x / renderer.columnsCount}
-          dy={totalSizeVector.y / renderer.rowsCount}
-          coordinates={controlValue.origin.mul(totalSizeVector)}
-          renderItem={renderer.renderItem}
-        />
-      </div>
-      <div
-        style={{
-          position: "relative",
-          display: "inline-block",
-          background: "blue",
-          userSelect: "none",
-        }}
-      >
-        <VirtualGrid
-          viewBox={viewBox}
-          dx={viewBox.dx / renderer.columnsCount}
-          dy={viewBox.dy / renderer.rowsCount}
-          coordinates={new Point(0, 0)}
-          renderItem={renderer.renderItem}
-        />
-        <ResizableControl
-          value={controlValue}
-          onChange={setControlValue}
-          sizeBounds={{ width: lengthBounds, height: lengthBounds }}
-          outerBox={viewBox}
-        >
-          <div
-            style={{
-              ...stretchStyle,
-              background: getRgbaColor("#FFFFFF", 0.3),
-              border: "1px solid orange",
-            }}
-          />
-        </ResizableControl>
-      </div>
-    </div>
   );
 };
 
