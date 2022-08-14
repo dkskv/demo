@@ -11,7 +11,7 @@ export default { title: "Demo" };
 
 export const Sliders: ComponentStory<typeof NumberRangeInputWithSlider> =
   () => {
-    const [orientation, setOrientation] = useState(Orientations.vertical);
+    const [orientation, setOrientation] = useState(Orientations.horizontal);
     const [isSmooth, setIsSmooth] = useState(false);
 
     const handleRotate = () => {
@@ -39,8 +39,9 @@ export const Sliders: ComponentStory<typeof NumberRangeInputWithSlider> =
           />
           <NumberRangeInputWithSlider
             {...commonProps}
-            initialValue={new NumbersRange(1, 7)}
-            bounds={new NumbersRange(-10, 10)}
+            initialValue={new NumbersRange(0, 10)}
+            bounds={new NumbersRange(-30, 30)}
+            sizeBounds={new NumbersRange(10, 30)}
           />
           <NumberRangeInputWithSlider
             {...commonProps}
