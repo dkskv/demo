@@ -48,15 +48,17 @@ export const SortableContainers: ComponentStory<any> = () => {
     [50, 100, 100, 150]
   );
 
+  const containerStyle = { background: "grey", flexShrink: 0 };
+
   return (
-    <div style={{ display: "flex", columnGap: 300, position: "relative" }}>
+    <div style={{ display: "flex", columnGap: 280, position: "relative" }}>
       <DndConnector>
         <SortableContainer
           id="first"
           items={items}
           transitionDuration={300}
           box={BoundingBox.createByDimensions(0, 0, width, 600)}
-          style={{ background: "grey" }}
+          style={containerStyle}
         >
           {renderItem}
         </SortableContainer>
@@ -65,10 +67,25 @@ export const SortableContainers: ComponentStory<any> = () => {
           items={items2}
           transitionDuration={300}
           box={BoundingBox.createByDimensions(0, 0, width, 600)}
-          style={{ background: "grey" }}
+          style={containerStyle}
         >
           {renderItem}
         </SortableContainer>
+        <div style={{ padding: "10px", border: "1px solid blue" }}>
+          Nesting
+          <div style={{ padding: "10px", border: "1px solid blue" }}>
+            Nesting
+            <SortableContainer
+              id="third"
+              items={[]}
+              transitionDuration={300}
+              box={BoundingBox.createByDimensions(0, 0, width, 600)}
+              style={containerStyle}
+            >
+              {renderItem}
+            </SortableContainer>
+          </div>
+        </div>
       </DndConnector>
     </div>
   );
