@@ -1,5 +1,5 @@
 import { prop, sortBy } from "ramda";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { IDndElement, useDndConnection } from "../../decorators/dndConnection";
 import {
   useActiveSortableItem,
@@ -37,35 +37,44 @@ export const SortableContainer: React.FC<IProps> = ({
     useActiveSortableItem(transitionDuration);
   const [isActiveHidden, setIsActiveHidden] = useState(false);
 
+  const canDropRef = useRef(false);
+
   const handleDragIn = useCallback(
     (item: ISortableItem, isFirstEvent: boolean) => {
-      // const isAllow = manager.totalHeight + item.box.height <=
+      if (isFirstEvent) {
+        canDropRef.current =
+          manager.totalHeight + item.box.height <= box.height;
+      }
 
-      setActiveItem(item);
+      if (canDropRef.current) {
+        isFirstEvent ? manager.insert(item) : manager.relocate(item);
+        manager.align();
 
-      isFirstEvent ? manager.insert(item) : manager.relocate(item);
-      manager.align();
+        setActiveItem(item);
+      }
 
-      return { canDrop: true };
+      return { canDrop: canDropRef.current };
     },
-    [manager, setActiveItem]
+    [manager, setActiveItem, box]
   );
 
   const handleDropIn = useCallback(
     (item: ISortableItem) => {
-      dropActiveItem(item.key);
+      canDropRef.current && dropActiveItem(item.key);
 
-      return { canDrop: true };
+      return { canDrop: canDropRef.current };
     },
     [dropActiveItem]
   );
 
   const handleDragOut = useCallback(
     (key: string) => {
-      setActiveItem(null);
+      if (canDropRef.current) {
+        setActiveItem(null);
 
-      manager.remove(key);
-      manager.align();
+        manager.remove(key);
+        manager.align();
+      }
     },
     [manager, setActiveItem]
   );

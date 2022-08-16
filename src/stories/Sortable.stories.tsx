@@ -40,12 +40,12 @@ function renderItem({ key }: ISortableItem) {
 export const SortableContainers: ComponentStory<any> = () => {
   const items = generateItems(
     ["red", "blue", "green", "purple"],
-    [50, 150, 150, 150]
+    [50, 100, 100, 150]
   );
 
   const items2 = generateItems(
     ["orange", "black", "yellow", "deepskyblue"],
-    [50, 150, 150, 150]
+    [50, 100, 100, 150]
   );
 
   return (
