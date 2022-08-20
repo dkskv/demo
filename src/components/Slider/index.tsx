@@ -8,7 +8,7 @@ import { IPressedKeys, noop } from "../../utils/common";
 export interface ISliderProps
   extends Omit<
     IResizableControlProps,
-    "value" | "onChange" | "onStart" | "onEnd" | "sizeBounds"
+    "value" | "onChange" | "onStart" | "onEnd" | "sizeBounds" | "thumbKeys"
   > {
   /** Нормированный диапазон (в пределах от 0 до 1) */
   value: NumbersRange;
@@ -18,8 +18,9 @@ export interface ISliderProps
 
   /** Диапазон возможных размеров трека */
   sizeBounds?: NumbersRange;
-
   orientation?: IOrientation;
+
+  thumbKeys?: [0] | [1] | [0, 1];
 }
 
 const Slider: React.FC<ISliderProps> = ({
@@ -29,6 +30,7 @@ const Slider: React.FC<ISliderProps> = ({
   onEnd = noop,
   sizeBounds = NumbersRange.infinite(),
   orientation = Orientations.horizontal,
+  thumbKeys = [0, 1],
   ...rest
 }) => {
   const handleChange = useOrientedCallback(onChange, orientation);
@@ -46,7 +48,9 @@ const Slider: React.FC<ISliderProps> = ({
       onStart={handleStart}
       onEnd={handleEnd}
       sizeBounds={{ [orientation.lengthKey]: sizeBounds }}
-      thumbKeys={orientation.sides}
+      thumbKeys={orientation.sides.filter((_, i) =>
+        (thumbKeys as number[]).includes(i)
+      )}
     />
   );
 };

@@ -20,6 +20,7 @@ export interface IResizableProps
   > {
   value: BoundingBox;
   onChange: IResizeParams["onChange"];
+  isDraggable?: boolean;
 }
 
 const Resizable: React.FC<IResizableProps> = ({
@@ -32,11 +33,18 @@ const Resizable: React.FC<IResizableProps> = ({
   keepAspectRatio = false,
   thumbKeys = resizingPointsPreset.all,
   ThumbComponent = Thumb,
+  isDraggable = true,
   children,
 }) => {
   const [element, setElement] = useState<HTMLElement | null>(null);
 
-  useDragBox({ element, outerBox, onChange, onStart, onEnd });
+  useDragBox({
+    element: isDraggable ? element : null,
+    outerBox,
+    onChange,
+    onStart,
+    onEnd,
+  });
 
   const thumbsElements = useResize({
     box: value,

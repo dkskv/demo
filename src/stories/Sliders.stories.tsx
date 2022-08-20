@@ -6,6 +6,7 @@ import { NumbersRange } from "../utils/numbersRange";
 import { Orientations } from "../utils/orientation";
 import { prop } from "ramda";
 import { Checkbox } from "../components/Checkbox";
+import NumberInputWithSlider from "../components/NumberInputWithSlider";
 
 export default { title: "Demo" };
 
@@ -43,11 +44,7 @@ export const Sliders: ComponentStory<typeof NumberRangeInputWithSlider> =
             bounds={new NumbersRange(-30, 30)}
             sizeBounds={new NumbersRange(10, 30)}
           />
-          <NumberRangeInputWithSlider
-            {...commonProps}
-            initialValue={new NumbersRange(1, 7)}
-            bounds={new NumbersRange(-10, 10)}
-          />
+          <NumberInputWithSlider {...commonProps} initialValue={4} max={10} />
         </Space>
       </Space>
     );
