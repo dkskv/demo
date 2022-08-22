@@ -80,6 +80,10 @@ export class NumbersRange implements Iterable<number> {
     return new NumbersRange(this.start + offset, this.end - offset);
   }
 
+  invert() {
+    return new NumbersRange(this.end, this.start);
+  }
+
   /** Разместить в точке */
   moveTo(x: number, origin = 0) {
     return this.shift(x - this.denormalizeNumber(origin));

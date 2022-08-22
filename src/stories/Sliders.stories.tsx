@@ -4,7 +4,6 @@ import NumberRangeInputWithSlider from "../components/NumberRangeInputWithSlider
 import { Space } from "../components/Space";
 import { NumbersRange } from "../utils/numbersRange";
 import { Orientations } from "../utils/orientation";
-import { prop } from "ramda";
 import { Checkbox } from "../components/Checkbox";
 import NumberInputWithSlider from "../components/NumberInputWithSlider";
 
@@ -13,10 +12,10 @@ export default { title: "Demo" };
 export const Sliders: ComponentStory<typeof NumberRangeInputWithSlider> =
   () => {
     const [orientation, setOrientation] = useState(Orientations.horizontal);
-    const [isSmooth, setIsSmooth] = useState(false);
+    const [isSmooth, setIsSmooth] = useState(true);
 
     const handleRotate = () => {
-      setOrientation(prop("opposite"));
+      setOrientation((a) => a.opposite.reversed);
     };
 
     const sliderBox = orientation.boxFromRanges(
@@ -32,7 +31,7 @@ export const Sliders: ComponentStory<typeof NumberRangeInputWithSlider> =
           <button onClick={handleRotate}>Rotate</button>
           <Checkbox value={isSmooth} onChange={setIsSmooth} label="Smooth" />
         </Space>
-        <Space size={40} orientation={orientation.opposite}>
+        <Space size={40} orientation={orientation.opposite.regular}>
           <NumberRangeInputWithSlider
             {...commonProps}
             initialValue={new NumbersRange(1, 7)}

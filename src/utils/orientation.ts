@@ -34,7 +34,11 @@ export interface IOrientation {
   cssValues: {
     direction: CSSProperties["flexDirection"];
   };
+  /** Обычное направление для обычного и reversed направлений */
+  regular: IOrientation;
   opposite: IOrientation;
+  reversed: IOrientation;
+  isReversed: boolean;
 }
 
 export namespace Orientations {
@@ -58,9 +62,16 @@ export namespace Orientations {
     cssValues: {
       direction: "row",
     },
+    get regular() {
+      return Orientations.horizontal;
+    },
     get opposite() {
       return Orientations.vertical;
     },
+    get reversed() {
+      return Orientations.horizontalReversed;
+    },
+    isReversed: false,
   };
 
   export const vertical: IOrientation = {
@@ -83,26 +94,45 @@ export namespace Orientations {
     cssValues: {
       direction: "column",
     },
+    get regular() {
+      return Orientations.vertical;
+    },
     get opposite() {
       return Orientations.horizontal;
     },
+    get reversed() {
+      return Orientations.verticalReversed;
+    },
+    isReversed: false,
   };
 
-  /*
-  export const horizontalReverse: IOrientation = {
+  export const horizontalReversed: IOrientation = {
     ...horizontal,
-    cssKeys: {
-      ...horizontal.cssKeys,
-      coordinate: "right",
+    cssValues: {
+      ...horizontal.cssValues,
+      direction: "row-reverse",
     },
+    get opposite() {
+      return Orientations.verticalReversed;
+    },
+    get reversed() {
+      return Orientations.horizontal;
+    },
+    isReversed: true,
   };
 
-  export const verticalReverse: IOrientation = {
+  export const verticalReversed: IOrientation = {
     ...vertical,
-    cssKeys: {
-      ...vertical.cssKeys,
-      coordinate: "bottom",
+    cssValues: {
+      ...vertical.cssValues,
+      direction: "column-reverse",
     },
+    get opposite() {
+      return Orientations.horizontalReversed;
+    },
+    get reversed() {
+      return Orientations.vertical;
+    },
+    isReversed: true,
   };
-  */
 }

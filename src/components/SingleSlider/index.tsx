@@ -37,7 +37,7 @@ const SingleSlider: React.FC<ISingleSliderProps> = ({
       onStart={useSingleCallback(onStart)}
       onEnd={useSingleCallback(onEnd)}
       orientation={orientation}
-      thumbKeys={[1]}
+      thumbKeys={orientation.isReversed ? [0] : [1]}
       isDraggable={false}
     />
   );

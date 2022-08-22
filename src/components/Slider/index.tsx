@@ -41,7 +41,7 @@ const Slider: React.FC<ISliderProps> = ({
     <ResizableControl
       {...rest}
       value={orientation.boxFromRanges(
-        value,
+        orientRange(value, orientation),
         NumbersRange.normalizationBounds()
       )}
       onChange={handleChange}
@@ -55,13 +55,19 @@ const Slider: React.FC<ISliderProps> = ({
   );
 };
 
+function orientRange(range: NumbersRange, orientation: IOrientation) {
+  return orientation.isReversed ? range.map((a) => 1 - a).invert() : range;
+}
+
 function useOrientedCallback(
   callback: (box: NumbersRange, pressedKeys: IPressedKeys) => void,
   orientation: IOrientation
 ) {
   return useCallback(
     (box: BoundingBox, pressedKeys: IPressedKeys) => {
-      callback(orientation.rangesOfBox(box)[0], pressedKeys);
+      const range = orientation.rangesOfBox(box)[0];
+
+      callback(orientRange(range, orientation), pressedKeys);
     },
     [callback, orientation]
   );
