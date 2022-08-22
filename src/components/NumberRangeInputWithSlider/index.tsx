@@ -10,7 +10,7 @@ import { normalize } from "../../utils/normalization";
 import { useSmoothControl } from "../../decorators/useSmoothControl";
 import React from "react";
 import { getBoxStyle, stretchStyle } from "../../utils/styles";
-import { Orientations } from "../../utils/orientation";
+import { Directions } from "../../utils/direction";
 import { BoundingBox } from "../../utils/boundingBox";
 
 interface IProps
@@ -31,7 +31,7 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
     isSmoothSlider = false,
     sliderBox,
     sliderStyle,
-    orientation = Orientations.horizontal,
+    direction = Directions.horizontal,
     children = <div style={{ ...stretchStyle, background: "purple" }} />,
   } = props;
   const converter = useMemo(() => createConverter(bounds), [bounds]);
@@ -50,7 +50,7 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
       onChange={handleChange}
       bounds={bounds}
       sizeBounds={sizeBounds}
-      orientation={orientation}
+      direction={direction}
     >
       <div
         style={{
@@ -65,7 +65,7 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
           onChange={handleControlChange}
           onEnd={handleControlEnd}
           sizeBounds={normalize(sizeBounds, bounds.size)}
-          orientation={orientation}
+          direction={direction}
           outerBox={sliderBox}
         >
           {children}

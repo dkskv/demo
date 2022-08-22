@@ -3,7 +3,7 @@ import { useState } from "react";
 import NumberRangeInputWithSlider from "../components/NumberRangeInputWithSlider";
 import { Space } from "../components/Space";
 import { NumbersRange } from "../utils/numbersRange";
-import { Orientations } from "../utils/orientation";
+import { Directions } from "../utils/direction";
 import { Checkbox } from "../components/Checkbox";
 import NumberInputWithSlider from "../components/NumberInputWithSlider";
 
@@ -11,27 +11,27 @@ export default { title: "Demo" };
 
 export const Sliders: ComponentStory<typeof NumberRangeInputWithSlider> =
   () => {
-    const [orientation, setOrientation] = useState(Orientations.horizontal);
+    const [direction, setDirection] = useState(Directions.horizontal);
     const [isSmooth, setIsSmooth] = useState(true);
 
     const handleRotate = () => {
-      setOrientation((a) => a.opposite.reversed);
+      setDirection((a) => a.opposite.reversed);
     };
 
-    const sliderBox = orientation.boxFromRanges(
+    const sliderBox = direction.boxFromRanges(
       new NumbersRange(0, 500),
       new NumbersRange(0, 25)
     );
 
-    const commonProps = { sliderBox, isSmoothSlider: isSmooth, orientation };
+    const commonProps = { sliderBox, isSmoothSlider: isSmooth, direction };
 
     return (
-      <Space size={40} orientation={Orientations.vertical}>
+      <Space size={40} direction={Directions.vertical}>
         <Space size={20}>
           <button onClick={handleRotate}>Rotate</button>
           <Checkbox value={isSmooth} onChange={setIsSmooth} label="Smooth" />
         </Space>
-        <Space size={40} orientation={orientation.opposite.regular}>
+        <Space size={40} direction={direction.opposite.regular}>
           <NumberRangeInputWithSlider
             {...commonProps}
             initialValue={new NumbersRange(1, 7)}

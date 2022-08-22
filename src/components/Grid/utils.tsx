@@ -1,4 +1,4 @@
-import { IOrientation } from "../../utils/orientation";
+import { IDirection } from "../../utils/direction";
 
 export interface IPattern {
   /** Шаг между линиями, в % */
@@ -9,18 +9,18 @@ export interface IPattern {
 
 export function createDef(
   patternKey: string,
-  orientation: IOrientation,
+  direction: IDirection,
   { step, thickness }: IPattern,
   color: string
 ) {
   const patternProps = {
-    [orientation.cssKeys.length]: `${step}px`,
-    [orientation.cssKeys.thickness]: "1",
+    [direction.cssKeys.length]: `${step}px`,
+    [direction.cssKeys.thickness]: "1",
   };
 
   const rectProps = {
-    [orientation.cssKeys.length]: `${thickness}px`,
-    [orientation.cssKeys.thickness]: "1",
+    [direction.cssKeys.length]: `${thickness}px`,
+    [direction.cssKeys.thickness]: "1",
   };
 
   return (

@@ -1,6 +1,6 @@
 import { BoundingBox } from "../../utils/boundingBox";
 import { NumbersRange } from "../../utils/numbersRange";
-import { IOrientation, Orientations } from "../../utils/orientation";
+import { IDirection, Directions } from "../../utils/direction";
 import { getBoxStyle } from "../../utils/styles";
 import { getRenderingIndexes } from "./utils";
 
@@ -9,7 +9,7 @@ export interface IVirtualListProps {
   viewBox: BoundingBox;
   itemSize: number;
   renderItem(index: number): React.ReactNode;
-  orientation?: IOrientation;
+  direction?: IDirection;
 }
 
 /** Контейнер для отображения элементов */
@@ -18,9 +18,9 @@ export const VirtualList: React.FC<IVirtualListProps> = ({
   itemSize,
   coordinate,
   renderItem,
-  orientation = Orientations.horizontal,
+  direction = Directions.horizontal,
 }) => {
-  const [viewRange, thicknessRange] = orientation.rangesOfBox(viewBox);
+  const [viewRange, thicknessRange] = direction.rangesOfBox(viewBox);
 
   const viewAreaBounds = NumbersRange.createByDelta(coordinate, viewRange.size);
   const indexes = getRenderingIndexes(viewAreaBounds, itemSize, 1);
@@ -37,8 +37,8 @@ export const VirtualList: React.FC<IVirtualListProps> = ({
         const itemRange = NumbersRange.createByDelta(
           index * itemSize - coordinate,
           itemSize
-        ); 
-        const itemBox = orientation.boxFromRanges(itemRange, thicknessRange);
+        );
+        const itemBox = direction.boxFromRanges(itemRange, thicknessRange);
 
         return (
           <div

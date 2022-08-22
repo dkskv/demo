@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { noop } from "../../utils/common";
 import { NumbersRange } from "../../utils/numbersRange";
-import { Orientations } from "../../utils/orientation";
+import { Directions } from "../../utils/direction";
 import Slider, { ISliderProps } from "../Slider";
 
 export interface ISingleSliderProps
@@ -26,7 +26,7 @@ const SingleSlider: React.FC<ISingleSliderProps> = ({
   onChange,
   onStart = noop,
   onEnd = noop,
-  orientation = Orientations.horizontal,
+  direction = Directions.horizontal,
   ...rest
 }) => {
   return (
@@ -36,8 +36,8 @@ const SingleSlider: React.FC<ISingleSliderProps> = ({
       onChange={useSingleCallback(onChange)}
       onStart={useSingleCallback(onStart)}
       onEnd={useSingleCallback(onEnd)}
-      orientation={orientation}
-      thumbKeys={orientation.isReversed ? [0] : [1]}
+      direction={direction}
+      thumbKeys={direction.isReversed ? [0] : [1]}
       isDraggable={false}
     />
   );

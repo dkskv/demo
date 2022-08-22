@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { NumbersRange } from "../../utils/numbersRange";
-import { IOrientation } from "../../utils/orientation";
+import { IDirection } from "../../utils/direction";
 import { Space } from "../Space";
 
 export interface INumbersRangeInputProps {
@@ -11,7 +11,7 @@ export interface INumbersRangeInputProps {
   /** Минимальный и максимальный размер диапазона */
   sizeBounds?: NumbersRange;
 
-  orientation?: IOrientation;
+  direction?: IDirection;
 }
 
 const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
@@ -19,7 +19,7 @@ const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
   bounds = NumbersRange.infinite(),
   sizeBounds = NumbersRange.infinite(),
   onChange,
-  orientation,
+  direction,
   children,
 }) => {
   const handleChangeStartValue = useCallback(
@@ -45,7 +45,7 @@ const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
   );
 
   return (
-    <Space orientation={orientation} size={20}>
+    <Space direction={direction} size={20}>
       <input
         type="number"
         onChange={handleChangeStartValue}

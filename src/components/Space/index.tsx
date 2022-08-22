@@ -1,12 +1,12 @@
-import { IOrientation, Orientations } from "../../utils/orientation";
+import { IDirection, Directions } from "../../utils/direction";
 
 interface IProps {
-  orientation?: IOrientation;
+  direction?: IDirection;
   size: number;
 }
 
 export const Space: React.FC<IProps> = ({
-  orientation = Orientations.horizontal,
+  direction = Directions.horizontal,
   size,
   children,
 }) => {
@@ -14,8 +14,8 @@ export const Space: React.FC<IProps> = ({
     <div
       style={{
         display: "flex",
-        flexDirection: orientation.cssValues.direction,
-        [orientation.cssKeys.gap]: size,
+        flexDirection: direction.cssValues.direction,
+        [direction.cssKeys.gap]: size,
       }}
     >
       {children}

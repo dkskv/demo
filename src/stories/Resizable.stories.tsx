@@ -7,7 +7,7 @@ import { Space } from "../components/Space";
 import { BoundingBox } from "../utils/boundingBox";
 import { magnetize } from "../utils/common";
 import { NumbersRange } from "../utils/numbersRange";
-import { Orientations } from "../utils/orientation";
+import { Directions } from "../utils/direction";
 import { centererStyle, getBoxStyle, stretchStyle } from "../utils/styles";
 
 export default { title: "Demo" };
@@ -56,7 +56,7 @@ export const ResizableBox: ComponentStory<typeof Resizable> = () => {
   ));
 
   return (
-    <Space size={40} orientation={Orientations.vertical}>
+    <Space size={40} direction={Directions.vertical}>
       <Space size={20}>
         <Checkbox
           value={isGridEnabled}

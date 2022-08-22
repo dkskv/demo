@@ -1,5 +1,5 @@
 import { zipWith } from "ramda";
-import { IOrientation, Orientations } from "../../utils/orientation";
+import { IDirection, Directions } from "../../utils/direction";
 import { stretchStyle } from "../../utils/styles";
 import { createDef, getMarking, IPattern } from "./utils";
 
@@ -9,14 +9,11 @@ interface IProps extends IPattern {
 }
 
 export const Grid: React.VFC<IProps> = ({ step, thickness, color, id }) => {
-  function getPatternKey(orientation: IOrientation) {
-    return `${id}_${orientation.key}`;
+  function getPatternKey(direction: IDirection) {
+    return `${id}_${direction.key}`;
   }
 
-  const orientations = [
-    Orientations.horizontal,
-    Orientations.vertical,
-  ] as const;
+  const directions = [Directions.horizontal, Directions.vertical] as const;
 
   const patterns = [
     { step, thickness },
@@ -38,15 +35,13 @@ export const Grid: React.VFC<IProps> = ({ step, thickness, color, id }) => {
     >
       <defs>
         {zipWith(
-          (orientation, pattern) =>
-            createDef(getPatternKey(orientation), orientation, pattern, color),
-          orientations,
+          (direction, pattern) =>
+            createDef(getPatternKey(direction), direction, pattern, color),
+          directions,
           patterns
         )}
       </defs>
-      {orientations.map((orientation) =>
-        getMarking(getPatternKey(orientation))
-      )}
+      {directions.map((direction) => getMarking(getPatternKey(direction)))}
     </svg>
   );
 };

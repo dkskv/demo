@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { IOrientation, Orientations } from "../../utils/orientation";
+import { IDirection, Directions } from "../../utils/direction";
 import { NumbersRange } from "../../utils/numbersRange";
 import { BoundingBox } from "../../utils/boundingBox";
 import ResizableControl, { IResizableControlProps } from "../ResizableControl";
@@ -18,7 +18,7 @@ export interface ISliderProps
 
   /** Диапазон возможных размеров трека */
   sizeBounds?: NumbersRange;
-  orientation?: IOrientation;
+  direction?: IDirection;
 
   thumbKeys?: [0] | [1] | [0, 1];
 }
@@ -29,47 +29,47 @@ const Slider: React.FC<ISliderProps> = ({
   onStart = noop,
   onEnd = noop,
   sizeBounds = NumbersRange.infinite(),
-  orientation = Orientations.horizontal,
+  direction = Directions.horizontal,
   thumbKeys = [0, 1],
   ...rest
 }) => {
-  const handleChange = useOrientedCallback(onChange, orientation);
-  const handleStart = useOrientedCallback(onStart, orientation);
-  const handleEnd = useOrientedCallback(onEnd, orientation);
+  const handleChange = useDirectedCallback(onChange, direction);
+  const handleStart = useDirectedCallback(onStart, direction);
+  const handleEnd = useDirectedCallback(onEnd, direction);
 
   return (
     <ResizableControl
       {...rest}
-      value={orientation.boxFromRanges(
-        orientRange(value, orientation),
+      value={direction.boxFromRanges(
+        directRange(value, direction),
         NumbersRange.normalizationBounds()
       )}
       onChange={handleChange}
       onStart={handleStart}
       onEnd={handleEnd}
-      sizeBounds={{ [orientation.lengthKey]: sizeBounds }}
-      thumbKeys={orientation.sides.filter((_, i) =>
+      sizeBounds={{ [direction.lengthKey]: sizeBounds }}
+      thumbKeys={direction.sides.filter((_, i) =>
         (thumbKeys as number[]).includes(i)
       )}
     />
   );
 };
 
-function orientRange(range: NumbersRange, orientation: IOrientation) {
-  return orientation.isReversed ? range.map((a) => 1 - a).invert() : range;
+function directRange(range: NumbersRange, direction: IDirection) {
+  return direction.isReversed ? range.map((a) => 1 - a).invert() : range;
 }
 
-function useOrientedCallback(
+function useDirectedCallback(
   callback: (box: NumbersRange, pressedKeys: IPressedKeys) => void,
-  orientation: IOrientation
+  direction: IDirection
 ) {
   return useCallback(
     (box: BoundingBox, pressedKeys: IPressedKeys) => {
-      const range = orientation.rangesOfBox(box)[0];
+      const range = direction.rangesOfBox(box)[0];
 
-      callback(orientRange(range, orientation), pressedKeys);
+      callback(directRange(range, direction), pressedKeys);
     },
-    [callback, orientation]
+    [callback, direction]
   );
 }
 

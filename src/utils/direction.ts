@@ -3,14 +3,14 @@ import { BoundingBox } from "./boundingBox";
 import { EBoxLength, EBoxSide } from "./boxParams";
 import { NumbersRange } from "./numbersRange";
 
-export const enum EOrientation {
+export const enum EDirection {
   horizontal = "horizontal",
   vertical = "vertical",
 }
 
-/** Интерфейс для работы компонентов в разных ориентациях */
-export interface IOrientation {
-  key: EOrientation;
+/** Интерфейс для работы компонентов в разных направлениях */
+export interface IDirection {
+  key: EDirection;
   /** Возвращает диапазоны (параллельный и перпендикулярный) из переданного бокса */
   rangesOfBox(box: BoundingBox): [NumbersRange, NumbersRange];
   /** Строит бокс из заданных диапазонов (параллельного и перпендикулярного) */
@@ -19,11 +19,11 @@ export interface IOrientation {
     normalRange: NumbersRange
   ): BoundingBox;
   lengthKey: EBoxLength;
-  /** Стороны бокса, перпендикулярные оси ориентации */
+  /** Стороны бокса, перпендикулярные оси направления */
   sides: readonly [EBoxSide, EBoxSide];
   cssKeys: {
     length: keyof Pick<CSSProperties, "width" | "height">;
-    thickness: IOrientation["cssKeys"]["length"];
+    thickness: IDirection["cssKeys"]["length"];
     coordinate: keyof Pick<CSSProperties, "left" | "top" | "right" | "bottom">;
     normalCoordinate: keyof Pick<
       CSSProperties,
@@ -35,15 +35,15 @@ export interface IOrientation {
     direction: CSSProperties["flexDirection"];
   };
   /** Обычное направление для обычного и reversed направлений */
-  regular: IOrientation;
-  opposite: IOrientation;
-  reversed: IOrientation;
+  regular: IDirection;
+  opposite: IDirection;
+  reversed: IDirection;
   isReversed: boolean;
 }
 
-export namespace Orientations {
-  export const horizontal: IOrientation = {
-    key: EOrientation.horizontal,
+export namespace Directions {
+  export const horizontal: IDirection = {
+    key: EDirection.horizontal,
     rangesOfBox(box: BoundingBox) {
       return [box.xsRange, box.ysRange];
     },
@@ -63,19 +63,19 @@ export namespace Orientations {
       direction: "row",
     },
     get regular() {
-      return Orientations.horizontal;
+      return Directions.horizontal;
     },
     get opposite() {
-      return Orientations.vertical;
+      return Directions.vertical;
     },
     get reversed() {
-      return Orientations.horizontalReversed;
+      return Directions.horizontalReversed;
     },
     isReversed: false,
   };
 
-  export const vertical: IOrientation = {
-    key: EOrientation.vertical,
+  export const vertical: IDirection = {
+    key: EDirection.vertical,
     rangesOfBox(box: BoundingBox) {
       return [box.ysRange, box.xsRange];
     },
@@ -95,43 +95,43 @@ export namespace Orientations {
       direction: "column",
     },
     get regular() {
-      return Orientations.vertical;
+      return Directions.vertical;
     },
     get opposite() {
-      return Orientations.horizontal;
+      return Directions.horizontal;
     },
     get reversed() {
-      return Orientations.verticalReversed;
+      return Directions.verticalReversed;
     },
     isReversed: false,
   };
 
-  export const horizontalReversed: IOrientation = {
+  export const horizontalReversed: IDirection = {
     ...horizontal,
     cssValues: {
       ...horizontal.cssValues,
       direction: "row-reverse",
     },
     get opposite() {
-      return Orientations.verticalReversed;
+      return Directions.verticalReversed;
     },
     get reversed() {
-      return Orientations.horizontal;
+      return Directions.horizontal;
     },
     isReversed: true,
   };
 
-  export const verticalReversed: IOrientation = {
+  export const verticalReversed: IDirection = {
     ...vertical,
     cssValues: {
       ...vertical.cssValues,
       direction: "column-reverse",
     },
     get opposite() {
-      return Orientations.horizontalReversed;
+      return Directions.horizontalReversed;
     },
     get reversed() {
-      return Orientations.vertical;
+      return Directions.vertical;
     },
     isReversed: true,
   };

@@ -1,5 +1,5 @@
 import { BoundingBox } from "../../utils/boundingBox";
-import { Orientations } from "../../utils/orientation";
+import { Directions } from "../../utils/direction";
 import { Point } from "../../utils/point";
 import { VirtualList } from "../VirtualList";
 
@@ -23,13 +23,13 @@ export const VirtualGrid: React.FC<IVirtualGridProps> = ({
 
   return (
     <VirtualList
-      orientation={Orientations.vertical}
+      direction={Directions.vertical}
       viewBox={viewBox}
       coordinate={coordinates.y}
       itemSize={dy}
       renderItem={(rowIndex) => (
         <VirtualList
-          orientation={Orientations.horizontal}
+          direction={Directions.horizontal}
           viewBox={rowBox}
           coordinate={coordinates.x}
           itemSize={dx}

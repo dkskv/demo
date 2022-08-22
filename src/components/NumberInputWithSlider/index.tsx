@@ -20,7 +20,7 @@ const NumberInputWithSlider: React.FC<IProps> = ({
   sliderBox,
   max,
   isSmoothSlider = false,
-  orientation,
+  direction,
   children = <div style={{ ...stretchStyle, background: "purple" }} />,
 }) => {
   const converter = useMemo(() => {
@@ -50,7 +50,7 @@ const NumberInputWithSlider: React.FC<IProps> = ({
   );
 
   return (
-    <Space size={20} orientation={orientation}>
+    <Space size={20} direction={direction}>
       <div
         style={{
           background: "lavender",
@@ -64,7 +64,7 @@ const NumberInputWithSlider: React.FC<IProps> = ({
           onChange={handleControlChange}
           onEnd={handleControlEnd}
           outerBox={sliderBox}
-          orientation={orientation}
+          direction={direction}
         >
           {children}
         </SingleSlider>
