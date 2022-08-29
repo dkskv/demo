@@ -4,121 +4,19 @@ import { useDragMovement } from "../decorators/dnd";
 import { VirtualList } from "../components/VirtualList";
 import { useCallbackRef } from "../hooks";
 import { BoundingBox } from "../utils/boundingBox";
-import { NumbersRange } from "../utils/numbersRange";
 import { Point } from "../utils/point";
 import {
   centererStyle,
   ellipsisStyle,
   getBoxStyle,
-  getRgbaColor,
   stretchStyle,
 } from "../utils/styles";
-import Slider from "../components/Slider";
-import { useScale } from "../decorators/useScale";
-import { WheelScalingK } from "../utils/constants";
 import { clamp } from "ramda";
 
 export default {
-  title: "Demo/Carousel",
-  component: VirtualList,
+  title: "Demo",
   parameters: {},
-} as ComponentMeta<typeof VirtualList>;
-
-const Template: ComponentStory<typeof VirtualList> = (args) => {
-  const renderer = useCellRenderer();
-
-  const viewBox = BoundingBox.createByDimensions(0, 0, 500, 70);
-
-  const [sliderValue, setSliderValue] = useState<NumbersRange>(
-    new NumbersRange(0, 0.3)
-  );
-  const [element, setElement] = useCallbackRef();
-
-  const viewSize = viewBox.dx;
-  const totalSize = viewSize / sliderValue.size;
-
-  const sizeBounds = useMemo(() => new NumbersRange(0.2, 1), []);
-
-  const handleDrag = useCallback(
-    (delta: Point) => {
-      setSliderValue((prevValue) => {
-        const bounds = NumbersRange.normalizationBounds();
-        return bounds.clampInner(prevValue.shift(-delta.x / totalSize));
-      });
-    },
-    [totalSize]
-  );
-
-  useDragMovement({ element, onChange: handleDrag });
-
-  const handleScale = useCallback(
-    (delta: number, point: Point) => {
-      setSliderValue((prevValue) => {
-        const bounds = NumbersRange.normalizationBounds();
-
-        const k = delta * WheelScalingK;
-
-        return bounds.clipInner(
-          prevValue
-            .scale(k)
-            .constrainSize(sizeBounds)
-            .moveTo(prevValue.denormalizeNumber(point.x), point.x)
-        );
-      });
-    },
-    [sizeBounds]
-  );
-
-  useScale(element, handleScale);
-
-  const renderItem = (columnIndex: number) =>
-    renderer.renderItem(0, columnIndex);
-
-  return (
-    <>
-      <div
-        ref={setElement}
-        style={{
-          display: "inline-block",
-          background: "orange",
-          userSelect: "none",
-          cursor: "grab",
-        }}
-      >
-        <VirtualList
-          viewBox={viewBox}
-          coordinate={sliderValue.start * totalSize}
-          itemSize={totalSize / renderer.columnsCount}
-          renderItem={renderItem}
-        />
-      </div>
-      <div style={{ position: "relative", ...getBoxStyle(viewBox) }}>
-        <VirtualList
-          viewBox={viewBox}
-          coordinate={0}
-          itemSize={viewSize / renderer.columnsCount}
-          renderItem={renderItem}
-        />
-        <Slider
-          value={sliderValue}
-          onChange={setSliderValue}
-          sizeBounds={sizeBounds}
-          outerBox={viewBox}
-        >
-          <div
-            style={{
-              ...stretchStyle,
-              background: getRgbaColor("#FFFFFF", 0.3),
-              border: "1px solid orange",
-            }}
-          />
-        </Slider>
-      </div>
-    </>
-  );
-};
-
-export const WithSlider = Template.bind({});
+} as ComponentMeta<any>;
 
 function useSlowdown() {
   const [speed, setSpeed] = useState(0);
@@ -171,7 +69,7 @@ function useSlowdown() {
   return [speed, handleChange, setK] as const;
 }
 
-export const WithMomentum: ComponentStory<typeof VirtualList> = (args) => {
+export const SwipeContainer: ComponentStory<typeof VirtualList> = (args) => {
   const renderer = useCellRenderer(CellRenderer.manyColors);
 
   const viewBox = BoundingBox.createByDimensions(0, 0, 500, 70);
