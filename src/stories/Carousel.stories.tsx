@@ -1,167 +1,150 @@
 import { ComponentMeta, ComponentStory } from "@storybook/react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useDragMovement } from "../decorators/dnd";
 import { VirtualList } from "../components/VirtualList";
 import { useCallbackRef } from "../hooks";
 import { BoundingBox } from "../utils/boundingBox";
 import { Point } from "../utils/point";
-import {
-  centererStyle,
-  ellipsisStyle,
-  getBoxStyle,
-  stretchStyle,
-} from "../utils/styles";
-import { clamp } from "ramda";
+import { centererStyle, ellipsisStyle, stretchStyle } from "../utils/styles";
+import { clamp, minBy } from "ramda";
 
 export default {
   title: "Demo",
   parameters: {},
 } as ComponentMeta<any>;
 
-function useSlowdown() {
-  const [speed, setSpeed] = useState(0);
-  const request = useRef<number | null>(null);
-  const k = useRef<number>(0);
-  // const prevTimestamp = useRef<number | null>();
-
-  const slow = useCallback(function () {
-    request.current = requestAnimationFrame((timestamp: number) => {
-      setSpeed((prevSpeed) => {
-        // const dt = timestamp - (prevTimestamp.current ?? timestamp);
-        // prevTimestamp.current = timestamp;
-
-        const nextSpeed = prevSpeed * k.current;
-
-        if (Math.abs(nextSpeed) < 0.1) {
-          request.current = null;
-          return 0;
-        }
-
-        slow();
-        return nextSpeed;
-      });
-    });
-  }, []);
-
-  const handleChange = useCallback(
-    (value: number) => {
-      setSpeed(value);
-
-      if (request.current === null) {
-        slow();
-      }
-    },
-    [slow]
-  );
-
-  const setK = useCallback((value: number) => {
-    k.current = value;
-  }, []);
-
-  useEffect(
-    () =>
-      function () {
-        request.current && cancelAnimationFrame(request.current);
-      },
-    []
-  );
-
-  return [speed, handleChange, setK] as const;
-}
-
-export const SwipeContainer: ComponentStory<typeof VirtualList> = (args) => {
+export const SwipeContainer: ComponentStory<typeof VirtualList> = () => {
   const renderer = useCellRenderer(CellRenderer.manyColors);
 
-  const viewBox = BoundingBox.createByDimensions(0, 0, 500, 70);
-
-  const [value, setValue] = useState<number>(0);
   const [element, setElement] = useCallbackRef();
-
-  const [speed, setSpeed, slowdown] = useSlowdown();
-
-  const isGrabRef = useRef(false);
-
+  const viewBox = BoundingBox.createByDimensions(0, 0, 500, 70);
   const itemSize = 100;
 
-  const maxValue = itemSize * renderer.columnsCount - viewBox.dx;
+  const [coordinate, setCoordinate] = useState<number>(0);
+  const maxCoordinate = itemSize * renderer.columnsCount - viewBox.dx;
+  const maxOverflow = 100;
 
-  useEffect(() => {
-    if (!isGrabRef.current) {
-      setValue((prevValue) => {
-        return clamp(0, maxValue, prevValue + speed);
+  const impulse = useRef<number>(0);
+
+  const dragTimestamp = useRef<number>(0);
+
+  const request = useRef<number>(0);
+
+  function clampCoordinate(coordinate: number) {
+    return clamp(-maxOverflow, maxCoordinate + maxOverflow, coordinate);
+  }
+
+  function isOverflow(coordinate: number) {
+    return coordinate < 0 || coordinate > maxCoordinate;
+  }
+
+  const startMoving = () => {
+    let prevTimestamp: number | null;
+
+    request.current = requestAnimationFrame(function self(timestamp: number) {
+      prevTimestamp = prevTimestamp ?? timestamp;
+
+      const dt = timestamp - prevTimestamp;
+      prevTimestamp = timestamp;
+
+      setCoordinate((prevCoordinate) => {
+        const friction = 0.03;
+        const extrusion = 0.2;
+
+        const brakingImpulse = minBy(
+          Math.abs,
+          -impulse.current,
+          Math.sign(impulse.current) * -friction * dt
+        );
+
+        const extrusionImpulse =
+          dt *
+          (prevCoordinate < 0
+            ? extrusion
+            : prevCoordinate > maxCoordinate
+            ? -extrusion
+            : 0);
+
+        impulse.current += brakingImpulse + extrusionImpulse;
+
+        const velocity = impulse.current / 1;
+        const nextCoordinate = prevCoordinate + velocity;
+
+        if (extrusionImpulse !== 0 && !isOverflow(nextCoordinate)) {
+          impulse.current = 0;
+          return nextCoordinate - prevCoordinate > 0 ? 0 : maxCoordinate;
+        }
+
+        if (impulse.current !== 0 || isOverflow(nextCoordinate)) {
+          requestAnimationFrame(self);
+        }
+
+        return clampCoordinate(nextCoordinate);
       });
-    }
-  }, [speed, renderer, maxValue]);
+    });
+  };
+
+  const stopMoving = () => {
+    cancelAnimationFrame(request.current);
+  };
+
+  function handleDragStart() {
+    stopMoving();
+  }
 
   function handleDrag(delta: Point) {
-    isGrabRef.current = true;
-    setSpeed(-delta.x);
-    slowdown(0.9);
+    dragTimestamp.current = performance.now();
 
-    setValue((prevValue) => {
-      return clamp(0, maxValue, prevValue - delta.x);
+    setCoordinate((prevCoordinate) => {
+      impulse.current = -delta.x;
+
+      // заменить функцию на более резко тормозящую
+      if (prevCoordinate < 0 && impulse.current < 0) {
+        impulse.current *= 1 - prevCoordinate / -maxOverflow;
+      } else if (prevCoordinate > maxCoordinate && impulse.current > 0) {
+        impulse.current *= 1 - (prevCoordinate - maxCoordinate) / maxOverflow;
+      }
+
+      return clampCoordinate(prevCoordinate + impulse.current);
     });
+    // clamp(0, maxCoordinate, prevCoordinate + impulse.current)
   }
 
   const handleDragEnd = useCallback(() => {
-    isGrabRef.current = false;
-    slowdown(0.98);
-  }, [slowdown]);
+    if (
+      performance.now() - dragTimestamp.current < 40 ||
+      isOverflow(coordinate)
+    ) {
+      startMoving();
+    }
+  }, [coordinate]);
 
-  useDragMovement({ element, onChange: handleDrag, onEnd: handleDragEnd });
-
-  const renderItem = (columnIndex: number) =>
-    renderer.renderItem(0, columnIndex);
+  useDragMovement({
+    element,
+    onChange: handleDrag,
+    onStart: handleDragStart,
+    onEnd: handleDragEnd,
+  });
 
   return (
-    <>
-      <div
-        ref={setElement}
-        style={{
-          display: "inline-block",
-          background: "orange",
-          userSelect: "none",
-          cursor: "grab",
-        }}
-      >
-        <VirtualList
-          viewBox={viewBox}
-          coordinate={value}
-          itemSize={itemSize}
-          renderItem={renderItem}
-        />
-      </div>
-      <div
-        style={{
-          ...getBoxStyle(BoundingBox.createByDimensions(0, 0, 500, 10)),
-          background: "grey",
-          position: "relative",
-        }}
-      >
-        {speed > 0 && (
-          <div
-            style={{
-              ...getBoxStyle(
-                BoundingBox.createByDimensions(250, 0, (250 * speed) / 20, 10)
-              ),
-              background: "purple",
-              position: "absolute",
-            }}
-          />
-        )}
-        {speed < 0 && (
-          <div
-            style={{
-              ...getBoxStyle(
-                new BoundingBox(250 + (250 * speed) / 20, 250, 0, 10)
-              ),
-              background: "purple",
-              position: "absolute",
-            }}
-          />
-        )}
-      </div>
-    </>
+    <div
+      ref={setElement}
+      style={{
+        display: "inline-block",
+        background: "orange",
+        userSelect: "none",
+        cursor: "grab",
+      }}
+    >
+      <VirtualList
+        viewBox={viewBox}
+        coordinate={coordinate}
+        itemSize={itemSize}
+        renderItem={(columnIndex: number) =>
+          renderer.renderItem(0, columnIndex)
+        }
+      />
+    </div>
   );
 };
 
@@ -169,6 +152,7 @@ function useCellRenderer(colors?: string[]) {
   return useMemo(() => new CellRenderer(colors), [colors]);
 }
 
+// todo: переименовать в cardRenderer и соответствующе упростить
 class CellRenderer {
   public static colorsPreset = [
     "lavender",
@@ -192,9 +176,9 @@ class CellRenderer {
 
   public static manyColors = [
     ...this.colorsPreset,
-    ...this.colorsPreset,
-    ...this.colorsPreset,
-    ...this.colorsPreset,
+    // ...this.colorsPreset,
+    // ...this.colorsPreset,
+    // ...this.colorsPreset,
   ];
 
   constructor(private items: string[] = CellRenderer.colorsPreset) {}
