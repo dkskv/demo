@@ -13,6 +13,14 @@ export default {
   parameters: {},
 } as ComponentMeta<any>;
 
+function getBrakingImpulse(srcImpulse: number, frictionForce: number, dt: number) {
+  return minBy(
+    Math.abs,
+    -srcImpulse,
+    Math.sign(srcImpulse) * -frictionForce * dt
+  );
+}
+
 export const SwipeContainer: ComponentStory<typeof VirtualList> = () => {
   const renderer = useCellRenderer(CellRenderer.manyColors);
 
@@ -30,11 +38,16 @@ export const SwipeContainer: ComponentStory<typeof VirtualList> = () => {
 
   const request = useRef<number>(0);
 
-  function clampCoordinate(coordinate: number) {
-    return clamp(-maxOverflow, maxCoordinate + maxOverflow, coordinate);
+  function clampExtendedCoordinate(coordinate: number, overflowZone: number) {
+    return clamp(-overflowZone, maxCoordinate + overflowZone, coordinate);
   }
 
-  function isOverflow(coordinate: number) {
+  // todo: как я должен понять по названию, что это не относится к 0 и maxCoordinate?
+  function isEdgeCoordinate(coordinate: number, overflowZone: number) {
+    return coordinate === -overflowZone || coordinate === maxCoordinate + overflowZone;
+  }
+
+  function inExtrusionZone(coordinate: number) {
     return coordinate < 0 || coordinate > maxCoordinate;
   }
 
@@ -51,12 +64,7 @@ export const SwipeContainer: ComponentStory<typeof VirtualList> = () => {
         const friction = 0.03;
         const extrusion = 0.2;
 
-        const brakingImpulse = minBy(
-          Math.abs,
-          -impulse.current,
-          Math.sign(impulse.current) * -friction * dt
-        );
-
+        const brakingImpulse = getBrakingImpulse(impulse.current, friction, dt);
         const extrusionImpulse =
           dt *
           (prevCoordinate < 0
@@ -66,20 +74,24 @@ export const SwipeContainer: ComponentStory<typeof VirtualList> = () => {
             : 0);
 
         impulse.current += brakingImpulse + extrusionImpulse;
-
         const velocity = impulse.current / 1;
-        const nextCoordinate = prevCoordinate + velocity;
+        const nextCoordinate = clampExtendedCoordinate(prevCoordinate + velocity, maxOverflow);
 
-        if (extrusionImpulse !== 0 && !isOverflow(nextCoordinate)) {
+        const hasLeftExtrusionZone = inExtrusionZone(prevCoordinate) && !inExtrusionZone(nextCoordinate);
+        
+        if (isEdgeCoordinate(nextCoordinate, maxOverflow) || hasLeftExtrusionZone) {
           impulse.current = 0;
+        }
+        
+        if (impulse.current !== 0 || inExtrusionZone(nextCoordinate)) {
+          requestAnimationFrame(self);
+        }
+        
+        if (hasLeftExtrusionZone) {
           return nextCoordinate - prevCoordinate > 0 ? 0 : maxCoordinate;
         }
 
-        if (impulse.current !== 0 || isOverflow(nextCoordinate)) {
-          requestAnimationFrame(self);
-        }
-
-        return clampCoordinate(nextCoordinate);
+        return nextCoordinate;
       });
     });
   };
@@ -98,22 +110,20 @@ export const SwipeContainer: ComponentStory<typeof VirtualList> = () => {
     setCoordinate((prevCoordinate) => {
       impulse.current = -delta.x;
 
-      // заменить функцию на более резко тормозящую
       if (prevCoordinate < 0 && impulse.current < 0) {
         impulse.current *= 1 - prevCoordinate / -maxOverflow;
       } else if (prevCoordinate > maxCoordinate && impulse.current > 0) {
         impulse.current *= 1 - (prevCoordinate - maxCoordinate) / maxOverflow;
       }
 
-      return clampCoordinate(prevCoordinate + impulse.current);
+      return clampExtendedCoordinate(prevCoordinate + impulse.current, maxOverflow);
     });
-    // clamp(0, maxCoordinate, prevCoordinate + impulse.current)
   }
 
   const handleDragEnd = useCallback(() => {
     if (
       performance.now() - dragTimestamp.current < 40 ||
-      isOverflow(coordinate)
+      inExtrusionZone(coordinate)
     ) {
       startMoving();
     }
