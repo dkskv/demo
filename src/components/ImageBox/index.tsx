@@ -1,13 +1,13 @@
 import { BoundingBox } from "../../utils/boundingBox";
 import { getBoxStyle } from "../../utils/styles";
 
-interface IProps {
+export interface IImageBoxProps {
   src: string;
   box: BoundingBox;
   viewBox?: BoundingBox;
 }
 
-export const ImageBox: React.FC<IProps> = ({
+export const ImageBox: React.FC<IImageBoxProps> = ({
   box,
   src,
   viewBox = BoundingBox.createByDimensions(0, 0, 1, 1),
