@@ -94,28 +94,30 @@ export const SwipeContainer: React.FC<IProps> = ({
       const dt = timestamp - prevTimestamp;
       prevTimestamp = timestamp;
 
-      setCoordinate((prevCoordinate) => {
+      setCoordinate((currentCoordinate) => {
         const friction = 0.03;
         const extrusion = 0.1;
 
-        const brakingImpulse = getBrakingImpulse(impulse.current, friction, dt);
         const extrusionImpulse =
           dt *
-          (prevCoordinate < 0
+          (currentCoordinate < 0
             ? extrusion
-            : prevCoordinate > maxCoordinate
+            : currentCoordinate > maxCoordinate
             ? -extrusion
             : 0);
 
-        impulse.current += brakingImpulse + extrusionImpulse;
+        impulse.current += extrusionImpulse;
+        impulse.current += getBrakingImpulse(impulse.current, friction, dt);
+
         const velocity = impulse.current / 1;
         const nextCoordinate = clampExtendedCoordinate(
-          prevCoordinate + velocity,
+          currentCoordinate + velocity,
           maxOverflow
         );
 
         const hasLeftExtrusionZone =
-          inExtrusionZone(prevCoordinate) && !inExtrusionZone(nextCoordinate);
+          inExtrusionZone(currentCoordinate) &&
+          !inExtrusionZone(nextCoordinate);
 
         if (
           isEdgeCoordinate(nextCoordinate, maxOverflow) ||
@@ -129,7 +131,7 @@ export const SwipeContainer: React.FC<IProps> = ({
         }
 
         if (hasLeftExtrusionZone) {
-          return nextCoordinate - prevCoordinate > 0 ? 0 : maxCoordinate;
+          return nextCoordinate - currentCoordinate > 0 ? 0 : maxCoordinate;
         }
 
         return nextCoordinate;
