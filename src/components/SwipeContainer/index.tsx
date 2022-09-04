@@ -15,7 +15,7 @@ interface IProps {
   direction?: IDirection;
 }
 
-function getBrakingImpulse(
+function calcBrakingImpulse(
   srcImpulse: number,
   frictionForce: number,
   dt: number
@@ -46,7 +46,6 @@ export const SwipeContainer: React.FC<IProps> = ({
     }
 
     const contentBox = getBoxOnPage(content);
-
     return getBoxLength(contentBox, direction);
   })();
 
@@ -56,7 +55,6 @@ export const SwipeContainer: React.FC<IProps> = ({
 
   const [coordinate, setCoordinate] = useState<number>(0);
   const actualCoordinate = useActualRef(coordinate);
-
   const maxCoordinate = Math.max(
     0,
     contentLength - getBoxLength(box, direction)
@@ -64,87 +62,85 @@ export const SwipeContainer: React.FC<IProps> = ({
   const maxOverflow = 100;
 
   const impulse = useRef<number>(0);
-
   const dragTimestamp = useRef<number>(0);
-
   const request = useRef<number>(0);
 
   function clampExtendedCoordinate(coordinate: number, overflowZone: number) {
     return clamp(-overflowZone, maxCoordinate + overflowZone, coordinate);
   }
 
-  // todo: как я должен понять по названию, что это не относится к 0 и maxCoordinate?
-  function isEdgeCoordinate(coordinate: number, overflowZone: number) {
-    return (
-      coordinate === -overflowZone ||
-      coordinate === maxCoordinate + overflowZone
-    );
-  }
-
   function inExtrusionZone(coordinate: number) {
     return coordinate < 0 || coordinate > maxCoordinate;
   }
 
+  function placeOnEdge(coordinate: number) {
+    return coordinate < 0 ? 0 : maxCoordinate;
+  }
+
   const startMoving = () => {
-    let prevTimestamp: number | null;
+    function doStep(
+      coordinate: number,
+      impulse: number,
+      dt: number
+    ): { coordinate: number; impulse: number } {
+      const friction = 0.03;
+      const extrusion = 0.05;
 
-    request.current = requestAnimationFrame(function self(timestamp: number) {
-      prevTimestamp = prevTimestamp ?? timestamp;
+      const extrusionImpulse =
+        dt *
+        (coordinate < 0
+          ? extrusion
+          : coordinate > maxCoordinate
+          ? -extrusion
+          : 0);
 
-      const dt = timestamp - prevTimestamp;
-      prevTimestamp = timestamp;
+      const nextImpulse =
+        impulse + extrusionImpulse + calcBrakingImpulse(impulse, friction, dt);
 
-      setCoordinate((currentCoordinate) => {
-        const friction = 0.03;
-        const extrusion = 0.1;
+      const velocity = nextImpulse / 1;
+      const movedCoordinate = coordinate + velocity;
 
-        const extrusionImpulse =
-          dt *
-          (currentCoordinate < 0
-            ? extrusion
-            : currentCoordinate > maxCoordinate
-            ? -extrusion
-            : 0);
+      const nextCoordinate = clampExtendedCoordinate(
+        movedCoordinate,
+        maxOverflow
+      );
+      const didStoppedByLimit = nextCoordinate !== movedCoordinate;
+      const didLeaveExtrusionZone =
+        inExtrusionZone(coordinate) && !inExtrusionZone(nextCoordinate);
 
-        impulse.current += extrusionImpulse;
-        impulse.current += getBrakingImpulse(impulse.current, friction, dt);
+      return {
+        coordinate: didLeaveExtrusionZone
+          ? placeOnEdge(coordinate)
+          : nextCoordinate,
+        impulse: didStoppedByLimit || didLeaveExtrusionZone ? 0 : nextImpulse,
+      };
+    }
 
-        const velocity = impulse.current / 1;
-        const nextCoordinate = clampExtendedCoordinate(
-          currentCoordinate + velocity,
-          maxOverflow
-        );
-
-        const hasLeftExtrusionZone =
-          inExtrusionZone(currentCoordinate) &&
-          !inExtrusionZone(nextCoordinate);
-
-        if (
-          isEdgeCoordinate(nextCoordinate, maxOverflow) ||
-          hasLeftExtrusionZone
-        ) {
-          impulse.current = 0;
-        }
-
-        if (impulse.current !== 0 || inExtrusionZone(nextCoordinate)) {
-          requestAnimationFrame(self);
-        }
-
-        if (hasLeftExtrusionZone) {
-          return nextCoordinate - currentCoordinate > 0 ? 0 : maxCoordinate;
-        }
-
-        return nextCoordinate;
-      });
-    });
-  };
-
-  const stopMoving = () => {
     cancelAnimationFrame(request.current);
+
+    let prevTimestamp: number;
+
+    (function move() {
+      request.current = requestAnimationFrame((timestamp: number) => {
+        const dt = timestamp - (prevTimestamp ?? timestamp);
+        prevTimestamp = timestamp;
+
+        setCoordinate((coordinate) => {
+          const step = doStep(coordinate, impulse.current, dt);
+
+          if (step.impulse !== 0 || inExtrusionZone(step.coordinate)) {
+            move();
+          }
+
+          impulse.current = step.impulse;
+          return step.coordinate;
+        });
+      });
+    })();
   };
 
   function handleDragStart() {
-    stopMoving();
+    cancelAnimationFrame(request.current);
   }
 
   function handleDrag(delta: Point) {
