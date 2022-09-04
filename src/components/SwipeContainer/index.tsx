@@ -96,7 +96,7 @@ export const SwipeContainer: React.FC<IProps> = ({
 
       setCoordinate((prevCoordinate) => {
         const friction = 0.03;
-        const extrusion = 0.2;
+        const extrusion = 0.1;
 
         const brakingImpulse = getBrakingImpulse(impulse.current, friction, dt);
         const extrusionImpulse =
