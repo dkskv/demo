@@ -8,6 +8,7 @@ import { useBooleanState } from "../decorators/useBooleanState";
 import { useScale } from "../decorators/useScale";
 import { useCallbackRef } from "../hooks";
 import { BoundingBox } from "../utils/boundingBox";
+import { noop } from "../utils/common";
 import { WheelScalingK } from "../utils/constants";
 import { NumbersRange } from "../utils/numbersRange";
 import { Point } from "../utils/point";
@@ -52,10 +53,15 @@ export const ImageViewer: ComponentStory<any> = () => {
     });
   };
 
-  const [isDrag, onStart, onEnd] = useBooleanState(false);
-  useDragMovement({ element, onChange: handleDrag, onStart, onEnd });
-
   const isScaled = controlValue.dx < 1 || controlValue.dy < 1;
+
+  const [isDrag, enableDragFlag, disableDragFlag] = useBooleanState(false);
+  useDragMovement({
+    element,
+    onChange: isScaled ? handleDrag : noop,
+    onStart: isScaled ? enableDragFlag : noop,
+    onEnd: isScaled ? disableDragFlag : noop,
+  });
 
   const src =
     "https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg";
