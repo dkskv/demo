@@ -2,6 +2,7 @@ import { CSSProperties } from "react";
 import { BoundingBox } from "./boundingBox";
 import { EBoxLength, EBoxSide } from "./boxParams";
 import { NumbersRange } from "./numbersRange";
+import { Point } from "./point";
 
 export const enum EDirection {
   horizontal = "horizontal",
@@ -18,6 +19,13 @@ export interface IDirection {
     parallelRange: NumbersRange,
     normalRange: NumbersRange
   ): BoundingBox;
+  /** Возвращает координаты (параллельную и перпендикулярную) из переданного бокса */
+  coordinatesOfPoint(p: Point): [number, number];
+  /** Строит точку из заданных координат (параллельной и перпендикулярной) */
+  pointOfCoordinates(
+    parallelCoordinate: number,
+    normalCoordinate: number
+    ): Point;
   lengthKey: EBoxLength;
   /** Стороны бокса, перпендикулярные оси направления */
   sides: readonly [EBoxSide, EBoxSide];
@@ -50,6 +58,12 @@ export namespace Directions {
     boxFromRanges(parallelRange: NumbersRange, normalRange: NumbersRange) {
       return BoundingBox.createByRanges(parallelRange, normalRange);
     },
+    coordinatesOfPoint({x, y}: Point) {
+      return [x, y];
+    },
+    pointOfCoordinates(x: number, y: number) {
+      return new Point(x, y);
+    },
     lengthKey: EBoxLength.width,
     sides: [EBoxSide.left, EBoxSide.right],
     cssKeys: {
@@ -81,6 +95,12 @@ export namespace Directions {
     },
     boxFromRanges(parallelRange: NumbersRange, normalRange: NumbersRange) {
       return BoundingBox.createByRanges(normalRange, parallelRange);
+    },
+    coordinatesOfPoint({x, y}: Point) {
+      return [y, x];
+    },
+    pointOfCoordinates(y: number, x: number) {
+      return new Point(x, y);
     },
     lengthKey: EBoxLength.height,
     sides: [EBoxSide.top, EBoxSide.bottom],

@@ -1,15 +1,18 @@
 import { clamp, minBy } from "ramda";
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDragMovement } from "../../decorators/dnd";
 import { useActualRef } from "../../decorators/useActualRef";
 import { useCallbackRef } from "../../hooks";
 import { BoundingBox } from "../../utils/boundingBox";
+import { Directions, IDirection } from "../../utils/direction";
 import { Point } from "../../utils/point";
 import { getBoxStyle } from "../../utils/styles";
+import { getBoxOnPage } from "../../utils/dom";
 
 interface IProps {
   box: BoundingBox;
   children: React.ReactNode;
+  direction?: IDirection;
 }
 
 function getBrakingImpulse(
@@ -24,23 +27,40 @@ function getBrakingImpulse(
   );
 }
 
-export const SwipeContainer: React.FC<IProps> = ({ box, children }) => {
+function getBoxLength(box: BoundingBox, direction: IDirection) {
+  return direction.rangesOfBox(box)[0].size;
+}
+
+export const SwipeContainer: React.FC<IProps> = ({
+  box,
+  children,
+  direction = Directions.horizontal,
+}) => {
   const [element, setElement] = useCallbackRef();
 
-  const swipeLength = useMemo(() => {
-    const child = element?.childNodes?.[0];
+  const contentLength = (() => {
+    const content = element?.childNodes?.[0];
 
-    if (!(child instanceof HTMLElement)) {
+    if (!(content instanceof HTMLElement)) {
       return 0;
     }
 
-    // todo: учесть направление
-    return child.offsetWidth;
-  }, [element]);
+    const contentBox = getBoxOnPage(content);
+
+    return getBoxLength(contentBox, direction);
+  })();
+
+  useEffect(() => {
+    setCoordinate(0);
+  }, [direction]);
 
   const [coordinate, setCoordinate] = useState<number>(0);
   const actualCoordinate = useActualRef(coordinate);
-  const maxCoordinate = swipeLength - box.width;
+
+  const maxCoordinate = Math.max(
+    0,
+    contentLength - getBoxLength(box, direction)
+  );
   const maxOverflow = 100;
 
   const impulse = useRef<number>(0);
@@ -129,7 +149,7 @@ export const SwipeContainer: React.FC<IProps> = ({ box, children }) => {
     dragTimestamp.current = performance.now();
 
     setCoordinate((prevCoordinate) => {
-      impulse.current = -delta.x;
+      impulse.current = -direction.coordinatesOfPoint(delta)[0];
 
       if (prevCoordinate < 0 && impulse.current < 0) {
         impulse.current *= 1 - prevCoordinate / -maxOverflow;
@@ -176,9 +196,9 @@ export const SwipeContainer: React.FC<IProps> = ({ box, children }) => {
       <div
         style={{
           position: "absolute",
-          height: "100%",
-          top: 0,
-          left: -coordinate,
+          [direction.cssKeys.thickness]: "100%",
+          [direction.cssKeys.normalCoordinate]: 0,
+          [direction.cssKeys.coordinate]: -coordinate,
         }}
       >
         {children}
