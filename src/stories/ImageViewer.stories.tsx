@@ -6,7 +6,7 @@ import { ScalableImage } from "../components/ScalableImage";
 import { Space } from "../components/Space";
 import { BoundingBox } from "../utils/boundingBox";
 import { NumbersRange } from "../utils/numbersRange";
-import { stretchStyle, getRgbaColor, getBoxStyle } from "../utils/styles";
+import { stretchStyle, getBoxStyle } from "../utils/styles";
 
 export default { title: "Demo" };
 
@@ -36,6 +36,7 @@ export const ImageViewer: ComponentStory<any> = () => {
         style={{
           position: "relative",
           border: "1px solid black",
+          overflow: "hidden",
           ...getBoxStyle(controlBox),
         }}
       >
@@ -50,8 +51,8 @@ export const ImageViewer: ComponentStory<any> = () => {
           <div
             style={{
               ...stretchStyle,
-              background: getRgbaColor("#FFFFFF", 0.3),
               border: "1px solid orange",
+              boxShadow: `0 0 0 100vmax rgba(34, 60, 80, 0.7)`,
             }}
           />
         </ResizableControl>
