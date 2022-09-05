@@ -16,7 +16,7 @@ export function useScale(
       const targetBox = getBoxOnPage(event.currentTarget as Element);
       const offsetPoint = getMouseOffsetPoint(event as WheelEvent);
 
-      onChange(deltaY, targetBox.normalizePoint(offsetPoint));
+      onChange(deltaY, targetBox.resetOrigin().normalizePoint(offsetPoint));
     },
     [onChange]
   );
