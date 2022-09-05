@@ -4,7 +4,7 @@ import { Point } from "../utils/point";
 
 export function useScale(
   element: Element | null,
-  onChange: (delta: number, point: Point) => void
+  onChange: (delta: number, scalingOrigin: Point) => void
 ) {
   const handleChange = useCallback(
     (event: Event) => {

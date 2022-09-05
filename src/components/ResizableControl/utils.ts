@@ -1,5 +1,5 @@
 import { BoundingBox } from "../../utils/boundingBox";
-import { ISizeBounds } from "../../utils/boxResize";
+import { ISizeBounds } from "../../utils/boxResize/constraints";
 import { denormalize } from "../../utils/normalization";
 
 export function denormalizeSizeBounds(

@@ -1,65 +1,56 @@
 import { BoundingBox } from "../boundingBox";
-import { ResizingPoint } from "./resizingPoint";
 import { Point } from "../point";
 import { NumbersRange } from "../numbersRange";
 import { EBoxLength } from "../boxParams";
 
-interface IUpdateBoxParams {
-  prevBox: BoundingBox;
-  resizingPoint: ResizingPoint;
-  resizingPointTarget: Point;
+export type ISizeBounds = Partial<Record<EBoxLength, NumbersRange>>;
 
-  // Ограничения
-
+interface IBoxConstraints {
   aspectRatio: number | null;
   sizeBounds: ISizeBounds;
   outerBox: BoundingBox;
 }
 
-export type ISizeBounds = Partial<Record<EBoxLength, NumbersRange>>;
+interface IInitialConditions {
+  sourceBox: BoundingBox;
+  transformOrigin: Point;
+}
 
-/** Изменить размер бокса, сохранив наложенные ограничения */
-export function updateBox({
-  prevBox,
-  resizingPoint,
-  resizingPointTarget,
-  aspectRatio,
-  sizeBounds,
-  outerBox,
-}: IUpdateBoxParams): BoundingBox {
-  // Изменение размера
-  let nextBox = resizingPoint.resizeBox(prevBox, resizingPointTarget);
-
+export function constrainResizedBox(
+  resizedBox: BoundingBox,
+  { sourceBox, transformOrigin }: IInitialConditions,
+  { aspectRatio, sizeBounds, outerBox }: IBoxConstraints
+) {
   const keepAspectRatio = aspectRatio !== null;
 
   // Сохранение соотношения сторон
   if (keepAspectRatio) {
-    nextBox = nextBox.setAspectRatio(aspectRatio);
+    resizedBox = resizedBox.setAspectRatio(aspectRatio);
   }
 
   // Ограничение размера
-  nextBox = constrainSize(nextBox, sizeBounds);
+  resizedBox = constrainSize(resizedBox, sizeBounds);
 
   // Поправка расположения
-  nextBox = resizingPoint.keepTransformOrigin(prevBox, nextBox);
+  resizedBox = resizedBox.placeInSameOrigin(sourceBox, transformOrigin);
 
   // Ограничение внешним боксом
-  nextBox = outerBox.clipInner(nextBox);
+  resizedBox = outerBox.clipInner(resizedBox);
 
   if (keepAspectRatio) {
     const precision = 5;
 
     if (
       aspectRatio.toPrecision(precision) !==
-      nextBox.aspectRatio.toPrecision(precision)
+      resizedBox.aspectRatio.toPrecision(precision)
     ) {
       // Если сломалось соотношение сторон, то откатываем изменения
       // p.s. Можно вычислять предельные размеры при `aspectRatio`, но профит низкий
-      return prevBox;
+      return sourceBox;
     }
   }
 
-  return nextBox;
+  return resizedBox;
 }
 
 function constrainSize(box: BoundingBox, { width, height }: ISizeBounds) {

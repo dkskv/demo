@@ -4,7 +4,7 @@ import { Point } from "../point";
 // todo: переименовать на ResizingHandle
 /** Точка, меняющая размеры бокса (координаты точки нормированы) */
 export class ResizingPoint extends Point {
-  private get mirroredPoint(): Point {
+  public get mirroredPoint(): Point {
     return this.reflectAroundPoint(new Point(0.5, 0.5));
   }
 
@@ -39,18 +39,5 @@ export class ResizingPoint extends Point {
 
     /** Изменение размеров бокса на вектор перемещения */
     return box.shiftDeltas(moveVector.x, moveVector.y);
-  }
-
-  /** Переместить бокс в соответствии с `origin` после применения трансформаций */
-  public keepTransformOrigin(
-    prevBox: BoundingBox,
-    nextBox: BoundingBox,
-    origin = this.mirroredPoint
-  ): BoundingBox {
-    /** Исходное значение `origin` (реальные координаты) */
-    const prevOrigin = prevBox.denormalizePoint(origin);
-
-    /** Возвращаем `origin` в исходное положение */
-    return nextBox.moveTo(prevOrigin, origin);
   }
 }

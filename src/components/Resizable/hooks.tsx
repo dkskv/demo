@@ -5,7 +5,7 @@ import { Point } from "../../utils/point";
 import { Draggable } from "../Draggable";
 import { ResizingPoint } from "../../utils/boxResize/resizingPoint";
 import { IResizeThumbKey, resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
-import { ISizeBounds, updateBox } from "../../utils/boxResize";
+import { constrainResizedBox, ISizeBounds } from "../../utils/boxResize/constraints";
 import { useActualRef } from "../../decorators/useActualRef";
 import { IDragBoxCallback, IDragBoxCallbacks } from "../../decorators/dnd";
 import { IDragCallback } from "../../utils/drag";
@@ -66,16 +66,21 @@ export function useResize(params: IResizeParams): React.ReactNode {
     ) => {
       const { box, keepAspectRatio, sizeBounds, outerBox } = paramsRef.current;
 
-      const updatedBox = updateBox({
-        prevBox: box,
-        resizingPoint,
-        resizingPointTarget,
-        aspectRatio: keepAspectRatio || pressedKeys.shiftKey ? aspectRatioRef.current : null,
-        sizeBounds,
-        outerBox
-      });
+      const resizedBox = resizingPoint.resizeBox(box, resizingPointTarget);
 
-      onChange(updatedBox, pressedKeys);
+      const constraints = { 
+        aspectRatio: keepAspectRatio || pressedKeys.shiftKey ? aspectRatioRef.current : null,
+        sizeBounds, 
+        outerBox 
+      } as const;
+
+      const nextBox = constrainResizedBox(
+        resizedBox, 
+        { sourceBox: box, transformOrigin: resizingPoint.mirroredPoint},
+        constraints
+      );
+
+      onChange(nextBox, pressedKeys);
     }, 
     [paramsRef, onChange]
   )
