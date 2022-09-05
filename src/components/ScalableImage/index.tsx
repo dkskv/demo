@@ -28,7 +28,7 @@ export const ScalableImage: React.FC<IProps> = ({
     const nextViewBox = viewBox
       .scale(delta * WheelScalingK)
       .constrainSize(scaleBounds, scaleBounds)
-      .moveTo(viewBox.denormalizePoint(p), p)
+      .placeInSameOrigin(viewBox, p)
       .clampByOuter(BoundingBox.fromOrigin(1, 1));
 
     onViewBoxChange(nextViewBox);

@@ -236,4 +236,10 @@ export class BoundingBox {
   map(f: (a: number) => number) {
     return new BoundingBox(f(this.x1), f(this.x2), f(this.y1), f(this.y2));
   }
+
+  /** Разместить в той же точке, что и переданный бокс */
+  placeInSameOrigin(box: BoundingBox, normalizedOrigin: Point) {
+    const realOrigin = box.denormalizePoint(normalizedOrigin);
+    return this.moveTo(realOrigin, normalizedOrigin);
+  }
 }
