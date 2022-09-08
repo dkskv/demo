@@ -8,6 +8,8 @@ import { Directions, IDirection } from "../../utils/direction";
 import { Point } from "../../utils/point";
 import { getBoxStyle } from "../../utils/styles";
 import { getBoxOnPage } from "../../utils/dom";
+import { Space } from "../Space";
+import { NumbersRange } from "../../utils/numbersRange";
 
 interface IProps {
   box: BoundingBox;
@@ -38,16 +40,16 @@ export const SwipeContainer: React.FC<IProps> = ({
 }) => {
   const [element, setElement] = useCallbackRef();
 
-  const contentLength = (() => {
+  const [contentLength, setContentLength] = useState(0);
+
+  useEffect(() => {
     const content = element?.childNodes?.[0];
 
-    if (!(content instanceof HTMLElement)) {
-      return 0;
+    if (content instanceof HTMLElement) {
+      const contentBox = getBoxOnPage(content);
+      setContentLength(getBoxLength(contentBox, direction));
     }
-
-    const contentBox = getBoxOnPage(content);
-    return getBoxLength(contentBox, direction);
-  })();
+  }, [element, direction]);
 
   useEffect(() => {
     setCoordinate(0);
@@ -178,29 +180,86 @@ export const SwipeContainer: React.FC<IProps> = ({
     onEnd: handleDragEnd,
   });
 
+  const containerLength = getBoxLength(box, direction);
+
+  return (
+    <Space size={8} direction={direction.opposite}>
+      <div
+        ref={setElement}
+        style={{
+          display: "inline-block",
+          background: "SkyBlue",
+          userSelect: "none",
+          cursor: "grab",
+          position: "relative",
+          overflow: "hidden",
+          ...getBoxStyle(box),
+        }}
+      >
+        <div
+          style={{
+            position: "absolute",
+            [direction.cssKeys.thickness]: "100%",
+            [direction.cssKeys.normalCoordinate]: 0,
+            [direction.cssKeys.coordinate]: -coordinate,
+          }}
+        >
+          {children}
+        </div>
+      </div>
+      <Scrollbar
+        direction={direction}
+        length={containerLength}
+        thickness={5}
+        range={NumbersRange.createByDelta(
+          coordinate / contentLength,
+          containerLength / contentLength
+        )}
+      />
+    </Space>
+  );
+};
+
+interface IScrollbarProps {
+  thickness: number;
+  length: number;
+  direction: IDirection;
+  // В нормализованном виде
+  range: NumbersRange;
+}
+
+const Scrollbar: React.FC<IScrollbarProps> = ({
+  direction,
+  length,
+  thickness,
+  range,
+}) => {
+  const box = direction.boxFromRanges(
+    new NumbersRange(0, length),
+    new NumbersRange(0, thickness)
+  );
+
+  const thumbBox = direction.boxFromRanges(
+    range.map((n) => n * length),
+    new NumbersRange(0, thickness)
+  );
+
   return (
     <div
-      ref={setElement}
       style={{
-        display: "inline-block",
-        background: "SkyBlue",
-        userSelect: "none",
-        cursor: "grab",
         position: "relative",
-        overflow: "hidden",
         ...getBoxStyle(box),
+        background: "Dimgrey",
+        overflow: "hidden",
       }}
     >
       <div
         style={{
           position: "absolute",
-          [direction.cssKeys.thickness]: "100%",
-          [direction.cssKeys.normalCoordinate]: 0,
-          [direction.cssKeys.coordinate]: -coordinate,
+          ...getBoxStyle(thumbBox),
+          background: "yellow",
         }}
-      >
-        {children}
-      </div>
+      />
     </div>
   );
 };
