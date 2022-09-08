@@ -1,15 +1,12 @@
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import makeStateful from "../../decorators/makeStateful";
 import { BoundingBox } from "../../utils/boundingBox";
-import { IResizeParams, useResize } from "./hooks";
+import { IResizeParams, useResize, useScalableBox } from "./hooks";
 import { resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
 import { getBoxStyle } from "../../utils/styles";
 import { Thumb } from "../Thumb";
 import { useDragBox } from "../../decorators/dnd";
-import { useScale } from "../../decorators/useScale";
-import { Point } from "../../utils/point";
-import { WheelScalingK } from "../../utils/constants";
-import { constrainResizedBox } from "../../utils/boxResize/constraints";
+import { noop } from "../../utils/common";
 
 export interface IResizableProps
   extends Pick<
@@ -30,8 +27,8 @@ export interface IResizableProps
 const Resizable: React.FC<IResizableProps> = ({
   value,
   onChange,
-  onStart,
-  onEnd,
+  onStart = noop,
+  onEnd = noop,
   sizeBounds = {},
   outerBox = BoundingBox.infinite(),
   keepAspectRatio = false,
@@ -62,23 +59,15 @@ const Resizable: React.FC<IResizableProps> = ({
     ThumbComponent,
   });
 
-  const handleScale = useCallback(
-    (delta: number, p: Point /*, pressedKeys */) => {
-      const scaledBox = value.scale(delta * WheelScalingK);
-
-      const nextBox = constrainResizedBox(
-        scaledBox,
-        { sourceBox: value, transformOrigin: p },
-        { aspectRatio: scaledBox.aspectRatio, outerBox, sizeBounds }
-      );
-
-      // @ts-ignore
-      onChange(nextBox, {});
-    },
-    [value, onChange, outerBox, sizeBounds]
-  );
-
-  useScale(element, handleScale);
+  useScalableBox({
+    box: value,
+    element: isDraggable ? element : null,
+    sizeBounds,
+    outerBox,
+    onChange,
+    onStart,
+    onEnd,
+  });
 
   return (
     <>

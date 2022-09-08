@@ -1,4 +1,4 @@
-import { IPressedKeys, noop } from "./common";
+import { extractPressedKeys, IPressedKeys, noop } from "./common";
 import { getMouseOffsetPoint, getMousePoint } from "./dom";
 import { Point } from "./point";
 
@@ -102,12 +102,4 @@ export class DragMovementListener extends DragListener {
     this.callbacks.onEnd(Point.nullish, extractPressedKeys(upEvent));
     document.removeEventListener("mousemove", this.handleMove);
   }
-}
-
-function extractPressedKeys({
-  altKey,
-  shiftKey,
-  ctrlKey,
-}: MouseEvent): IPressedKeys {
-  return { altKey, shiftKey, ctrlKey };
 }

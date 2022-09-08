@@ -6,6 +6,14 @@ export interface IPressedKeys {
   ctrlKey: boolean;
 }
 
+export function extractPressedKeys({
+  altKey,
+  shiftKey,
+  ctrlKey,
+}: MouseEvent): IPressedKeys {
+  return { altKey, shiftKey, ctrlKey };
+}
+
 export const noop = () => {};
 
 export const magnetize = curryN(

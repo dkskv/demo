@@ -1,24 +1,52 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
+import { extractPressedKeys, IPressedKeys, noop } from "../utils/common";
 import { getBoxOnPage, getMouseOffsetPoint } from "../utils/dom";
 import { Point } from "../utils/point";
 
+interface IParams {
+  onChange(
+    delta: number,
+    scalingOrigin: Point,
+    pressedKeys: IPressedKeys
+  ): void;
+  onStart?(scalingOrigin: Point, pressedKeys: IPressedKeys): void;
+  onEnd?(scalingOrigin: Point, pressedKeys: IPressedKeys): void;
+  delayToEnd?: number;
+}
+
 export function useScale(
   element: Element | null,
-  onChange: (delta: number, scalingOrigin: Point) => void
+  { onChange, onStart = noop, onEnd = noop, delayToEnd = 100 }: IParams
 ) {
+  const timerId = useRef<NodeJS.Timer>();
+
   const handleChange = useCallback(
     (event: Event) => {
-      event.stopPropagation();
-      event.preventDefault();
+      const wheelEvent = event as WheelEvent;
 
-      const { deltaY } = event as WheelEvent;
+      wheelEvent.stopPropagation();
+      wheelEvent.preventDefault();
 
-      const targetBox = getBoxOnPage(event.currentTarget as Element);
-      const offsetPoint = getMouseOffsetPoint(event as WheelEvent);
+      const targetBox = getBoxOnPage(wheelEvent.currentTarget as Element);
+      const offsetPoint = getMouseOffsetPoint(wheelEvent);
 
-      onChange(deltaY, targetBox.resetOrigin().normalizePoint(offsetPoint));
+      const scalingOrigin = targetBox.resetOrigin().normalizePoint(offsetPoint);
+      const pressedKeys = extractPressedKeys(wheelEvent);
+
+      if (timerId.current === undefined) {
+        onStart(scalingOrigin, pressedKeys);
+      }
+
+      onChange(wheelEvent.deltaY, scalingOrigin, pressedKeys);
+
+      timerId.current && clearTimeout(timerId.current);
+
+      timerId.current = setTimeout(() => {
+        timerId.current = undefined;
+        onEnd(scalingOrigin, pressedKeys);
+      }, delayToEnd);
     },
-    [onChange]
+    [onChange, onStart, onEnd, delayToEnd]
   );
 
   useEffect(() => {

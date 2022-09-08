@@ -34,7 +34,7 @@ export const ScalableImage: React.FC<IProps> = ({
     onViewBoxChange(nextViewBox);
   }
 
-  useScale(element, handleScale);
+  useScale(element, { onChange: handleScale });
 
   const handleDrag = function (delta: Point) {
     const scaledDelta = delta.div(

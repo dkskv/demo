@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
 import { BoundingBox } from "../../utils/boundingBox";
-import { type IPressedKeys } from "../../utils/common";
+import { noop, type IPressedKeys } from "../../utils/common";
 import { Point } from "../../utils/point";
 import { Draggable } from "../Draggable";
 import { ResizingPoint } from "../../utils/boxResize/resizingPoint";
@@ -9,6 +9,8 @@ import { constrainResizedBox, ISizeBounds } from "../../utils/boxResize/constrai
 import { useActualRef } from "../../decorators/useActualRef";
 import { IDragBoxCallback, IDragBoxCallbacks } from "../../decorators/dnd";
 import { IDragCallback } from "../../utils/drag";
+import { WheelScalingK } from "../../utils/constants";
+import { useScale } from "../../decorators/useScale";
 
 export interface IResizeParams extends Partial<IDragBoxCallbacks> {
   /** Текущее состояние бокса */
@@ -68,20 +70,20 @@ export function useResize(params: IResizeParams): React.ReactNode {
 
       const resizedBox = resizingPoint.resizeBox(box, resizingPointTarget);
 
-      const constraints = { 
+      const constraints = {
         aspectRatio: keepAspectRatio || pressedKeys.shiftKey ? aspectRatioRef.current : null,
-        sizeBounds, 
-        outerBox 
+        sizeBounds,
+        outerBox
       } as const;
 
       const nextBox = constrainResizedBox(
-        resizedBox, 
-        { sourceBox: box, transformOrigin: resizingPoint.mirroredPoint},
+        resizedBox,
+        { sourceBox: box, transformOrigin: resizingPoint.mirroredPoint },
         constraints
       );
 
       onChange(nextBox, pressedKeys);
-    }, 
+    },
     [paramsRef, onChange]
   )
 
@@ -107,3 +109,58 @@ export function useResize(params: IResizeParams): React.ReactNode {
   })
 }
 
+interface IScalableBoxParams extends Partial<IDragBoxCallbacks> {
+  box: BoundingBox;
+  onChange: IDragBoxCallback;
+  element: Element | null;
+  sizeBounds: ISizeBounds;
+  outerBox: BoundingBox;
+}
+
+export function useScalableBox({
+  element,
+  box,
+  onChange,
+  onStart = noop,
+  onEnd = noop,
+  outerBox,
+  sizeBounds
+}: IScalableBoxParams) {
+  const actualBox = useActualRef(box);
+
+  const handleScaleStart = useCallback(
+    (p: Point, pressedKeys: IPressedKeys) => {
+      onStart(actualBox.current, pressedKeys);
+    },
+    [actualBox, onStart]
+  );
+
+  const handleScale = useCallback(
+    (delta: number, p: Point, pressedKeys: IPressedKeys) => {
+      const value = actualBox.current;
+      const scaledBox = value.scale(delta * WheelScalingK);
+
+      const nextBox = constrainResizedBox(
+        scaledBox,
+        { sourceBox: value, transformOrigin: p },
+        { aspectRatio: scaledBox.aspectRatio, outerBox, sizeBounds }
+      );
+
+      onChange(nextBox, pressedKeys);
+    },
+    [actualBox, onChange, outerBox, sizeBounds]
+  );
+
+  const handleScaleEnd = useCallback(
+    (p: Point, pressedKeys: IPressedKeys) => {
+      onEnd(actualBox.current, pressedKeys);
+    },
+    [actualBox, onEnd]
+  );
+
+  useScale(element, {
+    onChange: handleScale,
+    onStart: handleScaleStart,
+    onEnd: handleScaleEnd,
+  });
+}
