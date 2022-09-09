@@ -8,7 +8,6 @@ import { Directions, IDirection } from "../../utils/direction";
 import { Point } from "../../utils/point";
 import { getBoxStyle } from "../../utils/styles";
 import { getBoxOnPage } from "../../utils/dom";
-import { Space } from "../Space";
 import { NumbersRange } from "../../utils/numbersRange";
 
 interface IProps {
@@ -63,7 +62,8 @@ export const SwipeContainer: React.FC<IProps> = ({
   );
   const maxOverflow = 100;
 
-  const impulse = useRef<number>(0);
+  const [impulse, setImpulse] = useState<number>(0);
+  const actualImpulse = useActualRef(impulse);
   const dragTimestamp = useRef<number>(0);
   const request = useRef<number>(0);
 
@@ -128,13 +128,13 @@ export const SwipeContainer: React.FC<IProps> = ({
         prevTimestamp = timestamp;
 
         setCoordinate((coordinate) => {
-          const step = doStep(coordinate, impulse.current, dt);
+          const step = doStep(coordinate, actualImpulse.current, dt);
 
           if (step.impulse !== 0 || inExtrusionZone(step.coordinate)) {
             move();
           }
 
-          impulse.current = step.impulse;
+          setImpulse(step.impulse);
           return step.coordinate;
         });
       });
@@ -149,18 +149,17 @@ export const SwipeContainer: React.FC<IProps> = ({
     dragTimestamp.current = performance.now();
 
     setCoordinate((prevCoordinate) => {
-      impulse.current = -direction.coordinatesOfPoint(delta)[0];
+      let impulse = -direction.coordinatesOfPoint(delta)[0];
 
-      if (prevCoordinate < 0 && impulse.current < 0) {
-        impulse.current *= 1 - prevCoordinate / -maxOverflow;
-      } else if (prevCoordinate > maxCoordinate && impulse.current > 0) {
-        impulse.current *= 1 - (prevCoordinate - maxCoordinate) / maxOverflow;
+      if (prevCoordinate < 0 && impulse < 0) {
+        impulse *= 1 - prevCoordinate / -maxOverflow;
+      } else if (prevCoordinate > maxCoordinate && impulse > 0) {
+        impulse *= 1 - (prevCoordinate - maxCoordinate) / maxOverflow;
       }
 
-      return clampExtendedCoordinate(
-        prevCoordinate + impulse.current,
-        maxOverflow
-      );
+      setImpulse(impulse);
+
+      return clampExtendedCoordinate(prevCoordinate + impulse, maxOverflow);
     });
   }
 
@@ -170,10 +169,12 @@ export const SwipeContainer: React.FC<IProps> = ({
       inExtrusionZone(actualCoordinate.current)
     ) {
       startMoving();
+    } else {
+      setImpulse(0);
     }
   };
 
-  useDragMovement({
+  const { isDrag } = useDragMovement({
     element,
     onChange: handleDrag,
     onStart: handleDragStart,
@@ -183,40 +184,46 @@ export const SwipeContainer: React.FC<IProps> = ({
   const containerLength = getBoxLength(box, direction);
 
   return (
-    <Space size={8} direction={direction.opposite}>
+    <div
+      ref={setElement}
+      style={{
+        display: "inline-block",
+        background: "SkyBlue",
+        userSelect: "none",
+        cursor: "grab",
+        position: "relative",
+        overflow: "hidden",
+        ...getBoxStyle(box),
+      }}
+    >
       <div
-        ref={setElement}
         style={{
-          display: "inline-block",
-          background: "SkyBlue",
-          userSelect: "none",
-          cursor: "grab",
-          position: "relative",
-          overflow: "hidden",
-          ...getBoxStyle(box),
+          position: "absolute",
+          [direction.cssKeys.thickness]: "100%",
+          [direction.cssKeys.normalCoordinate]: 0,
+          [direction.cssKeys.coordinate]: -coordinate,
         }}
       >
-        <div
-          style={{
-            position: "absolute",
-            [direction.cssKeys.thickness]: "100%",
-            [direction.cssKeys.normalCoordinate]: 0,
-            [direction.cssKeys.coordinate]: -coordinate,
-          }}
-        >
-          {children}
-        </div>
+        {children}
       </div>
-      <Scrollbar
-        direction={direction}
-        length={containerLength}
-        thickness={5}
-        range={NumbersRange.createByDelta(
-          coordinate / contentLength,
-          containerLength / contentLength
-        )}
-      />
-    </Space>
+      <div
+        style={{
+          position: "absolute",
+          [direction.reversed.cssKeys.normalCoordinate]: 0,
+        }}
+      >
+        <Scrollbar
+          isActive={impulse !== 0 || isDrag}
+          direction={direction}
+          length={containerLength}
+          thickness={5}
+          range={NumbersRange.createByDelta(
+            coordinate / contentLength,
+            containerLength / contentLength
+          )}
+        />
+      </div>
+    </div>
   );
 };
 
@@ -226,6 +233,7 @@ interface IScrollbarProps {
   direction: IDirection;
   // В нормализованном виде
   range: NumbersRange;
+  isActive: boolean;
 }
 
 const Scrollbar: React.FC<IScrollbarProps> = ({
@@ -233,6 +241,7 @@ const Scrollbar: React.FC<IScrollbarProps> = ({
   length,
   thickness,
   range,
+  isActive,
 }) => {
   const box = direction.boxFromRanges(
     new NumbersRange(0, length),
@@ -249,7 +258,7 @@ const Scrollbar: React.FC<IScrollbarProps> = ({
       style={{
         position: "relative",
         ...getBoxStyle(box),
-        background: "Dimgrey",
+        background: "transparent",
         overflow: "hidden",
       }}
     >
@@ -258,6 +267,9 @@ const Scrollbar: React.FC<IScrollbarProps> = ({
           position: "absolute",
           ...getBoxStyle(thumbBox),
           background: "yellow",
+          transitionProperty: "opacity",
+          transitionDuration: "500ms",
+          opacity: isActive ? 1 : 0,
         }}
       />
     </div>
