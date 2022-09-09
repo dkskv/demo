@@ -1,5 +1,5 @@
 import { identity, mapObjIndexed } from "ramda";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { BoundingBox } from "../utils/boundingBox";
 import { IPressedKeys, noop } from "../utils/common";
 import { getBoxOnPage, getPointOnPage } from "../utils/dom";
@@ -23,8 +23,10 @@ export interface IDragParams extends Partial<IDragCallbacks> {
 function useDndListener(
   Listener: { new (element: Element): DragListener },
   element: Element | null,
-  callbacks: IDragCallbacks
+  { onChange, onStart, onEnd }: IDragCallbacks
 ) {
+  const [isDrag, setIsDrag] = useState(false);
+
   const instance = useMemo(
     () => element && new Listener(element),
     [Listener, element]
@@ -32,7 +34,25 @@ function useDndListener(
 
   useEffect(() => instance?.launch(), [instance]);
 
-  instance?.setCallbacks(callbacks);
+  const handleStart: typeof onStart = useCallback(
+    (...args) => {
+      setIsDrag(true);
+      onStart(...args);
+    },
+    [onStart]
+  );
+
+  const handleEnd: typeof onEnd = useCallback(
+    (...args) => {
+      setIsDrag(false);
+      onEnd(...args);
+    },
+    [onEnd]
+  );
+
+  instance?.setCallbacks({ onChange, onStart: handleStart, onEnd: handleEnd });
+
+  return { isDrag } as const;
 }
 
 export function useDragMovement({
@@ -41,7 +61,11 @@ export function useDragMovement({
   onStart = noop,
   onEnd = noop,
 }: IDragParams) {
-  useDndListener(DragMovementListener, element, { onStart, onChange, onEnd });
+  return useDndListener(DragMovementListener, element, {
+    onStart,
+    onChange,
+    onEnd,
+  });
 }
 
 export function useDrag({
@@ -77,7 +101,7 @@ export function useDrag({
 
   const wrapper = isInOwnCoordinates ? offsetParentDecorator : identity;
 
-  useDndListener(
+  return useDndListener(
     DragCoordinatesListener,
     element,
     mapObjIndexed(wrapper, { onStart, onChange, onEnd })
