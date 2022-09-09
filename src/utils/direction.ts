@@ -25,7 +25,7 @@ export interface IDirection {
   pointOfCoordinates(
     parallelCoordinate: number,
     normalCoordinate: number
-    ): Point;
+  ): Point;
   lengthKey: EBoxLength;
   /** Стороны бокса, перпендикулярные оси направления */
   sides: readonly [EBoxSide, EBoxSide];
@@ -58,7 +58,7 @@ export namespace Directions {
     boxFromRanges(parallelRange: NumbersRange, normalRange: NumbersRange) {
       return BoundingBox.createByRanges(parallelRange, normalRange);
     },
-    coordinatesOfPoint({x, y}: Point) {
+    coordinatesOfPoint({ x, y }: Point) {
       return [x, y];
     },
     pointOfCoordinates(x: number, y: number) {
@@ -96,7 +96,7 @@ export namespace Directions {
     boxFromRanges(parallelRange: NumbersRange, normalRange: NumbersRange) {
       return BoundingBox.createByRanges(normalRange, parallelRange);
     },
-    coordinatesOfPoint({x, y}: Point) {
+    coordinatesOfPoint({ x, y }: Point) {
       return [y, x];
     },
     pointOfCoordinates(y: number, x: number) {
@@ -132,6 +132,11 @@ export namespace Directions {
       ...horizontal.cssValues,
       direction: "row-reverse",
     },
+    cssKeys: {
+      ...horizontal.cssKeys,
+      coordinate: "right",
+      normalCoordinate: "bottom",
+    },
     get opposite() {
       return Directions.verticalReversed;
     },
@@ -146,6 +151,11 @@ export namespace Directions {
     cssValues: {
       ...vertical.cssValues,
       direction: "column-reverse",
+    },
+    cssKeys: {
+      ...vertical.cssKeys,
+      coordinate: "bottom",
+      normalCoordinate: "right",
     },
     get opposite() {
       return Directions.horizontalReversed;
