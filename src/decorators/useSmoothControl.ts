@@ -1,5 +1,5 @@
 import { equals } from "ramda";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { IConverter } from "../utils/converter";
 
 interface IParams<ControlValue, Value> {
@@ -11,11 +11,6 @@ interface IParams<ControlValue, Value> {
   converter: IConverter<ControlValue, Value>;
 
   isSmooth: boolean;
-  /**
-   * @deprecated Функция сравнения двух целевых значений, чтобы не вызывать callback,
-   * если изменения альтернативного значения не повлияло на целевое
-   */
-  isChanged?(v1: Value, v2: Value): boolean;
 }
 
 /** Использовать более плавный способ управлять значением */
@@ -24,25 +19,25 @@ export function useSmoothControl<ControlValue, Value>({
   onChange,
   converter,
   isSmooth,
-  isChanged = equals,
 }: IParams<ControlValue, Value>) {
-  const [controlValue, setControlValue] = useState(
+  // todo: переименовать в selfValue?
+  const [controlValue, setControlValue] = useState(() =>
     converter.fromDestination(value)
   );
 
+  const actualValue = useRef(value);
+
   const handleControlChange = useCallback(
     (value: ControlValue) => {
-      setControlValue((prevValue) => {
-        const outputValue = converter.toDestination(value);
+      setControlValue(value);
 
-        if (isChanged(outputValue, converter.toDestination(prevValue))) {
-          onChange(outputValue);
-        }
+      const outputValue = converter.toDestination(value);
 
-        return value;
-      });
+      if (!equals(actualValue.current, outputValue)) {
+        onChange(outputValue);
+      }
     },
-    [converter, isChanged, onChange]
+    [converter, onChange]
   );
 
   const handleControlEnd = useCallback(
@@ -54,18 +49,23 @@ export function useSmoothControl<ControlValue, Value>({
     [converter]
   );
 
-  const handleChange = useCallback(
-    (value: Value) => {
-      onChange(value);
-      setControlValue(converter.fromDestination(value));
-    },
-    [converter, onChange]
-  );
+  // /** Эффект сброса значения из state, если оно не соответствует значению из props */
+  useEffect(() => {
+    setControlValue((controlValue) => {
+      const propsControlValue = converter.fromDestination(value);
+
+      return equals(
+        converter.toDestination(controlValue),
+        converter.toDestination(propsControlValue)
+      )
+        ? controlValue
+        : propsControlValue;
+    });
+  }, [value, converter]);
 
   return {
     controlValue: isSmooth ? controlValue : converter.fromDestination(value),
     handleControlChange,
     handleControlEnd,
-    handleChange,
   } as const;
 }

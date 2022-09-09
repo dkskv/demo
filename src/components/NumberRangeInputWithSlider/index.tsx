@@ -36,7 +36,7 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
   } = props;
   const converter = useMemo(() => createConverter(bounds), [bounds]);
 
-  const { controlValue, handleControlChange, handleControlEnd, handleChange } =
+  const { controlValue, handleControlChange, handleControlEnd } =
     useSmoothControl({
       value,
       onChange,
@@ -47,7 +47,7 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
   return (
     <NumbersRangeInput
       value={value}
-      onChange={handleChange}
+      onChange={onChange}
       bounds={bounds}
       sizeBounds={sizeBounds}
       direction={direction}

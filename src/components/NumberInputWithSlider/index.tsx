@@ -34,7 +34,7 @@ const NumberInputWithSlider: React.FC<IProps> = ({
     };
   }, [max]);
 
-  const { controlValue, handleControlChange, handleControlEnd, handleChange } =
+  const { controlValue, handleControlChange, handleControlEnd } =
     useSmoothControl({
       value,
       onChange,
@@ -44,9 +44,9 @@ const NumberInputWithSlider: React.FC<IProps> = ({
 
   const handleInputChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
-      handleChange(Number(event.target.value));
+      onChange(Number(event.target.value));
     },
-    [handleChange]
+    [onChange]
   );
 
   return (
