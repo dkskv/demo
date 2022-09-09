@@ -36,11 +36,21 @@ export abstract class DragListener {
     return () => this.dispose();
   }
 
-  private dispose() {
-    this.element.removeEventListener("mousedown", this.handleDown);
+  private addActiveElementListeners() {
+    document.addEventListener("mousemove", this.handleMove);
+    document.addEventListener("mouseup", this.handleEnd, { once: true });
+    document.addEventListener("mouseleave", this.handleEnd, { once: true });
+  }
+
+  protected removeActiveElementListeners() {
     document.removeEventListener("mousemove", this.handleMove);
     document.removeEventListener("mouseup", this.handleEnd);
     document.removeEventListener("mouseleave", this.handleEnd);
+  }
+
+  private dispose() {
+    this.element.removeEventListener("mousedown", this.handleDown);
+    this.removeActiveElementListeners();
   }
 
   protected abstract handleStart(downEvent: MouseEvent): void;
@@ -54,9 +64,7 @@ export abstract class DragListener {
 
     this.handleStart(downEvent);
 
-    document.addEventListener("mousemove", this.handleMove);
-    document.addEventListener("mouseup", this.handleEnd, { once: true });
-    document.addEventListener("mouseleave", this.handleEnd, { once: true });
+    this.addActiveElementListeners();
   }
 }
 
@@ -83,7 +91,7 @@ export class DragCoordinatesListener extends DragListener {
     const point = getMousePoint(upEvent).subtract(this.offset);
 
     this.callbacks.onEnd(point, extractPressedKeys(upEvent));
-    document.removeEventListener("mousemove", this.handleMove);
+    this.removeActiveElementListeners();
   }
 }
 
@@ -100,6 +108,6 @@ export class DragMovementListener extends DragListener {
 
   protected handleEnd(upEvent: MouseEvent) {
     this.callbacks.onEnd(Point.nullish, extractPressedKeys(upEvent));
-    document.removeEventListener("mousemove", this.handleMove);
+    this.removeActiveElementListeners();
   }
 }
