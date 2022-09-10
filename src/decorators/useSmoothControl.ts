@@ -1,6 +1,7 @@
 import { equals } from "ramda";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { IConverter } from "../utils/converter";
+import { useActualRef } from "./useActualRef";
 
 interface IParams<ControlValue, Value> {
   /** Целевое значение */
@@ -9,62 +10,51 @@ interface IParams<ControlValue, Value> {
   onChange(value: Value): void;
   /** Конвертер из альтернативного значения в целевое */
   converter: IConverter<ControlValue, Value>;
-
   isSmooth: boolean;
 }
 
 /** Использовать более плавный способ управлять значением */
 export function useSmoothControl<ControlValue, Value>({
-  value,
+  value: externalValue,
   onChange,
   converter,
   isSmooth,
 }: IParams<ControlValue, Value>) {
-  // todo: переименовать в selfValue?
-  const [controlValue, setControlValue] = useState(() =>
-    converter.fromDestination(value)
+  const [isActive, setIsActive] = useState(false);
+  const [selfValue, setSelfValue] = useState(() =>
+    converter.fromDestination(externalValue)
   );
-
-  const actualValue = useRef(value);
+  const actualExternalValue = useActualRef(externalValue);
 
   const handleControlChange = useCallback(
-    (value: ControlValue) => {
-      setControlValue(value);
+    (nextSelfValue: ControlValue) => {
+      setIsActive(true);
+      setSelfValue(nextSelfValue);
 
-      const outputValue = converter.toDestination(value);
+      const outputValue = converter.toDestination(nextSelfValue);
 
-      if (!equals(actualValue.current, outputValue)) {
+      if (!equals(actualExternalValue.current, outputValue)) {
         onChange(outputValue);
       }
     },
-    [converter, onChange]
+    [actualExternalValue, converter, onChange]
   );
 
-  const handleControlEnd = useCallback(
-    (value: ControlValue) => {
-      setControlValue(
-        converter.fromDestination(converter.toDestination(value))
-      );
-    },
-    [converter]
-  );
+  const handleControlEnd = useCallback(() => {
+    setIsActive(false);
+  }, []);
 
-  // /** Эффект сброса значения из state, если оно не соответствует значению из props */
+  /** Эффект сброса значения из state, если оно не соответствует значению из props */
   useEffect(() => {
-    setControlValue((controlValue) => {
-      const propsControlValue = converter.fromDestination(value);
-
-      return equals(
-        converter.toDestination(controlValue),
-        converter.toDestination(propsControlValue)
-      )
-        ? controlValue
-        : propsControlValue;
-    });
-  }, [value, converter]);
+    if (!isActive) {
+      setSelfValue(converter.fromDestination(externalValue));
+    }
+  }, [isActive, externalValue, converter]);
 
   return {
-    controlValue: isSmooth ? controlValue : converter.fromDestination(value),
+    controlValue: isSmooth
+      ? selfValue
+      : converter.fromDestination(externalValue),
     handleControlChange,
     handleControlEnd,
   } as const;
