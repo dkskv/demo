@@ -4,6 +4,7 @@ import { NumbersRange } from "../../utils/numbersRange";
 import { BoundingBox } from "../../utils/boundingBox";
 import ResizableControl, { IResizableControlProps } from "../ResizableControl";
 import { IPressedKeys, noop } from "../../utils/common";
+import { SizeBounds } from "../../utils/sizeBounds";
 
 export interface ISliderProps
   extends Omit<
@@ -21,6 +22,11 @@ export interface ISliderProps
   direction?: IDirection;
 
   thumbKeys?: [0] | [1] | [0, 1];
+}
+
+function getDirectedSizeBounds(bounds: NumbersRange, direction: IDirection) {
+  const boxOfBounds = direction.boxFromRanges(bounds, NumbersRange.infinite());
+  return new SizeBounds(boxOfBounds.xsRange, boxOfBounds.ysRange);
 }
 
 const Slider: React.FC<ISliderProps> = ({
@@ -47,7 +53,7 @@ const Slider: React.FC<ISliderProps> = ({
       onChange={handleChange}
       onStart={handleStart}
       onEnd={handleEnd}
-      sizeBounds={{ [direction.lengthKey]: sizeBounds }}
+      sizeBounds={getDirectedSizeBounds(sizeBounds, direction)}
       thumbKeys={direction.sides.filter((_, i) =>
         (thumbKeys as number[]).includes(i)
       )}

@@ -7,6 +7,7 @@ import { getBoxStyle } from "../../utils/styles";
 import { Thumb } from "../Thumb";
 import { useDragBox } from "../../decorators/dnd";
 import { noop } from "../../utils/common";
+import { SizeBounds } from "../../utils/sizeBounds";
 
 export interface IResizableProps
   extends Pick<
@@ -29,7 +30,7 @@ const Resizable: React.FC<IResizableProps> = ({
   onChange,
   onStart = noop,
   onEnd = noop,
-  sizeBounds = {},
+  sizeBounds = new SizeBounds(),
   outerBox = BoundingBox.infinite(),
   keepAspectRatio = false,
   thumbKeys = resizingPointsPreset.all,

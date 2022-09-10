@@ -1,8 +1,8 @@
 import React, { useCallback } from "react";
 import { BoundingBox } from "../../utils/boundingBox";
 import { IPressedKeys, noop } from "../../utils/common";
+import { SizeBounds } from "../../utils/sizeBounds";
 import Resizable, { IResizableProps } from "../Resizable";
-import { denormalizeSizeBounds } from "./utils";
 
 export interface IResizableControlProps extends IResizableProps {
   outerBox: NonNullable<IResizableProps["outerBox"]>;
@@ -14,7 +14,7 @@ const ResizableControl: React.FC<IResizableControlProps> = ({
   onChange,
   onStart = noop,
   onEnd = noop,
-  sizeBounds = {},
+  sizeBounds = new SizeBounds(),
   outerBox,
   ...rest
 }) => {
@@ -29,7 +29,7 @@ const ResizableControl: React.FC<IResizableControlProps> = ({
       onChange={handleChange}
       onStart={handleStart}
       onEnd={handleEnd}
-      sizeBounds={denormalizeSizeBounds(sizeBounds, outerBox)}
+      sizeBounds={sizeBounds.denormalize(outerBox.dx, outerBox.dy)}
       outerBox={outerBox}
     />
   );

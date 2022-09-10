@@ -1,13 +1,11 @@
 import { BoundingBox } from "../boundingBox";
+import { compareWithPrecision } from "../common";
 import { Point } from "../point";
-import { NumbersRange } from "../numbersRange";
-import { EBoxLength } from "../boxParams";
-
-export type ISizeBounds = Partial<Record<EBoxLength, NumbersRange>>;
+import { SizeBounds } from "../sizeBounds";
 
 interface IBoxConstraints {
   aspectRatio: number | null;
-  sizeBounds: ISizeBounds;
+  sizeBounds: SizeBounds;
   outerBox: BoundingBox;
 }
 
@@ -23,44 +21,31 @@ export function constrainResizedBox(
 ) {
   const keepAspectRatio = aspectRatio !== null;
 
-  // Сохранение соотношения сторон
   if (keepAspectRatio) {
     resizedBox = resizedBox.setAspectRatio(aspectRatio);
   }
 
-  // Ограничение размера
-  resizedBox = constrainSize(resizedBox, sizeBounds);
+  resizedBox = resizedBox
+    .constrainSize(sizeBounds.dxBounds, sizeBounds.dyBounds)
+    .placeInSameOrigin(sourceBox, transformOrigin)
+    .clipByOuter(outerBox);
 
-  // Поправка расположения
-  resizedBox = resizedBox.placeInSameOrigin(sourceBox, transformOrigin);
-
-  // Ограничение внешним боксом
-  resizedBox = outerBox.clipInner(resizedBox);
-
-  if (keepAspectRatio) {
-    const precision = 5;
-
-    if (
-      aspectRatio.toPrecision(precision) !==
-      resizedBox.aspectRatio.toPrecision(precision)
-    ) {
-      const scalingSign = Math.sign(resizedBox.area - sourceBox.area);
-
-      const f = scalingSign > 0 ? Math.min : Math.max;
-      const k = f(resizedBox.dx / sourceBox.dx, resizedBox.dy / sourceBox.dy);
-
-      return sourceBox
-        .scale(k)
-        .placeInSameOrigin(sourceBox, transformOrigin)
-        .clampByOuter(outerBox);
-    }
+  if (!keepAspectRatio) {
+    return resizedBox;
   }
 
-  return resizedBox;
-}
+  const isAspectRatioBroken =
+    compareWithPrecision(aspectRatio, resizedBox.aspectRatio, 5) !== 0;
 
-function constrainSize(box: BoundingBox, { width, height }: ISizeBounds) {
-  const withoutBounds = NumbersRange.infinite();
+  if (!isAspectRatioBroken) {
+    return resizedBox;
+  }
 
-  return box.constrainSize(width ?? withoutBounds, height ?? withoutBounds);
+  const scalingSign = Math.sign(resizedBox.area - sourceBox.area);
+  const f = scalingSign > 0 ? Math.min : Math.max;
+
+  return sourceBox
+    .scale(f(resizedBox.dx / sourceBox.dx, resizedBox.dy / sourceBox.dy))
+    .placeInSameOrigin(sourceBox, transformOrigin)
+    .clampByOuter(outerBox);
 }

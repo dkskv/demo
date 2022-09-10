@@ -5,11 +5,12 @@ import { Point } from "../../utils/point";
 import { Draggable } from "../Draggable";
 import { ResizingPoint } from "../../utils/boxResize/resizingPoint";
 import { IResizeThumbKey, resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
-import { constrainResizedBox, ISizeBounds } from "../../utils/boxResize/constraints";
+import { constrainResizedBox } from "../../utils/boxResize/constraints";
 import { useActualRef } from "../../decorators/useActualRef";
 import { IDragBoxCallback, IDragBoxCallbacks } from "../../decorators/dnd";
 import { IDragCallback } from "../../utils/drag";
 import { useScale } from "../../decorators/useScale";
+import { SizeBounds } from "../../utils/sizeBounds";
 
 export interface IResizeParams extends Partial<IDragBoxCallbacks> {
   /** Текущее состояние бокса */
@@ -20,7 +21,7 @@ export interface IResizeParams extends Partial<IDragBoxCallbacks> {
   // Ограничения
 
   /** Ограничения размера сторон */
-  sizeBounds: ISizeBounds;
+  sizeBounds: SizeBounds;
 
   /** Сохранять соотношении сторон */
   keepAspectRatio: boolean;
@@ -112,7 +113,7 @@ interface IScalableBoxParams extends Partial<IDragBoxCallbacks> {
   box: BoundingBox;
   onChange: IDragBoxCallback;
   element: Element | null;
-  sizeBounds: ISizeBounds;
+  sizeBounds: SizeBounds;
   outerBox: BoundingBox;
 }
 

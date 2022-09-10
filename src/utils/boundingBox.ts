@@ -105,6 +105,10 @@ export class BoundingBox {
     );
   }
 
+  clipByOuter(outer: BoundingBox) {
+    return outer.clipInner(this);
+  }
+
   clampInner(inner: BoundingBox) {
     return BoundingBox.createByRanges(
       this.xsRange.clampInner(inner.xsRange),

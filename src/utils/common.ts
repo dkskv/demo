@@ -24,3 +24,9 @@ export const magnetize = curryN(
 export function defineWheelScalingK(wheelDeltaY: number, sensitivity = 0.001) {
   return 1 + wheelDeltaY * sensitivity;
 }
+
+export function compareWithPrecision(a: number, b: number, precision: number) {
+  return Math.sign(
+    Number(a.toPrecision(precision)) - Number(b.toPrecision(precision))
+  );
+}

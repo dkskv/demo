@@ -6,6 +6,7 @@ import { ScalableImage } from "../components/ScalableImage";
 import { Space } from "../components/Space";
 import { BoundingBox } from "../utils/boundingBox";
 import { NumbersRange } from "../utils/numbersRange";
+import { SizeBounds } from "../utils/sizeBounds";
 import { stretchStyle, getBoxStyle } from "../utils/styles";
 
 export default { title: "Demo" };
@@ -46,7 +47,7 @@ export const ImageViewer: ComponentStory<any> = () => {
           onChange={setControlValue}
           outerBox={controlBox.resetOrigin()}
           keepAspectRatio={true}
-          sizeBounds={{ width: scaleBounds, height: scaleBounds }}
+          sizeBounds={new SizeBounds(scaleBounds, scaleBounds)}
         >
           <div
             style={{

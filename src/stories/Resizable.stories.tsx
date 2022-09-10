@@ -9,6 +9,7 @@ import { magnetize } from "../utils/common";
 import { NumbersRange } from "../utils/numbersRange";
 import { Directions } from "../utils/direction";
 import { centererStyle, getBoxStyle, stretchStyle } from "../utils/styles";
+import { SizeBounds } from "../utils/sizeBounds";
 
 export default { title: "Demo" };
 
@@ -79,10 +80,12 @@ export const ResizableBox: ComponentStory<typeof Resizable> = () => {
         {isGridEnabled && grid}
         <Resizable
           value={value}
-          sizeBounds={{
-            width: new NumbersRange(100, 600),
-            height: new NumbersRange(80, 400),
-          }}
+          sizeBounds={
+            new SizeBounds(
+              new NumbersRange(100, 600),
+              new NumbersRange(80, 400)
+            )
+          }
           onEnd={handleEnd}
           // todo: устранить необходимость вызывать `resetOrigin`
           outerBox={outerBox.resetOrigin()}
