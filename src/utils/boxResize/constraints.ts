@@ -44,9 +44,15 @@ export function constrainResizedBox(
       aspectRatio.toPrecision(precision) !==
       resizedBox.aspectRatio.toPrecision(precision)
     ) {
-      // Если сломалось соотношение сторон, то откатываем изменения
-      // p.s. Можно вычислять предельные размеры при `aspectRatio`, но профит низкий
-      return sourceBox;
+      const scalingSign = Math.sign(resizedBox.area - sourceBox.area);
+
+      const f = scalingSign > 0 ? Math.min : Math.max;
+      const k = f(resizedBox.dx / sourceBox.dx, resizedBox.dy / sourceBox.dy);
+
+      return sourceBox
+        .scale(k)
+        .placeInSameOrigin(sourceBox, transformOrigin)
+        .clampByOuter(outerBox);
     }
   }
 

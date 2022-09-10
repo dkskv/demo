@@ -76,6 +76,10 @@ export class BoundingBox {
     return new Point((this.x1 + this.x2) / 2, (this.y1 + this.y2) / 2);
   }
 
+  get area() {
+    return this.dx * this.dy;
+  }
+
   setX1(value: number) {
     return new BoundingBox(value, this.x2, this.y1, this.y2);
   }
