@@ -6,6 +6,7 @@ import { Directions } from "../utils/direction";
 import { centererStyle, getBoxStyle } from "../utils/styles";
 import { useCallback, useState } from "react";
 import { NumbersRange } from "../utils/numbersRange";
+import { BoundingBox } from "../utils/boundingBox";
 
 export default {
   title: "Demo",
@@ -19,13 +20,18 @@ export const SwipeContainerStory: ComponentStory<any> = () => {
     setDirection((prevDir) => prevDir.opposite);
   }, []);
 
+  const thickness = 200;
+
   const viewBox = direction.boxFromRanges(
-    new NumbersRange(0, 500),
-    new NumbersRange(0, 70)
+    new NumbersRange(0, 800),
+    new NumbersRange(0, thickness)
   );
-  const itemBox = direction.boxFromRanges(
-    new NumbersRange(0, 100),
-    new NumbersRange(0, 70)
+
+  const oddItemBox = BoundingBox.square(0, 0, thickness);
+
+  const evenItemBox = direction.boxFromRanges(
+    new NumbersRange(0, thickness * 2),
+    new NumbersRange(0, thickness)
   );
 
   return (
@@ -39,7 +45,7 @@ export const SwipeContainerStory: ComponentStory<any> = () => {
             (i: number) => (
               <div
                 style={{
-                  ...getBoxStyle(itemBox),
+                  ...getBoxStyle(i % 2 === 0 ? evenItemBox : oddItemBox),
                   ...centererStyle,
                   background: "lightgrey",
                 }}
