@@ -1,6 +1,6 @@
 import { useCallback, useRef } from "react";
 import { BoundingBox } from "../../utils/boundingBox";
-import { noop, type IPressedKeys } from "../../utils/common";
+import { defineWheelScalingK, noop, type IPressedKeys } from "../../utils/common";
 import { Point } from "../../utils/point";
 import { Draggable } from "../Draggable";
 import { ResizingPoint } from "../../utils/boxResize/resizingPoint";
@@ -9,7 +9,6 @@ import { constrainResizedBox, ISizeBounds } from "../../utils/boxResize/constrai
 import { useActualRef } from "../../decorators/useActualRef";
 import { IDragBoxCallback, IDragBoxCallbacks } from "../../decorators/dnd";
 import { IDragCallback } from "../../utils/drag";
-import { WheelScalingK } from "../../utils/constants";
 import { useScale } from "../../decorators/useScale";
 
 export interface IResizeParams extends Partial<IDragBoxCallbacks> {
@@ -138,7 +137,7 @@ export function useScalableBox({
   const handleScale = useCallback(
     (delta: number, p: Point, pressedKeys: IPressedKeys) => {
       const value = actualBox.current;
-      const scaledBox = value.scale(delta * WheelScalingK);
+      const scaledBox = value.scale(defineWheelScalingK(delta));
 
       const nextBox = constrainResizedBox(
         scaledBox,

@@ -3,8 +3,7 @@ import { useBooleanState } from "../../decorators/useBooleanState";
 import { useScale } from "../../decorators/useScale";
 import { useCallbackRef } from "../../hooks";
 import { BoundingBox } from "../../utils/boundingBox";
-import { noop } from "../../utils/common";
-import { WheelScalingK } from "../../utils/constants";
+import { defineWheelScalingK, noop } from "../../utils/common";
 import { NumbersRange } from "../../utils/numbersRange";
 import { Point } from "../../utils/point";
 import { IImageBoxProps, ImageBox } from "../ImageBox";
@@ -26,7 +25,7 @@ export const ScalableImage: React.FC<IProps> = ({
 
   function handleScale(delta: number, p: Point) {
     const nextViewBox = viewBox
-      .scale(delta * WheelScalingK)
+      .scale(defineWheelScalingK(delta))
       .constrainSize(scaleBounds, scaleBounds)
       .placeInSameOrigin(viewBox, p)
       .clampByOuter(BoundingBox.fromOrigin(1, 1));

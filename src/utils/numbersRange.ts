@@ -76,8 +76,7 @@ export class NumbersRange implements Iterable<number> {
 
   /** Изменить размер в k раз */
   scale(k: number) {
-    const offset = this.size * k;
-    return new NumbersRange(this.start + offset, this.end - offset);
+    return NumbersRange.createByDelta(this.start, this.delta * k);
   }
 
   invert() {

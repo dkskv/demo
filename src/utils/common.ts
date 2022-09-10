@@ -20,3 +20,7 @@ export const magnetize = curryN(
   2,
   (step: number, n: number) => Math.round(n / step) * step
 );
+
+export function defineWheelScalingK(wheelDeltaY: number, sensitivity = 0.001) {
+  return 1 + wheelDeltaY * sensitivity;
+}
