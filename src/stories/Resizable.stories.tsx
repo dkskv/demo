@@ -8,7 +8,7 @@ import { BoundingBox } from "../utils/boundingBox";
 import { magnetize } from "../utils/common";
 import { NumbersRange } from "../utils/numbersRange";
 import { Directions } from "../utils/direction";
-import { centererStyle, getBoxStyle, stretchStyle } from "../utils/styles";
+import { getBoxStyle, stretchStyle } from "../utils/styles";
 import { SizeBounds } from "../utils/sizeBounds";
 import { useTheme } from "../decorators/theme";
 
@@ -95,18 +95,13 @@ export const ResizableBox: ComponentStory<typeof Resizable> = () => {
           onChange={setValue}
           keepAspectRatio={isLockedRatio}
         >
-          <span
+          <div
             style={{
               ...stretchStyle,
-              ...centererStyle,
               background: theme.primaryColor,
-              color: theme.textColor,
               borderRadius: theme.largeBorderRadius,
-              cursor: "pointer",
             }}
-          >
-            Resize me
-          </span>
+          />
         </Resizable>
       </div>
     </Space>

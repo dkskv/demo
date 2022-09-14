@@ -49,12 +49,13 @@ const Resizable: React.FC<IResizableProps> = ({
 
   useScalableBox({
     box: value,
-    element: isDraggable ? element : null,
+    element,
     sizeBounds,
     outerBox,
     onChange,
     onStart,
     onEnd,
+    keepAspectRatio,
   });
 
   const thumbsProps = useResize({

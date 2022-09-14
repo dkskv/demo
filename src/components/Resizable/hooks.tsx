@@ -105,6 +105,7 @@ interface IScalableBoxParams extends Partial<IDragBoxCallbacks> {
   element: Element | null;
   sizeBounds: SizeBounds;
   outerBox: BoundingBox;
+  keepAspectRatio: boolean;
 }
 
 export function useScalableBox({
@@ -114,7 +115,8 @@ export function useScalableBox({
   onStart = noop,
   onEnd = noop,
   outerBox,
-  sizeBounds
+  sizeBounds,
+  keepAspectRatio
 }: IScalableBoxParams) {
   const actualBox = useActualRef(box);
 
@@ -133,12 +135,12 @@ export function useScalableBox({
       const nextBox = constrainResizedBox(
         scaledBox,
         { sourceBox: value, transformOrigin: p },
-        { aspectRatio: scaledBox.aspectRatio, outerBox, sizeBounds }
+        { aspectRatio: keepAspectRatio ? scaledBox.aspectRatio : null, outerBox, sizeBounds }
       );
 
       onChange(nextBox, pressedKeys);
     },
-    [actualBox, onChange, outerBox, sizeBounds]
+    [actualBox, onChange, outerBox, sizeBounds, keepAspectRatio]
   );
 
   const handleScaleEnd = useCallback(
