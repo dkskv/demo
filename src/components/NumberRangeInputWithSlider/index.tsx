@@ -1,4 +1,4 @@
-import { CSSProperties, useMemo } from "react";
+import { useMemo } from "react";
 import makeStateful from "../../decorators/makeStateful";
 import NumbersRangeInput, {
   INumbersRangeInputProps,
@@ -9,18 +9,11 @@ import { NumbersRange } from "../../utils/numbersRange";
 import { normalize } from "../../utils/normalization";
 import { useSmoothControl } from "../../decorators/useSmoothControl";
 import React from "react";
-import { getBoxStyle, stretchStyle } from "../../utils/styles";
 import { Directions } from "../../utils/direction";
-import { BoundingBox } from "../../utils/boundingBox";
-import { useTheme } from "../../decorators/theme";
 
-interface IProps
-  extends INumbersRangeInputProps,
-    Omit<ISliderProps, "outerBox"> {
+interface IProps extends INumbersRangeInputProps, ISliderProps {
   bounds: NonNullable<INumbersRangeInputProps["bounds"]>;
   isSmoothSlider?: boolean;
-  sliderBox: BoundingBox;
-  sliderStyle?: CSSProperties;
 }
 
 const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
@@ -30,9 +23,9 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
     bounds,
     sizeBounds = NumbersRange.endless(0),
     isSmoothSlider = false,
-    sliderBox,
-    sliderStyle,
     direction = Directions.horizontal,
+    length,
+    thickness,
   } = props;
   const converter = useMemo(() => createConverter(bounds), [bounds]);
 
@@ -44,8 +37,6 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
       isSmooth: isSmoothSlider,
     });
 
-  const theme = useTheme();
-
   return (
     <NumbersRangeInput
       value={value}
@@ -54,32 +45,15 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
       sizeBounds={sizeBounds}
       direction={direction}
     >
-      <div
-        style={{
-          background: theme.backgroundColor,
-          borderRadius: theme.smallBorderRadius,
-          ...sliderStyle,
-          ...getBoxStyle(sliderBox),
-          position: "relative",
-        }}
-      >
-        <Slider
-          value={controlValue}
-          onChange={handleControlChange}
-          onEnd={handleControlEnd}
-          sizeBounds={normalize(sizeBounds, bounds.size)}
-          direction={direction}
-          outerBox={sliderBox}
-        >
-          <div
-            style={{
-              ...stretchStyle,
-              background: theme.primaryColor,
-              borderRadius: theme.smallBorderRadius,
-            }}
-          />
-        </Slider>
-      </div>
+      <Slider
+        value={controlValue}
+        onChange={handleControlChange}
+        onEnd={handleControlEnd}
+        sizeBounds={normalize(sizeBounds, bounds.size)}
+        direction={direction}
+        length={length}
+        thickness={thickness}
+      />
     </NumbersRangeInput>
   );
 };

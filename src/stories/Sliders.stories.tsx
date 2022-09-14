@@ -18,12 +18,12 @@ export const Sliders: ComponentStory<typeof NumberRangeInputWithSlider> =
       setDirection((a) => a.opposite.reversed);
     };
 
-    const sliderBox = direction.boxFromRanges(
-      new NumbersRange(0, 500),
-      new NumbersRange(0, 25)
-    );
-
-    const commonProps = { sliderBox, isSmoothSlider: isSmooth, direction };
+    const commonProps = {
+      length: 500,
+      thickness: 25,
+      isSmoothSlider: isSmooth,
+      direction,
+    };
 
     return (
       <Space size={40} direction={Directions.vertical}>

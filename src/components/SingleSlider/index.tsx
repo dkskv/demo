@@ -45,8 +45,8 @@ const SingleSlider: React.FC<ISingleSliderProps> = ({
 
 function useSingleCallback(callback: (box: number) => void) {
   return useCallback(
-    (range: NumbersRange) => {
-      callback(range.end);
+    ({ end }: NumbersRange) => {
+      callback(end);
     },
     [callback]
   );

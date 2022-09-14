@@ -1,27 +1,22 @@
-import { CSSProperties, useCallback, useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import makeStateful from "../../decorators/makeStateful";
 import { useSmoothControl } from "../../decorators/useSmoothControl";
-import { BoundingBox } from "../../utils/boundingBox";
-import { getBoxStyle, stretchStyle } from "../../utils/styles";
 import SingleSlider, { ISingleSliderProps } from "../SingleSlider";
 import { Space } from "../Space";
 
-interface IProps extends Omit<ISingleSliderProps, "outerBox"> {
+interface IProps extends ISingleSliderProps {
   max: number;
   isSmoothSlider?: boolean;
-  sliderBox: BoundingBox;
-  sliderStyle?: CSSProperties;
 }
 
 const NumberInputWithSlider: React.FC<IProps> = ({
   value,
   onChange,
-  sliderStyle,
-  sliderBox,
   max,
   isSmoothSlider = false,
   direction,
-  children = <div style={{ ...stretchStyle, background: "purple" }} />,
+  length,
+  thickness,
 }) => {
   const converter = useMemo(() => {
     return {
@@ -51,24 +46,14 @@ const NumberInputWithSlider: React.FC<IProps> = ({
 
   return (
     <Space size={20} direction={direction}>
-      <div
-        style={{
-          background: "lavender",
-          ...sliderStyle,
-          ...getBoxStyle(sliderBox),
-          position: "relative",
-        }}
-      >
-        <SingleSlider
-          value={controlValue}
-          onChange={handleControlChange}
-          onEnd={handleControlEnd}
-          outerBox={sliderBox}
-          direction={direction}
-        >
-          {children}
-        </SingleSlider>
-      </div>
+      <SingleSlider
+        value={controlValue}
+        onChange={handleControlChange}
+        onEnd={handleControlEnd}
+        direction={direction}
+        length={length}
+        thickness={thickness}
+      />
       <input
         type="number"
         onChange={handleInputChange}

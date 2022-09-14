@@ -2,22 +2,23 @@ import React, { useCallback } from "react";
 import { IDirection, Directions } from "../../utils/direction";
 import { NumbersRange } from "../../utils/numbersRange";
 import { BoundingBox } from "../../utils/boundingBox";
-import ResizableControl, { IResizableControlProps } from "../ResizableControl";
+import ResizableControl from "../ResizableControl";
 import { IPressedKeys, noop } from "../../utils/common";
 import { SizeBounds } from "../../utils/sizeBounds";
-import { stretchStyle } from "../../utils/styles";
+import { getBoxStyle, stretchStyle } from "../../utils/styles";
 import { useTheme } from "../../decorators/theme";
 
-export interface ISliderProps
-  extends Omit<
-    IResizableControlProps,
-    "value" | "onChange" | "onStart" | "onEnd" | "sizeBounds" | "thumbKeys"
-  > {
+export interface ISliderProps {
   /** Нормированный диапазон (в пределах от 0 до 1) */
   value: NumbersRange;
   onChange(value: NumbersRange): void;
   onStart?(value: NumbersRange): void;
   onEnd?(value: NumbersRange): void;
+
+  length: number;
+  thickness: number;
+
+  isDraggable?: boolean;
 
   /** Диапазон возможных размеров трека */
   sizeBounds?: NumbersRange;
@@ -39,31 +40,54 @@ const Slider: React.FC<ISliderProps> = ({
   sizeBounds = NumbersRange.infinite(),
   direction = Directions.horizontal,
   thumbKeys = [0, 1],
-  ...rest
+  length,
+  thickness,
+  isDraggable,
 }) => {
   const handleChange = useDirectedCallback(onChange, direction);
   const handleStart = useDirectedCallback(onStart, direction);
   const handleEnd = useDirectedCallback(onEnd, direction);
 
+  const outerBox = direction.boxFromRanges(
+    new NumbersRange(0, length),
+    new NumbersRange(0, thickness)
+  );
+
   const theme = useTheme();
 
   return (
-    <ResizableControl
-      {...rest}
-      value={direction.boxFromRanges(
-        directRange(value, direction),
-        NumbersRange.normalizationBounds()
-      )}
-      onChange={handleChange}
-      onStart={handleStart}
-      onEnd={handleEnd}
-      sizeBounds={getDirectedSizeBounds(sizeBounds, direction)}
-      thumbKeys={direction.sides.filter((_, i) =>
-        (thumbKeys as number[]).includes(i)
-      )}
+    <div
+      style={{
+        position: "relative",
+        background: theme.backgroundColor,
+        borderRadius: theme.largeBorderRadius,
+        ...getBoxStyle(outerBox),
+      }}
     >
-      <div style={{ ...stretchStyle, background: theme.primaryColor }} />
-    </ResizableControl>
+      <ResizableControl
+        isDraggable={isDraggable}
+        outerBox={outerBox}
+        value={direction.boxFromRanges(
+          directRange(value, direction),
+          NumbersRange.normalizationBounds()
+        )}
+        onChange={handleChange}
+        onStart={handleStart}
+        onEnd={handleEnd}
+        sizeBounds={getDirectedSizeBounds(sizeBounds, direction)}
+        thumbKeys={direction.sides.filter((_, i) =>
+          (thumbKeys as number[]).includes(i)
+        )}
+      >
+        <div
+          style={{
+            ...stretchStyle,
+            borderRadius: theme.largeBorderRadius,
+            background: theme.primaryColor,
+          }}
+        />
+      </ResizableControl>
+    </div>
   );
 };
 
