@@ -24,6 +24,30 @@ export const ImageViewer: ComponentStory<any> = () => {
 
   const theme = useTheme();
 
+  function renderOverlay() {
+    return (
+      <div
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          ...stretchStyle,
+          overflow: "hidden",
+          borderRadius: theme.largeBorderRadius,
+        }}
+      >
+        <div
+          style={{
+            ...stretchStyle,
+            ...getBoxStyle(controlBox.denormalizeInner(controlValue)),
+            position: "absolute",
+            boxShadow: `0 0 0 100vmax ${theme.overlayColor}`,
+          }}
+        />
+      </div>
+    );
+  }
+
   const src =
     "https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg";
 
@@ -39,12 +63,12 @@ export const ImageViewer: ComponentStory<any> = () => {
       <div
         style={{
           position: "relative",
-          overflow: "hidden",
           borderRadius: theme.largeBorderRadius,
           ...getBoxStyle(controlBox),
         }}
       >
         <ImageBox box={controlBox} src={src} />
+        {renderOverlay()}
         <ResizableControl
           value={controlValue}
           onChange={setControlValue}
@@ -55,8 +79,8 @@ export const ImageViewer: ComponentStory<any> = () => {
           <div
             style={{
               ...stretchStyle,
+              boxSizing: "border-box",
               border: `1px solid ${theme.strokeColor}`,
-              boxShadow: `0 0 0 100vmax ${theme.overlayColor}`,
             }}
           />
         </ResizableControl>
