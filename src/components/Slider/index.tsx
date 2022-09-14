@@ -5,6 +5,8 @@ import { BoundingBox } from "../../utils/boundingBox";
 import ResizableControl, { IResizableControlProps } from "../ResizableControl";
 import { IPressedKeys, noop } from "../../utils/common";
 import { SizeBounds } from "../../utils/sizeBounds";
+import { stretchStyle } from "../../utils/styles";
+import { useTheme } from "../../decorators/theme";
 
 export interface ISliderProps
   extends Omit<
@@ -43,6 +45,8 @@ const Slider: React.FC<ISliderProps> = ({
   const handleStart = useDirectedCallback(onStart, direction);
   const handleEnd = useDirectedCallback(onEnd, direction);
 
+  const theme = useTheme();
+
   return (
     <ResizableControl
       {...rest}
@@ -57,7 +61,9 @@ const Slider: React.FC<ISliderProps> = ({
       thumbKeys={direction.sides.filter((_, i) =>
         (thumbKeys as number[]).includes(i)
       )}
-    />
+    >
+      <div style={{ ...stretchStyle, background: theme.primaryColor }} />
+    </ResizableControl>
   );
 };
 

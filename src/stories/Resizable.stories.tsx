@@ -10,6 +10,7 @@ import { NumbersRange } from "../utils/numbersRange";
 import { Directions } from "../utils/direction";
 import { centererStyle, getBoxStyle, stretchStyle } from "../utils/styles";
 import { SizeBounds } from "../utils/sizeBounds";
+import { useTheme } from "../decorators/theme";
 
 export default { title: "Demo" };
 
@@ -56,6 +57,8 @@ export const ResizableBox: ComponentStory<typeof Resizable> = () => {
     />
   ));
 
+  const theme = useTheme();
+
   return (
     <Space size={40} direction={Directions.vertical}>
       <Space size={20}>
@@ -96,8 +99,9 @@ export const ResizableBox: ComponentStory<typeof Resizable> = () => {
             style={{
               ...stretchStyle,
               ...centererStyle,
-              background: "purple",
-              color: "white",
+              background: theme.primaryColor,
+              color: theme.textColor,
+              borderRadius: theme.largeBorderRadius,
               cursor: "pointer",
             }}
           >

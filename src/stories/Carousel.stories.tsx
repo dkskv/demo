@@ -7,6 +7,7 @@ import { centererStyle, getBoxStyle } from "../utils/styles";
 import { useCallback, useState } from "react";
 import { NumbersRange } from "../utils/numbersRange";
 import { BoundingBox } from "../utils/boundingBox";
+import { useTheme } from "../decorators/theme";
 
 export default {
   title: "Demo",
@@ -34,20 +35,25 @@ export const SwipeContainerStory: ComponentStory<any> = () => {
     new NumbersRange(0, thickness)
   );
 
+  const theme = useTheme();
+
   return (
     <Space direction={Directions.vertical} size={20}>
       <div>
         <button onClick={handleRotate}>Rotate</button>
       </div>
       <SwipeContainer box={viewBox} direction={direction}>
-        <Space size={5} direction={direction}>
+        <Space size={theme.smallIndent} direction={direction}>
           {times(
             (i: number) => (
               <div
+                key={i}
                 style={{
                   ...getBoxStyle(i % 2 === 0 ? evenItemBox : oddItemBox),
                   ...centererStyle,
-                  background: "lightgrey",
+                  background: theme.primaryColor,
+                  color: theme.textColor,
+                  borderRadius: theme.largeBorderRadius,
                 }}
               >
                 {i}

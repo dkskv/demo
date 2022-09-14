@@ -12,6 +12,7 @@ import React from "react";
 import { getBoxStyle, stretchStyle } from "../../utils/styles";
 import { Directions } from "../../utils/direction";
 import { BoundingBox } from "../../utils/boundingBox";
+import { useTheme } from "../../decorators/theme";
 
 interface IProps
   extends INumbersRangeInputProps,
@@ -32,7 +33,6 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
     sliderBox,
     sliderStyle,
     direction = Directions.horizontal,
-    children = <div style={{ ...stretchStyle, background: "purple" }} />,
   } = props;
   const converter = useMemo(() => createConverter(bounds), [bounds]);
 
@@ -44,6 +44,8 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
       isSmooth: isSmoothSlider,
     });
 
+  const theme = useTheme();
+
   return (
     <NumbersRangeInput
       value={value}
@@ -54,7 +56,8 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
     >
       <div
         style={{
-          background: "lavender",
+          background: theme.backgroundColor,
+          borderRadius: theme.smallBorderRadius,
           ...sliderStyle,
           ...getBoxStyle(sliderBox),
           position: "relative",
@@ -68,7 +71,13 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
           direction={direction}
           outerBox={sliderBox}
         >
-          {children}
+          <div
+            style={{
+              ...stretchStyle,
+              background: theme.primaryColor,
+              borderRadius: theme.smallBorderRadius,
+            }}
+          />
         </Slider>
       </div>
     </NumbersRangeInput>

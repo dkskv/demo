@@ -4,6 +4,7 @@ import { ImageBox } from "../components/ImageBox";
 import ResizableControl from "../components/ResizableControl";
 import { ScalableImage } from "../components/ScalableImage";
 import { Space } from "../components/Space";
+import { useTheme } from "../decorators/theme";
 import { BoundingBox } from "../utils/boundingBox";
 import { NumbersRange } from "../utils/numbersRange";
 import { SizeBounds } from "../utils/sizeBounds";
@@ -21,6 +22,8 @@ export const ImageViewer: ComponentStory<any> = () => {
 
   const scaleBounds = new NumbersRange(0.2, 1);
 
+  const theme = useTheme();
+
   const src =
     "https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg";
 
@@ -36,8 +39,8 @@ export const ImageViewer: ComponentStory<any> = () => {
       <div
         style={{
           position: "relative",
-          border: "1px solid black",
           overflow: "hidden",
+          borderRadius: theme.largeBorderRadius,
           ...getBoxStyle(controlBox),
         }}
       >
@@ -52,8 +55,8 @@ export const ImageViewer: ComponentStory<any> = () => {
           <div
             style={{
               ...stretchStyle,
-              border: "1px solid orange",
-              boxShadow: `0 0 0 100vmax rgba(34, 60, 80, 0.7)`,
+              border: `1px solid ${theme.strokeColor}`,
+              boxShadow: `0 0 0 100vmax ${theme.overlayColor}`,
             }}
           />
         </ResizableControl>

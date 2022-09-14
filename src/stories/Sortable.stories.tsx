@@ -2,6 +2,7 @@ import { ComponentStory } from "@storybook/react";
 import { zipWith } from "ramda";
 import { SortableContainer } from "../components/SortableContainer";
 import { DndConnector } from "../decorators/dndConnection";
+import { useTheme } from "../decorators/theme";
 import { BoundingBox } from "../utils/boundingBox";
 import { ISortableItem, positionInChain } from "../utils/sortable/sortable";
 import { stretchStyle } from "../utils/styles";
@@ -24,20 +25,9 @@ const generateItems = (colors: string[], sizes: number[]) =>
     )
   );
 
-function renderItem({ key }: ISortableItem) {
-  return (
-    <div
-      style={{
-        ...stretchStyle,
-        background: key,
-        cursor: "pointer",
-        opacity: 0.5,
-      }}
-    />
-  );
-}
-
 export const SortableContainers: ComponentStory<any> = () => {
+  const theme = useTheme();
+
   const items = generateItems(
     ["red", "blue", "green", "purple"],
     [50, 100, 100, 150]
@@ -48,7 +38,31 @@ export const SortableContainers: ComponentStory<any> = () => {
     [50, 100, 100, 150]
   );
 
-  const containerStyle = { background: "grey", flexShrink: 0 };
+  function renderItem({ key }: ISortableItem) {
+    return (
+      <div
+        style={{
+          ...stretchStyle,
+          background: key,
+          cursor: "pointer",
+          borderRadius: theme.largeBorderRadius,
+          opacity: 0.5,
+        }}
+      />
+    );
+  }
+
+  const containerStyle = {
+    background: theme.backgroundColor,
+    flexShrink: 0,
+    borderRadius: theme.largeBorderRadius,
+  };
+
+  const mockWrapperStyle = {
+    padding: "10px",
+    border: `1px solid ${theme.strokeColor}`,
+    borderRadius: theme.largeBorderRadius,
+  };
 
   return (
     <div style={{ display: "flex", columnGap: 280, position: "relative" }}>
@@ -71,9 +85,9 @@ export const SortableContainers: ComponentStory<any> = () => {
         >
           {renderItem}
         </SortableContainer>
-        <div style={{ padding: "10px", border: "1px solid blue" }}>
+        <div style={mockWrapperStyle}>
           Nesting
-          <div style={{ padding: "10px", border: "1px solid blue" }}>
+          <div style={mockWrapperStyle}>
             Nesting
             <SortableContainer
               id="third"

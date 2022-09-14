@@ -1,3 +1,4 @@
+import { useTheme } from "../../decorators/theme";
 import { BoundingBox } from "../../utils/boundingBox";
 import { getBoxStyle } from "../../utils/styles";
 
@@ -12,9 +13,16 @@ export const ImageBox: React.FC<IImageBoxProps> = ({
   src,
   viewBox = BoundingBox.createByDimensions(0, 0, 1, 1),
 }) => {
+  const theme = useTheme();
+
   return (
     <div
-      style={{ position: "relative", overflow: "hidden", ...getBoxStyle(box) }}
+      style={{
+        position: "relative",
+        overflow: "hidden",
+        borderRadius: theme.largeBorderRadius,
+        ...getBoxStyle(box),
+      }}
     >
       <img
         alt="error"

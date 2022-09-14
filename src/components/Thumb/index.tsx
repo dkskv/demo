@@ -1,5 +1,17 @@
-import "./index.css"
+import { useTheme } from "../../decorators/theme";
 
 export const Thumb: React.VFC<{}> = () => {
-  return <div className="Thumb" />;
+  const theme = useTheme();
+
+  return (
+    <div
+      style={{
+        width: "10px",
+        height: "10px",
+        border: `1px solid ${theme.strokeColor}`,
+        borderRadius: theme.smallBorderRadius,
+        background: theme.handleColor,
+      }}
+    />
+  );
 };

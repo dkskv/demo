@@ -9,6 +9,7 @@ import { Point } from "../../utils/point";
 import { getBoxStyle } from "../../utils/styles";
 import { getBoxOnPage } from "../../utils/dom";
 import { NumbersRange } from "../../utils/numbersRange";
+import { useTheme } from "../../decorators/theme";
 
 interface IProps {
   box: BoundingBox;
@@ -183,16 +184,19 @@ export const SwipeContainer: React.FC<IProps> = ({
 
   const containerLength = getBoxLength(box, direction);
 
+  const theme = useTheme();
+
   return (
     <div
       ref={setElement}
       style={{
         display: "inline-block",
-        background: "SkyBlue",
+        background: theme.backgroundColor,
         userSelect: "none",
         cursor: "grab",
         position: "relative",
         overflow: "hidden",
+        borderRadius: theme.largeBorderRadius,
         ...getBoxStyle(box),
       }}
     >
@@ -253,11 +257,13 @@ const Scrollbar: React.FC<IScrollbarProps> = ({
     new NumbersRange(0, thickness)
   );
 
+  const theme = useTheme();
+
   return (
     <div
       style={{
-        position: "relative",
         ...getBoxStyle(box),
+        position: "relative",
         background: "transparent",
         overflow: "hidden",
       }}
@@ -266,9 +272,12 @@ const Scrollbar: React.FC<IScrollbarProps> = ({
         style={{
           position: "absolute",
           ...getBoxStyle(thumbBox),
-          background: "yellow",
+          background: theme.scrollColor,
           transitionProperty: "opacity",
           transitionDuration: "500ms",
+          borderRadius: theme.smallBorderRadius,
+          border: `1px solid ${theme.strokeColor}`,
+          boxSizing: "border-box",
           opacity: isActive ? 1 : 0,
         }}
       />
