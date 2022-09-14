@@ -45,7 +45,7 @@ const NumberInputWithSlider: React.FC<IProps> = ({
   );
 
   return (
-    <Space size={20} direction={direction}>
+    <Space size={20} direction={direction} align="center">
       <SingleSlider
         value={controlValue}
         onChange={handleControlChange}

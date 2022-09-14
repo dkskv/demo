@@ -45,7 +45,7 @@ const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
   );
 
   return (
-    <Space direction={direction} size={20}>
+    <Space direction={direction} size={20} align="center">
       <input
         type="number"
         onChange={handleChangeStartValue}

@@ -20,7 +20,7 @@ export const Sliders: ComponentStory<typeof NumberRangeInputWithSlider> =
 
     const commonProps = {
       length: 500,
-      thickness: 25,
+      thickness: 12,
       isSmoothSlider: isSmooth,
       direction,
     };
