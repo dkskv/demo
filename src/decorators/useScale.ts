@@ -16,7 +16,7 @@ interface IParams {
 
 export function useScale(
   element: Element | null,
-  { onChange, onStart = noop, onEnd = noop, delayToEnd = 100 }: IParams
+  { onChange, onStart = noop, onEnd = noop, delayToEnd = 400 }: IParams
 ) {
   const timerId = useRef<NodeJS.Timer>();
 
