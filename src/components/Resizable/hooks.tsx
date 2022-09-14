@@ -2,7 +2,6 @@ import { useCallback, useRef } from "react";
 import { BoundingBox } from "../../utils/boundingBox";
 import { defineWheelScalingK, noop, type IPressedKeys } from "../../utils/common";
 import { Point } from "../../utils/point";
-import { Draggable } from "../Draggable";
 import { ResizingPoint } from "../../utils/boxResize/resizingPoint";
 import { IResizeThumbKey, resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
 import { constrainResizedBox } from "../../utils/boxResize/constraints";
@@ -33,18 +32,14 @@ export interface IResizeParams extends Partial<IDragBoxCallbacks> {
 
   /** Ключи отображаемых кнопок, за которые производится resize  */
   thumbKeys: readonly IResizeThumbKey[];
-
-  /** React компонент кнопки, за которую производится resize */
-  ThumbComponent: React.ComponentType<{}>;
 }
 
-export function useResize(params: IResizeParams): React.ReactNode {
+export function useResize(params: IResizeParams) {
   const {
     onChange,
     onStart,
     onEnd,
     thumbKeys,
-    ThumbComponent,
   } = params;
   const aspectRatioRef = useRef<number | null>(null);
   const paramsRef = useActualRef(params);
@@ -92,20 +87,15 @@ export function useResize(params: IResizeParams): React.ReactNode {
     const resizingPoint = resizingPointsPreset.get(key);
     const { box } = paramsRef.current;
 
-    return (
-      <Draggable
-        key={String(key)}
-        isCentered={true}
-        value={box.denormalizePoint(resizingPoint)}
-        onChange={(point, pressedKeys) =>
-          handleChangeSize(resizingPoint, point, pressedKeys)
-        }
-        onStart={handleStart}
-        onEnd={handleEnd}
-      >
-        <ThumbComponent />
-      </Draggable>
-    );
+    return {
+      key: String(key),
+      value: box.denormalizePoint(resizingPoint),
+      onChange(point: Point, pressedKeys: IPressedKeys) {
+        handleChangeSize(resizingPoint, point, pressedKeys)
+      },
+      onStart: handleStart,
+      onEnd: handleEnd,
+    } as const;
   })
 }
 

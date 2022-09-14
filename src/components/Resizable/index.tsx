@@ -8,6 +8,7 @@ import { Thumb } from "../Thumb";
 import { useDragBox } from "../../decorators/dnd";
 import { noop } from "../../utils/common";
 import { SizeBounds } from "../../utils/sizeBounds";
+import { Draggable } from "../Draggable";
 
 export interface IResizableProps
   extends Pick<
@@ -15,7 +16,6 @@ export interface IResizableProps
     | "sizeBounds"
     | "keepAspectRatio"
     | "thumbKeys"
-    | "ThumbComponent"
     | "onStart"
     | "onEnd"
     | "outerBox"
@@ -34,7 +34,6 @@ const Resizable: React.FC<IResizableProps> = ({
   outerBox = BoundingBox.infinite(),
   keepAspectRatio = false,
   thumbKeys = resizingPointsPreset.all,
-  ThumbComponent = Thumb,
   isDraggable = true,
   children,
 }) => {
@@ -48,18 +47,6 @@ const Resizable: React.FC<IResizableProps> = ({
     onEnd,
   });
 
-  const thumbsElements = useResize({
-    box: value,
-    onChange,
-    onStart,
-    onEnd,
-    sizeBounds,
-    keepAspectRatio,
-    thumbKeys,
-    outerBox,
-    ThumbComponent,
-  });
-
   useScalableBox({
     box: value,
     element: isDraggable ? element : null,
@@ -70,6 +57,25 @@ const Resizable: React.FC<IResizableProps> = ({
     onEnd,
   });
 
+  const thumbsProps = useResize({
+    box: value,
+    onChange,
+    onStart,
+    onEnd,
+    sizeBounds,
+    keepAspectRatio,
+    thumbKeys,
+    outerBox,
+  });
+
+  function renderThumbs() {
+    return thumbsProps.map((thumbProps) => (
+      <Draggable isCentered={true} {...thumbProps}>
+        <Thumb />
+      </Draggable>
+    ));
+  }
+
   return (
     <>
       <div
@@ -78,7 +84,7 @@ const Resizable: React.FC<IResizableProps> = ({
       >
         {React.Children.only(children)}
       </div>
-      {thumbsElements}
+      {renderThumbs()}
     </>
   );
 };
