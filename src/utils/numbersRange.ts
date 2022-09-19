@@ -92,6 +92,10 @@ export class NumbersRange implements Iterable<number> {
     return this.start <= x && x <= this.end;
   }
 
+  expandEvenly(value: number) {
+    return new NumbersRange(this.start - value, this.end + value);
+  }
+
   isEqual({ start, end }: NumbersRange) {
     return this.start === start && this.end === end;
   }
