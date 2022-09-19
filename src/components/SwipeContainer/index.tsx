@@ -9,6 +9,7 @@ import { getBoxOnPage } from "../../utils/dom";
 import { NumbersRange } from "../../utils/numbersRange";
 import { useTheme } from "../../decorators/theme";
 import { ScrollConstraints, ScrollingState } from "./utils";
+import { Scrollbar } from "../Scrollbar";
 
 interface IProps {
   box: BoundingBox;
@@ -154,66 +155,12 @@ export const SwipeContainer: React.FC<IProps> = ({
           direction={direction}
           length={containerLength}
           thickness={5}
-          range={NumbersRange.createByDelta(
+          viewPort={NumbersRange.createByDelta(
             scrollingState.coordinate / contentLength,
             containerLength / contentLength
           )}
         />
       </div>
-    </div>
-  );
-};
-
-interface IScrollbarProps {
-  thickness: number;
-  length: number;
-  direction: IDirection;
-  // В нормализованном виде
-  range: NumbersRange;
-  isActive: boolean;
-}
-
-const Scrollbar: React.FC<IScrollbarProps> = ({
-  direction,
-  length,
-  thickness,
-  range,
-  isActive,
-}) => {
-  const box = direction.boxFromRanges(
-    new NumbersRange(0, length),
-    new NumbersRange(0, thickness)
-  );
-
-  const thumbBox = direction.boxFromRanges(
-    range.map((n) => n * length),
-    new NumbersRange(0, thickness)
-  );
-
-  const theme = useTheme();
-
-  return (
-    <div
-      style={{
-        ...getBoxStyle(box),
-        position: "relative",
-        background: "transparent",
-        overflow: "hidden",
-      }}
-    >
-      <div
-        style={{
-          position: "absolute",
-          ...getBoxStyle(thumbBox),
-          background: theme.scrollColor,
-          transitionProperty: "opacity",
-          transitionDuration: "500ms",
-          borderRadius: theme.smallBorderRadius,
-          border: `1px solid ${theme.strokeColor}`,
-          boxSizing: "border-box",
-          opacity: isActive ? 1 : 0,
-        }}
-      />
     </div>
   );
 };
