@@ -35,7 +35,11 @@ export class ScrollingState {
       return this;
     }
 
-    return this.setImpulse(this.impulse * (1 - overflowK));
+    function parabolic(k: number) {
+      return Math.pow(k, 2);
+    }
+
+    return this.setImpulse(this.impulse * (1 - parabolic(overflowK)));
   }
 
   private get isTendEscape() {
