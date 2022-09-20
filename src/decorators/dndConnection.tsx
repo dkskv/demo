@@ -122,9 +122,7 @@ export const DndConnector: React.FC = ({ children }) => {
 
   const register = useCallback((item: IDndContainer) => {
     setContainers(append(item));
-
     const unregister = () => setContainers(reject(propEq("key", item.key)));
-
     return unregister;
   }, []);
 

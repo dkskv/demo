@@ -11,15 +11,11 @@ import { SortableItemsState } from "./utils";
 
 interface IProps {
   id: string;
-
   box: BoundingBox;
   items: IDndElement[];
-  /** Время анимации в ms */
   transitionDuration?: number;
   style?: React.CSSProperties;
-
-  /** Item renderer */
-  children(item: ISortableItem): React.ReactNode;
+  renderItem(item: ISortableItem): React.ReactNode;
 }
 
 export const SortableContainer: React.FC<IProps> = ({
@@ -28,7 +24,7 @@ export const SortableContainer: React.FC<IProps> = ({
   items: initialItems,
   transitionDuration = 0,
   style,
-  children: renderItem,
+  renderItem,
 }) => {
   const [sortableItemsState, setSortableItemsState] = useState(
     () => new SortableItemsState(initialItems)
@@ -38,57 +34,59 @@ export const SortableContainer: React.FC<IProps> = ({
     useActiveSortableItem(transitionDuration);
   const [isActiveHidden, setIsActiveHidden] = useState(false);
 
-  // todo: назвать с отсылкой на остаток свободного места
-  const canDropRef = useRef(false);
+  const isAcceptingInProgress = useRef(false);
 
   const actualSortableItemsState = useActualRef(sortableItemsState);
 
-  const handleDragIn = useCallback(
+  const handleForeignItemDragIn = useCallback(
     (item: ISortableItem, isFirstEvent: boolean) => {
       if (isFirstEvent) {
-        canDropRef.current =
+        const isEnoughSpace =
           actualSortableItemsState.current.totalHeight + item.box.height <=
           box.height;
+
+        isAcceptingInProgress.current = isEnoughSpace;
       }
 
-      if (canDropRef.current) {
+      if (isAcceptingInProgress.current) {
         setSortableItemsState((state) =>
           isFirstEvent
-            ? state.insert(item).align()
-            : state.relocate(item).align()
+            ? state.insertAccordingToPosition(item).align()
+            : state.moveIndexAccordingToPosition(item).align()
         );
 
         setActiveItem(item);
       }
 
-      return { canDrop: canDropRef.current };
+      return { canDrop: isAcceptingInProgress.current };
     },
     [setActiveItem, box, actualSortableItemsState]
   );
 
-  const handleDropIn = useCallback(
+  const handleForeignItemDropIn = useCallback(
     (item: ISortableItem) => {
-      canDropRef.current && dropActiveItem(item.key);
+      isAcceptingInProgress.current && dropActiveItem(item.key);
 
-      return { canDrop: canDropRef.current };
+      return { canDrop: isAcceptingInProgress.current };
     },
     [dropActiveItem]
   );
 
-  const handleDragOut = useCallback(
+  const handleForeignItemDragOut = useCallback(
     (key: string) => {
-      if (canDropRef.current) {
+      if (isAcceptingInProgress.current) {
+        isAcceptingInProgress.current = false;
         setActiveItem(null);
-        setSortableItemsState((state) => state.remove(key).align());
+        setSortableItemsState((state) => state.removeByKey(key).align());
       }
     },
     [setActiveItem]
   );
 
   const { ref, onDrag, onDrop } = useDndConnection<HTMLDivElement>(id, {
-    onDragIn: handleDragIn,
-    onDropIn: handleDropIn,
-    onDragOut: handleDragOut,
+    onDragIn: handleForeignItemDragIn,
+    onDropIn: handleForeignItemDropIn,
+    onDragOut: handleForeignItemDragOut,
   });
 
   const handleChange = useCallback(
@@ -98,7 +96,9 @@ export const SortableContainer: React.FC<IProps> = ({
       setIsActiveHidden(canDrop);
       setActiveItem(item);
       setSortableItemsState((state) =>
-        isOutside ? state.lower(item.key).align() : state.relocate(item).align()
+        isOutside
+          ? state.placeToBottomByKey(item.key).align()
+          : state.moveIndexAccordingToPosition(item).align()
       );
     },
     [id, onDrag, setActiveItem]
@@ -112,17 +112,21 @@ export const SortableContainer: React.FC<IProps> = ({
       dropActiveItem(item.key);
 
       if (canDrop) {
-        setSortableItemsState((state) => state.remove(item.key).align());
+        setSortableItemsState((state) => state.removeByKey(item.key).align());
         return;
       }
 
       if (isOutside) {
-        setSortableItemsState((state) => state.remove(item.key).insert(item));
+        setSortableItemsState((state) =>
+          state.removeByKey(item.key).insertAccordingToPosition(item)
+        );
         setTimeout(() => setSortableItemsState((state) => state.align()));
         return;
       }
 
-      setSortableItemsState((state) => state.relocate(item).align());
+      setSortableItemsState((state) =>
+        state.moveIndexAccordingToPosition(item).align()
+      );
     },
     [dropActiveItem, onDrop, id]
   );

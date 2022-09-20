@@ -73,18 +73,16 @@ export const SortableContainers: ComponentStory<any> = () => {
           transitionDuration={300}
           box={BoundingBox.createByDimensions(0, 0, width, 600)}
           style={containerStyle}
-        >
-          {renderItem}
-        </SortableContainer>
+          renderItem={renderItem}
+        />
         <SortableContainer
           id="second"
           items={items2}
           transitionDuration={300}
           box={BoundingBox.createByDimensions(0, 0, width, 600)}
           style={containerStyle}
-        >
-          {renderItem}
-        </SortableContainer>
+          renderItem={renderItem}
+        />
         <div style={mockWrapperStyle}>
           Nesting
           <div style={mockWrapperStyle}>
@@ -95,9 +93,8 @@ export const SortableContainers: ComponentStory<any> = () => {
               transitionDuration={300}
               box={BoundingBox.createByDimensions(0, 0, width, 600)}
               style={containerStyle}
-            >
-              {renderItem}
-            </SortableContainer>
+              renderItem={renderItem}
+            />
           </div>
         </div>
       </DndConnector>

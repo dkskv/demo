@@ -1,9 +1,9 @@
 import { move, propEq, remove, sum } from "ramda";
 import {
-  insertNear,
+  insertAccordingToPosition,
   ISortableItem,
   positionInChain,
-  reorder,
+  moveIndexAccordingToPosition,
 } from "../../utils/sortable/sortable";
 
 // todo: сначала использовать массивы без оптимизаций, потом подумать над тем, как будет быстрее.
@@ -14,8 +14,8 @@ export class SortableItemsState {
     return sum(this.items.map(({ box }) => box.height));
   }
 
-  insert(item: ISortableItem) {
-    return new SortableItemsState(insertNear(item, this.items));
+  insertAccordingToPosition(item: ISortableItem) {
+    return new SortableItemsState(insertAccordingToPosition(item, this.items));
   }
 
   align() {
@@ -26,21 +26,24 @@ export class SortableItemsState {
     return this.items.findIndex(propEq("key", key));
   }
 
-  relocate(item: ISortableItem) {
+  moveIndexAccordingToPosition(item: ISortableItem) {
     const sourceIndex = this.findIndex(item.key);
     return new SortableItemsState(
-      reorder({ sourceIndex, point: item.box.origin }, this.items)
+      moveIndexAccordingToPosition(
+        { sourceIndex, point: item.box.origin },
+        this.items
+      )
     );
   }
 
-  lower(key: string) {
+  placeToBottomByKey(key: string) {
     const index = this.findIndex(key);
     return new SortableItemsState(
       move(index, this.items.length - 1, this.items)
     );
   }
 
-  remove(key: string) {
+  removeByKey(key: string) {
     const index = this.findIndex(key);
     return new SortableItemsState(remove(index, 1, this.items));
   }

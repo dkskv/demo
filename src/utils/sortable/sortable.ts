@@ -12,43 +12,54 @@ export interface IMovingAction {
   point: Point;
 }
 
-/** Изменить порядок элементов в соответствии с перемещаемым элементом */
-export function reorder(action: IMovingAction, items: ISortableItem[]) {
-  const targetIndex = defineTargetIndex(action, items);
-
+export function moveIndexAccordingToPosition(
+  action: IMovingAction,
+  items: ISortableItem[]
+) {
+  const targetIndex = defineIndexAfterMove(action, items);
   return move(action.sourceIndex, targetIndex, items);
 }
 
-// todo: Оптимизировать (возможно, использовать бинарный поиск)
-export function insertNear(item: ISortableItem, items: ISortableItem[]) {
+// todo: возможно, стоит использовать бинарный поиск для оптимизации
+export function insertAccordingToPosition(
+  item: ISortableItem,
+  items: ISortableItem[]
+) {
   const index = defineInsertionIndex(item, items);
-
   return insert(index, item, items);
+}
+
+function distance(a: number, b: number) {
+  return Math.abs(a - b);
 }
 
 export function defineInsertionIndex(
   item: ISortableItem,
   items: ISortableItem[]
 ) {
-  const points = items.length
-    ? [
-        Point.nullish,
-        ...items.map(({ box }) => box.denormalizePoint(new Point(0, 1))),
-      ]
-    : [];
+  const insertionY = item.box.center.y;
 
-  const itemPoint = item.box.center;
+  const { insertionIndex } = items.reduce(
+    (acc, { box }, index) => {
+      const distanceToStart = distance(box.y1, insertionY);
+      const distanceToEnd = distance(box.y2, insertionY);
 
-  return points.reduce(
-    (minIndex, point, index) =>
-      itemPoint.distance(points[minIndex]) > itemPoint.distance(point)
-        ? index
-        : minIndex,
-    0
+      const greaterThanMin =
+        distanceToStart > acc.minDistance && distanceToEnd > acc.minDistance;
+
+      return greaterThanMin
+        ? acc
+        : distanceToEnd > distanceToStart
+        ? { insertionIndex: index, minDistance: distanceToStart }
+        : { insertionIndex: index + 1, minDistance: distanceToEnd };
+    },
+    { minDistance: Infinity, insertionIndex: 0 }
   );
+
+  return insertionIndex;
 }
 
-export function defineTargetIndex(
+export function defineIndexAfterMove(
   { point, sourceIndex }: IMovingAction,
   items: ISortableItem[]
 ): number {

@@ -3,11 +3,11 @@ import { BoundingBox } from "../boundingBox";
 import { Point } from "../point";
 import {
   defineInsertionIndex,
-  defineTargetIndex,
+  defineIndexAfterMove,
   positionInChain,
 } from "./sortable";
 
-describe("defineInsertionIndex", () => {
+describe("Определение индекса для вставки нового элемента", () => {
   const items = [
     BoundingBox.square(0, 0, 20),
     BoundingBox.square(0, 20, 40),
@@ -36,7 +36,7 @@ describe("defineInsertionIndex", () => {
   });
 });
 
-describe("positionInChain", () => {
+describe("Позиционирование элементов в соответствии с их индексами", () => {
   function testPositioning(heights: number[], expectedYs: number[]) {
     const items = heights.map((h) => ({
       key: String(),
@@ -57,7 +57,7 @@ describe("positionInChain", () => {
   });
 });
 
-describe("defineTargetIndex", () => {
+describe("Определение нового индекса элемента после его перемещения", () => {
   const items = [
     BoundingBox.createByDimensions(0, 0, 0, 20),
     BoundingBox.createByDimensions(0, 20, 0, 40),
@@ -68,7 +68,7 @@ describe("defineTargetIndex", () => {
 
   function testMoving(sourceIndex: number, expectedIndex: number, y: number) {
     const action = { sourceIndex, point: new Point(0, y) };
-    const resultIndex = defineTargetIndex(action, items);
+    const resultIndex = defineIndexAfterMove(action, items);
 
     expect(resultIndex).toEqual(expectedIndex);
   }
