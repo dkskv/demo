@@ -6,7 +6,6 @@ import NumbersRangeInput, {
 import Slider, { ISliderProps } from "../Slider";
 import { createConverter } from "./utils";
 import { NumbersRange } from "../../utils/numbersRange";
-import { normalize } from "../../utils/normalization";
 import { useSmoothControl } from "../../decorators/useSmoothControl";
 import React from "react";
 import { Directions } from "../../utils/direction";
@@ -49,7 +48,7 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
         value={controlValue}
         onChange={handleControlChange}
         onEnd={handleControlEnd}
-        sizeBounds={normalize(sizeBounds, bounds.size)}
+        sizeBounds={sizeBounds.map((a) => a / bounds.size)}
         direction={direction}
         length={length}
         thickness={thickness}

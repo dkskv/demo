@@ -1,4 +1,3 @@
-import { denormalize } from "./normalization";
 import { NumbersRange } from "./numbersRange";
 
 export class SizeBounds {
@@ -9,8 +8,8 @@ export class SizeBounds {
 
   denormalize(dx: number, dy: number) {
     return new SizeBounds(
-      denormalize(this.dxBounds, dx),
-      denormalize(this.dyBounds, dy)
+      this.dxBounds.map((a) => a * dx),
+      this.dyBounds.map((a) => a * dy)
     );
   }
 }
