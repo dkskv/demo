@@ -1,14 +1,13 @@
 import { prop, sortBy } from "ramda";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { IDndElement, useDndConnection } from "../../decorators/dndConnection";
-import {
-  useActiveSortableItem,
-  useSortableItems,
-} from "../../decorators/useSortableItems";
+import { useActualRef } from "../../decorators/useActualRef";
+import { useActiveSortableItem } from "../../decorators/useSortableItems";
 import { BoundingBox } from "../../utils/boundingBox";
 import { ISortableItem } from "../../utils/sortable/sortable";
 import { getBoxStyle } from "../../utils/styles";
 import { DraggableBox } from "../DraggableBox";
+import { SortableItemsState } from "./utils";
 
 interface IProps {
   id: string;
@@ -31,31 +30,40 @@ export const SortableContainer: React.FC<IProps> = ({
   style,
   children: renderItem,
 }) => {
-  const [items, manager] = useSortableItems(initialItems);
+  const [sortableItemsState, setSortableItemsState] = useState(
+    () => new SortableItemsState(initialItems)
+  );
 
   const { activeItem, setActiveItem, dropActiveItem, getOverlapIndex } =
     useActiveSortableItem(transitionDuration);
   const [isActiveHidden, setIsActiveHidden] = useState(false);
 
+  // todo: назвать с отсылкой на остаток свободного места
   const canDropRef = useRef(false);
+
+  const actualSortableItemsState = useActualRef(sortableItemsState);
 
   const handleDragIn = useCallback(
     (item: ISortableItem, isFirstEvent: boolean) => {
       if (isFirstEvent) {
         canDropRef.current =
-          manager.totalHeight + item.box.height <= box.height;
+          actualSortableItemsState.current.totalHeight + item.box.height <=
+          box.height;
       }
 
       if (canDropRef.current) {
-        isFirstEvent ? manager.insert(item) : manager.relocate(item);
-        manager.align();
+        setSortableItemsState((state) =>
+          isFirstEvent
+            ? state.insert(item).align()
+            : state.relocate(item).align()
+        );
 
         setActiveItem(item);
       }
 
       return { canDrop: canDropRef.current };
     },
-    [manager, setActiveItem, box]
+    [setActiveItem, box, actualSortableItemsState]
   );
 
   const handleDropIn = useCallback(
@@ -71,12 +79,10 @@ export const SortableContainer: React.FC<IProps> = ({
     (key: string) => {
       if (canDropRef.current) {
         setActiveItem(null);
-
-        manager.remove(key);
-        manager.align();
+        setSortableItemsState((state) => state.remove(key).align());
       }
     },
-    [manager, setActiveItem]
+    [setActiveItem]
   );
 
   const { ref, onDrag, onDrop } = useDndConnection<HTMLDivElement>(id, {
@@ -91,11 +97,11 @@ export const SortableContainer: React.FC<IProps> = ({
 
       setIsActiveHidden(canDrop);
       setActiveItem(item);
-
-      isOutside ? manager.lower(item.key) : manager.relocate(item);
-      manager.align();
+      setSortableItemsState((state) =>
+        isOutside ? state.lower(item.key).align() : state.relocate(item).align()
+      );
     },
-    [id, onDrag, manager, setActiveItem]
+    [id, onDrag, setActiveItem]
   );
 
   const handleEnd = useCallback(
@@ -106,23 +112,19 @@ export const SortableContainer: React.FC<IProps> = ({
       dropActiveItem(item.key);
 
       if (canDrop) {
-        manager.remove(item.key);
-        manager.align();
+        setSortableItemsState((state) => state.remove(item.key).align());
         return;
       }
 
       if (isOutside) {
-        manager.remove(item.key);
-        manager.insert(item);
-
-        setTimeout(() => manager.align());
+        setSortableItemsState((state) => state.remove(item.key).insert(item));
+        setTimeout(() => setSortableItemsState((state) => state.align()));
         return;
       }
 
-      manager.relocate(item);
-      manager.align();
+      setSortableItemsState((state) => state.relocate(item).align());
     },
-    [dropActiveItem, onDrop, id, manager]
+    [dropActiveItem, onDrop, id]
   );
 
   /* 
@@ -130,7 +132,10 @@ export const SortableContainer: React.FC<IProps> = ({
     Без сортировки элементы резко меняют позицию, несмотря на CSS `transition`.
     todo: Попробовать избавиться.
   */
-  const sortedItems = useMemo(() => sortBy(prop("key"), items), [items]);
+  const sortedItems = useMemo(
+    () => sortBy(prop("key"), sortableItemsState.items),
+    [sortableItemsState.items]
+  );
 
   return (
     <div

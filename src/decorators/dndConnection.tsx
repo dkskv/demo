@@ -32,6 +32,7 @@ interface IContainerResponse {
 
 /** Подписка на входящие элементы. Callback'и возвращают разрешение на вход */
 interface IInputConnection {
+  // todo: подумать над внедрением дополнительного callback'а вместо использования isFirstEvent.
   onDragIn(a: IDndElement, isFirstEvent: boolean): IContainerResponse;
   onDropIn(a: IDndElement): IContainerResponse;
   onDragOut(key: string): void;
