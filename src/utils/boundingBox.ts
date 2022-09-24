@@ -160,6 +160,13 @@ export class BoundingBox {
     );
   }
 
+  expandEvenly(value: number) {
+    return BoundingBox.createByRanges(
+      this.xsRange.expandEvenly(value),
+      this.ysRange.expandEvenly(value)
+    );
+  }
+
   /** Определить площадь пересечения двух боксов */
   intersectionArea(box: BoundingBox) {
     const left = Math.max(this.x1, box.x1);

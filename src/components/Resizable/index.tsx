@@ -1,7 +1,12 @@
 import React, { useState } from "react";
 import makeStateful from "../../decorators/makeStateful";
 import { BoundingBox } from "../../utils/boundingBox";
-import { IResizeParams, useResize, useScalableBox } from "./hooks";
+import {
+  IResizeParams,
+  useHighlightingOnSizeLimit,
+  useResize,
+  useScalableBox,
+} from "./hooks";
 import { resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
 import { getBoxStyle } from "../../utils/styles";
 import { Thumb } from "../Thumb";
@@ -9,6 +14,7 @@ import { useDragBox } from "../../decorators/dnd";
 import { noop } from "../../utils/common";
 import { SizeBounds } from "../../utils/sizeBounds";
 import { Draggable } from "../Draggable";
+import { OutlineHighlighting } from "../OutlineHighlighting";
 
 export interface IResizableProps
   extends Pick<
@@ -69,6 +75,8 @@ const Resizable: React.FC<IResizableProps> = ({
     outerBox,
   });
 
+  const highlightingStage = useHighlightingOnSizeLimit(value, sizeBounds);
+
   function renderThumbs() {
     return thumbsProps.map((thumbProps) => (
       <Draggable isCentered={true} {...thumbProps}>
@@ -79,13 +87,14 @@ const Resizable: React.FC<IResizableProps> = ({
 
   return (
     <>
+      <OutlineHighlighting box={value} stage={highlightingStage} size={10} />
       <div
         ref={setElement}
         style={{ ...getBoxStyle(value), position: "absolute" }}
       >
         {React.Children.only(children)}
       </div>
-      {renderThumbs()}
+      <div>{renderThumbs()}</div>
     </>
   );
 };

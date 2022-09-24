@@ -49,3 +49,23 @@ export function constrainResizedBox(
     .placeInSameOrigin(sourceBox, transformOrigin)
     .clampByOuter(outerBox);
 }
+
+export function wasConstrainedBySizeBounds(
+  sourceBox: BoundingBox,
+  constrainedBox: BoundingBox,
+  sizeBounds: SizeBounds
+) {
+  let { dxBounds, dyBounds } = sizeBounds;
+  dxBounds = dxBounds.map(Math.round);
+  dyBounds = dyBounds.map(Math.round);
+
+  const sourceDx = Math.round(sourceBox.dx);
+  const sourceDy = Math.round(sourceBox.dy);
+  const constrainedDx = Math.round(constrainedBox.dx);
+  const constrainedDy = Math.round(constrainedBox.dy);
+
+  return (
+    (!dxBounds.isEdge(sourceDx) && dxBounds.isEdge(constrainedDx)) ||
+    (!dyBounds.isEdge(sourceDy) && dyBounds.isEdge(constrainedDy))
+  );
+}

@@ -1,15 +1,33 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { BoundingBox } from "../../utils/boundingBox";
 import { defineWheelScalingK, noop, type IPressedKeys } from "../../utils/common";
 import { Point } from "../../utils/point";
 import { ResizingPoint } from "../../utils/boxResize/resizingPoint";
 import { IResizeThumbKey, resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
-import { constrainResizedBox } from "../../utils/boxResize/constraints";
+import { constrainResizedBox, wasConstrainedBySizeBounds } from "../../utils/boxResize/constraints";
 import { useActualRef } from "../../decorators/useActualRef";
 import { IDragBoxCallback, IDragBoxCallbacks } from "../../decorators/dnd";
 import { IDragCallback } from "../../utils/drag";
 import { useScale } from "../../decorators/useScale";
 import { SizeBounds } from "../../utils/sizeBounds";
+import { useAnimationStage } from "../../decorators/useAnimationStage";
+import { usePrevious } from "../../decorators/usePrevious";
+
+export function useHighlightingOnSizeLimit(value: BoundingBox, sizeBounds: SizeBounds) {
+  const prevValue = usePrevious(value);
+  const [highlightingStage, highlight] = useAnimationStage({
+    duration: 300,
+    shouldResetOnEnd: true,
+  });
+
+  useEffect(() => {
+    if (prevValue && wasConstrainedBySizeBounds(prevValue, value, sizeBounds)) {
+      highlight();
+    }
+  }, [value, prevValue, highlight, sizeBounds]);
+
+  return highlightingStage;
+}
 
 export interface IResizeParams extends Partial<IDragBoxCallbacks> {
   /** Текущее состояние бокса */
@@ -71,13 +89,13 @@ export function useResize(params: IResizeParams) {
         outerBox
       } as const;
 
-      const nextBox = constrainResizedBox(
+      const constrainedBox = constrainResizedBox(
         resizedBox,
         { sourceBox: box, transformOrigin: resizingPoint.mirroredPoint },
         constraints
       );
 
-      onChange(nextBox, pressedKeys);
+      onChange(constrainedBox, pressedKeys);
     },
     [paramsRef, onChange]
   )
