@@ -8,12 +8,12 @@ export class ResizingHandle extends Point {
   }
 
   /**
-   * Получить положение ручки относительно переданного `origin`:
-   *   1  - координата `origin` меньше;
-   * (-1) - координата `origin` больше.
+   * Получить положение ручки относительно переданного `point`:
+   *   1  - координата `point` меньше;
+   * (-1) - координата `point` больше.
    */
-  private getSigns(origin: Point): Point {
-    return this.subtract(origin).map(Math.sign);
+  private getSignsRelativeTo(point: Point): Point {
+    return this.subtract(point).map(Math.sign);
   }
 
   /**
@@ -25,14 +25,16 @@ export class ResizingHandle extends Point {
    */
   public resizeBox(
     box: BoundingBox,
-    target: Point,
+    targetPoint: Point,
     origin = this.mirroredPoint
   ): BoundingBox {
-    const source = box.denormalizePoint(this);
+    const sourcePoint = box.denormalizePoint(this);
     /** Вектор перемещения ручки */
-    const moveVector = target.subtract(source).mul(this.getSigns(origin));
+    const moveVector = targetPoint
+      .subtract(sourcePoint)
+      .mul(this.getSignsRelativeTo(origin));
 
     /** Изменение размеров бокса на вектор перемещения */
-    return box.shiftDeltas(moveVector.x, moveVector.y);
+    return box.addToDeltas(moveVector.x, moveVector.y);
   }
 }

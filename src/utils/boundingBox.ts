@@ -140,7 +140,7 @@ export class BoundingBox {
     return BoundingBox.byDeltas(this.x0, this.y0, dx, dy);
   }
 
-  shiftDeltas(offsetX: number, offsetY: number) {
+  addToDeltas(offsetX: number, offsetY: number) {
     return BoundingBox.byDeltas(
       this.x0,
       this.y0,
