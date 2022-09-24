@@ -1,11 +1,11 @@
 import { BoundingBox } from "../boundingBox";
 import { compareWithPrecision } from "../common";
 import { Point } from "../point";
-import { SizeBounds } from "../sizeBounds";
+import { SizeLimits } from "../sizeLimits";
 
 interface IBoxConstraints {
   aspectRatio: number | null;
-  sizeBounds: SizeBounds;
+  sizeLimits: SizeLimits;
   outerBox: BoundingBox;
 }
 
@@ -17,7 +17,7 @@ interface IInitialConditions {
 export function constrainResizedBox(
   resizedBox: BoundingBox,
   { sourceBox, transformOrigin }: IInitialConditions,
-  { aspectRatio, sizeBounds, outerBox }: IBoxConstraints
+  { aspectRatio, sizeLimits, outerBox }: IBoxConstraints
 ) {
   const keepAspectRatio = aspectRatio !== null;
 
@@ -26,7 +26,7 @@ export function constrainResizedBox(
   }
 
   resizedBox = resizedBox
-    .constrainSize(sizeBounds.dxBounds, sizeBounds.dyBounds)
+    .constrainSize(sizeLimits.dxLimits, sizeLimits.dyLimits)
     .placeInSameOrigin(sourceBox, transformOrigin)
     .clipByOuter(outerBox);
 
@@ -50,14 +50,14 @@ export function constrainResizedBox(
     .clampByOuter(outerBox);
 }
 
-export function wasConstrainedBySizeBounds(
+export function wasConstrainedBySizeLimits(
   sourceBox: BoundingBox,
   constrainedBox: BoundingBox,
-  sizeBounds: SizeBounds
+  sizeLimits: SizeLimits
 ) {
-  let { dxBounds, dyBounds } = sizeBounds;
-  dxBounds = dxBounds.map(Math.round);
-  dyBounds = dyBounds.map(Math.round);
+  let { dxLimits, dyLimits } = sizeLimits;
+  dxLimits = dxLimits.map(Math.round);
+  dyLimits = dyLimits.map(Math.round);
 
   const sourceDx = Math.round(sourceBox.dx);
   const sourceDy = Math.round(sourceBox.dy);
@@ -65,7 +65,7 @@ export function wasConstrainedBySizeBounds(
   const constrainedDy = Math.round(constrainedBox.dy);
 
   return (
-    (!dxBounds.isEdge(sourceDx) && dxBounds.isEdge(constrainedDx)) ||
-    (!dyBounds.isEdge(sourceDy) && dyBounds.isEdge(constrainedDy))
+    (!dxLimits.isEdge(sourceDx) && dxLimits.isEdge(constrainedDx)) ||
+    (!dyLimits.isEdge(sourceDy) && dyLimits.isEdge(constrainedDy))
   );
 }

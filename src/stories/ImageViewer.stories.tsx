@@ -7,7 +7,7 @@ import { Space } from "../components/Space";
 import { useTheme } from "../decorators/theme";
 import { BoundingBox } from "../utils/boundingBox";
 import { NumbersRange } from "../utils/numbersRange";
-import { SizeBounds } from "../utils/sizeBounds";
+import { SizeLimits } from "../utils/sizeLimits";
 import { stretchStyle, getBoxStyle } from "../utils/styles";
 
 export default { title: "Demo" };
@@ -74,7 +74,7 @@ export const ImageViewer: ComponentStory<any> = () => {
           onChange={setControlValue}
           outerBox={controlBox.resetOrigin()}
           keepAspectRatio={true}
-          sizeBounds={new SizeBounds(scaleBounds, scaleBounds)}
+          sizeLimits={new SizeLimits(scaleBounds, scaleBounds)}
         >
           <div
             style={{

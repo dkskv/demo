@@ -4,16 +4,16 @@ import { defineWheelScalingK, noop, type IPressedKeys } from "../../utils/common
 import { Point } from "../../utils/point";
 import { ResizingHandle } from "../../utils/boxResize/resizingHandle";
 import { IResizeHandleKey, resizingHandlesPreset } from "../../utils/boxResize/resizingHandlesPreset";
-import { constrainResizedBox, wasConstrainedBySizeBounds } from "../../utils/boxResize/constraints";
+import { constrainResizedBox, wasConstrainedBySizeLimits } from "../../utils/boxResize/constraints";
 import { useActualRef } from "../../decorators/useActualRef";
 import { IDragBoxCallback, IDragBoxCallbacks } from "../../decorators/dnd";
 import { IDragCallback } from "../../utils/drag";
 import { useScale } from "../../decorators/useScale";
-import { SizeBounds } from "../../utils/sizeBounds";
+import { SizeLimits } from "../../utils/sizeLimits";
 import { useAnimationStage } from "../../decorators/useAnimationStage";
 import { usePrevious } from "../../decorators/usePrevious";
 
-export function useHighlightingOnSizeLimit(value: BoundingBox, sizeBounds: SizeBounds) {
+export function useHighlightingOnSizeLimit(value: BoundingBox, sizeLimits: SizeLimits) {
   const prevValue = usePrevious(value);
   const [highlightingStage, highlight] = useAnimationStage({
     duration: 300,
@@ -21,10 +21,10 @@ export function useHighlightingOnSizeLimit(value: BoundingBox, sizeBounds: SizeB
   });
 
   useEffect(() => {
-    if (prevValue && wasConstrainedBySizeBounds(prevValue, value, sizeBounds)) {
+    if (prevValue && wasConstrainedBySizeLimits(prevValue, value, sizeLimits)) {
       highlight();
     }
-  }, [value, prevValue, highlight, sizeBounds]);
+  }, [value, prevValue, highlight, sizeLimits]);
 
   return highlightingStage;
 }
@@ -35,10 +35,8 @@ export interface IResizeParams extends Partial<IDragBoxCallbacks> {
 
   onChange: IDragBoxCallback;
 
-  // Ограничения
-
   /** Ограничения размера сторон */
-  sizeBounds: SizeBounds;
+  sizeLimits: SizeLimits;
 
   /** Сохранять соотношении сторон */
   keepAspectRatio: boolean;
@@ -77,13 +75,13 @@ export function useResize(params: IResizeParams) {
       movedHandlePoint: Point,
       pressedKeys: IPressedKeys
     ) => {
-      const { box, keepAspectRatio, sizeBounds, outerBox } = paramsRef.current;
+      const { box, keepAspectRatio, sizeLimits, outerBox } = paramsRef.current;
 
       const resizedBox = handle.resizeBox(box, movedHandlePoint);
 
       const constraints = {
         aspectRatio: keepAspectRatio || pressedKeys.shiftKey ? aspectRatioRef.current : null,
-        sizeBounds,
+        sizeLimits,
         outerBox
       } as const;
 
@@ -119,7 +117,7 @@ interface IScalableBoxParams extends Partial<IDragBoxCallbacks> {
   box: BoundingBox;
   onChange: IDragBoxCallback;
   element: Element | null;
-  sizeBounds: SizeBounds;
+  sizeLimits: SizeLimits;
   outerBox: BoundingBox;
   keepAspectRatio: boolean;
 }
@@ -131,7 +129,7 @@ export function useScalableBox({
   onStart = noop,
   onEnd = noop,
   outerBox,
-  sizeBounds,
+  sizeLimits,
   keepAspectRatio
 }: IScalableBoxParams) {
   const actualBox = useActualRef(box);
@@ -151,12 +149,12 @@ export function useScalableBox({
       const nextBox = constrainResizedBox(
         scaledBox,
         { sourceBox: value, transformOrigin: p },
-        { aspectRatio: keepAspectRatio ? scaledBox.aspectRatio : null, outerBox, sizeBounds }
+        { aspectRatio: keepAspectRatio ? scaledBox.aspectRatio : null, outerBox, sizeLimits }
       );
 
       onChange(nextBox, pressedKeys);
     },
-    [actualBox, onChange, outerBox, sizeBounds, keepAspectRatio]
+    [actualBox, onChange, outerBox, sizeLimits, keepAspectRatio]
   );
 
   const handleScaleEnd = useCallback(

@@ -9,7 +9,7 @@ import { magnetize } from "../utils/common";
 import { NumbersRange } from "../utils/numbersRange";
 import { Directions } from "../utils/direction";
 import { getBoxStyle, stretchStyle } from "../utils/styles";
-import { SizeBounds } from "../utils/sizeBounds";
+import { SizeLimits } from "../utils/sizeLimits";
 import { useTheme } from "../decorators/theme";
 
 export default { title: "Demo" };
@@ -83,8 +83,8 @@ export const ResizableBox: ComponentStory<typeof Resizable> = () => {
         {isGridEnabled && grid}
         <Resizable
           value={value}
-          sizeBounds={
-            new SizeBounds(
+          sizeLimits={
+            new SizeLimits(
               new NumbersRange(100, 600),
               new NumbersRange(80, 400)
             )

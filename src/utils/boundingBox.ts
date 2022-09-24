@@ -137,9 +137,9 @@ export class BoundingBox {
     return BoundingBox.createByDimensions(0, 0, this.dx, this.dy);
   }
 
-  constrainSize(dxBounds: NumbersRange, dyBounds: NumbersRange) {
-    const dx = dxBounds.clampNumber(this.dx);
-    const dy = dyBounds.clampNumber(this.dy);
+  constrainSize(dxLimits: NumbersRange, dyLimits: NumbersRange) {
+    const dx = dxLimits.clampNumber(this.dx);
+    const dy = dyLimits.clampNumber(this.dy);
 
     return BoundingBox.createByDimensions(this.x0, this.y0, dx, dy);
   }

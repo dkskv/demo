@@ -9,7 +9,7 @@ export interface INumbersRangeInputProps {
   /** Диапазон минимального и максимального значений */
   bounds?: NumbersRange;
   /** Минимальный и максимальный размер диапазона */
-  sizeBounds?: NumbersRange;
+  sizeLimits?: NumbersRange;
 
   direction?: IDirection;
 }
@@ -17,7 +17,7 @@ export interface INumbersRangeInputProps {
 export const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
   value: range,
   bounds = NumbersRange.infinite(),
-  sizeBounds = NumbersRange.infinite(),
+  sizeLimits = NumbersRange.infinite(),
   onChange,
   direction,
   children,
@@ -27,10 +27,10 @@ export const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
       const value = Number(event.target.value);
 
       onChange(
-        range.setStart(value).constrainSize(sizeBounds).moveTo(range.end, 1)
+        range.setStart(value).constrainSize(sizeLimits).moveTo(range.end, 1)
       );
     },
-    [range, sizeBounds, onChange]
+    [range, sizeLimits, onChange]
   );
 
   const handleChangeEndValue = useCallback(
@@ -38,10 +38,10 @@ export const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
       const value = Number(event.target.value);
 
       onChange(
-        range.setEnd(value).constrainSize(sizeBounds).moveTo(range.start, 0)
+        range.setEnd(value).constrainSize(sizeLimits).moveTo(range.start, 0)
       );
     },
-    [range, sizeBounds, onChange]
+    [range, sizeLimits, onChange]
   );
 
   return (

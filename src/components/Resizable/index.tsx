@@ -11,14 +11,14 @@ import { getBoxStyle } from "../../utils/styles";
 import { Thumb } from "../Thumb";
 import { useDragBox } from "../../decorators/dnd";
 import { noop } from "../../utils/common";
-import { SizeBounds } from "../../utils/sizeBounds";
+import { SizeLimits } from "../../utils/sizeLimits";
 import { Draggable } from "../Draggable";
 import { OutlineHighlighting } from "../OutlineHighlighting";
 
 export interface IResizableProps
   extends Pick<
     Partial<IResizeParams>,
-    | "sizeBounds"
+    | "sizeLimits"
     | "keepAspectRatio"
     | "handlesKeys"
     | "onStart"
@@ -35,7 +35,7 @@ export const Resizable: React.FC<IResizableProps> = ({
   onChange,
   onStart = noop,
   onEnd = noop,
-  sizeBounds = new SizeBounds(),
+  sizeLimits = new SizeLimits(),
   outerBox = BoundingBox.infinite(),
   keepAspectRatio = false,
   handlesKeys = resizingHandlesPreset.all,
@@ -55,7 +55,7 @@ export const Resizable: React.FC<IResizableProps> = ({
   useScalableBox({
     box: value,
     element,
-    sizeBounds,
+    sizeLimits,
     outerBox,
     onChange,
     onStart,
@@ -68,13 +68,13 @@ export const Resizable: React.FC<IResizableProps> = ({
     onChange,
     onStart,
     onEnd,
-    sizeBounds,
+    sizeLimits,
     keepAspectRatio,
     handlesKeys,
     outerBox,
   });
 
-  const highlightingStage = useHighlightingOnSizeLimit(value, sizeBounds);
+  const highlightingStage = useHighlightingOnSizeLimit(value, sizeLimits);
 
   function renderHandles() {
     return handlesProps.map((handleProps) => (

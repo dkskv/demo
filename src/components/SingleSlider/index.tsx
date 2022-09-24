@@ -12,7 +12,7 @@ export interface ISingleSliderProps
     | "onStart"
     | "onEnd"
     | "bounds"
-    | "sizeBounds"
+    | "sizeLimits"
     | "isDraggable"
   > {
   value: number;

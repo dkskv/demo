@@ -4,7 +4,7 @@ import { NumbersRange } from "../../utils/numbersRange";
 import { BoundingBox } from "../../utils/boundingBox";
 import { ResizableControl } from "../ResizableControl";
 import { IPressedKeys, noop } from "../../utils/common";
-import { SizeBounds } from "../../utils/sizeBounds";
+import { SizeLimits } from "../../utils/sizeLimits";
 import { centererStyle, getBoxStyle, stretchStyle } from "../../utils/styles";
 import { useTheme } from "../../decorators/theme";
 
@@ -21,7 +21,7 @@ export interface ISliderProps {
   isDraggable?: boolean;
 
   /** Диапазон возможных размеров трека */
-  sizeBounds?: NumbersRange;
+  sizeLimits?: NumbersRange;
   direction?: IDirection;
 
   handlesKeys?: [0] | [1] | [0, 1];
@@ -29,7 +29,7 @@ export interface ISliderProps {
 
 function getDirectedSizeBounds(bounds: NumbersRange, direction: IDirection) {
   const boxOfBounds = direction.boxFromRanges(bounds, NumbersRange.infinite());
-  return new SizeBounds(boxOfBounds.xsRange, boxOfBounds.ysRange);
+  return new SizeLimits(boxOfBounds.xsRange, boxOfBounds.ysRange);
 }
 
 export const Slider: React.FC<ISliderProps> = ({
@@ -37,7 +37,7 @@ export const Slider: React.FC<ISliderProps> = ({
   onChange,
   onStart = noop,
   onEnd = noop,
-  sizeBounds = NumbersRange.infinite(),
+  sizeLimits = NumbersRange.infinite(),
   direction = Directions.horizontal,
   handlesKeys = [0, 1],
   length,
@@ -89,7 +89,7 @@ export const Slider: React.FC<ISliderProps> = ({
         onChange={handleChange}
         onStart={handleStart}
         onEnd={handleEnd}
-        sizeBounds={getDirectedSizeBounds(sizeBounds, direction)}
+        sizeLimits={getDirectedSizeBounds(sizeLimits, direction)}
         handlesKeys={direction.sides.filter((_, i) =>
           (handlesKeys as number[]).includes(i)
         )}
