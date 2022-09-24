@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import { IDirection, Directions } from "../../utils/direction";
 import { NumbersRange } from "../../utils/numbersRange";
 import { BoundingBox } from "../../utils/boundingBox";
-import ResizableControl from "../ResizableControl";
+import { ResizableControl } from "../ResizableControl";
 import { IPressedKeys, noop } from "../../utils/common";
 import { SizeBounds } from "../../utils/sizeBounds";
 import { centererStyle, getBoxStyle, stretchStyle } from "../../utils/styles";
@@ -32,7 +32,7 @@ function getDirectedSizeBounds(bounds: NumbersRange, direction: IDirection) {
   return new SizeBounds(boxOfBounds.xsRange, boxOfBounds.ysRange);
 }
 
-const Slider: React.FC<ISliderProps> = ({
+export const Slider: React.FC<ISliderProps> = ({
   value,
   onChange,
   onStart = noop,
@@ -126,5 +126,3 @@ function useDirectedCallback(
     [callback, direction]
   );
 }
-
-export default Slider;

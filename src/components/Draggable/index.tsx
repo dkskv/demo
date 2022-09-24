@@ -1,5 +1,4 @@
 import React from "react";
-import makeStateful from "../../decorators/makeStateful";
 import { useCallbackRef } from "../../hooks";
 import { getPointStyle } from "../../utils/styles";
 import { IDragCallbacks } from "../../utils/drag";
@@ -45,5 +44,3 @@ export const Draggable: React.FC<IProps> = ({
     </div>
   );
 };
-
-export const StatefulDraggable = makeStateful(Draggable);

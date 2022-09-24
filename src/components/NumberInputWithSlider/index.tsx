@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from "react";
-import makeStateful from "../../decorators/makeStateful";
 import { useSmoothControl } from "../../decorators/useSmoothControl";
-import SingleSlider, { ISingleSliderProps } from "../SingleSlider";
+import { SingleSlider, ISingleSliderProps } from "../SingleSlider";
 import { Space } from "../Space";
 
 interface IProps extends ISingleSliderProps {
@@ -9,7 +8,7 @@ interface IProps extends ISingleSliderProps {
   isSmoothSlider?: boolean;
 }
 
-const NumberInputWithSlider: React.FC<IProps> = ({
+export const NumberInputWithSlider: React.FC<IProps> = ({
   value,
   onChange,
   max,
@@ -64,5 +63,3 @@ const NumberInputWithSlider: React.FC<IProps> = ({
     </Space>
   );
 };
-
-export default makeStateful(NumberInputWithSlider);

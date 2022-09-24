@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { noop } from "../../utils/common";
 import { NumbersRange } from "../../utils/numbersRange";
 import { Directions } from "../../utils/direction";
-import Slider, { ISliderProps } from "../Slider";
+import { Slider, ISliderProps } from "../Slider";
 
 export interface ISingleSliderProps
   extends Omit<
@@ -21,7 +21,7 @@ export interface ISingleSliderProps
   onEnd?(value: number): void;
 }
 
-const SingleSlider: React.FC<ISingleSliderProps> = ({
+export const SingleSlider: React.FC<ISingleSliderProps> = ({
   value,
   onChange,
   onStart = noop,
@@ -51,5 +51,3 @@ function useSingleCallback(callback: (box: number) => void) {
     [callback]
   );
 }
-
-export default SingleSlider;

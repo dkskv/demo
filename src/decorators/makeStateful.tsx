@@ -15,7 +15,7 @@ interface IStatefulProps<V> {
  * - Принимает компонент с обязательными пропсами: value и onChange.
  * - Возвращает компонент с необязательными пропсами: value, onChange, initialValue
  */
-export default function makeStateful<V, O, RestProps>(
+export function makeStateful<V, O, RestProps>(
   Component: React.ComponentType<RestProps & IStatelessProps<V, O>>
 ) {
   return function (

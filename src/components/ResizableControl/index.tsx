@@ -2,14 +2,14 @@ import React, { useCallback } from "react";
 import { BoundingBox } from "../../utils/boundingBox";
 import { IPressedKeys, noop } from "../../utils/common";
 import { SizeBounds } from "../../utils/sizeBounds";
-import Resizable, { IResizableProps } from "../Resizable";
+import { Resizable, IResizableProps } from "../Resizable";
 
 export interface IResizableControlProps extends IResizableProps {
   outerBox: NonNullable<IResizableProps["outerBox"]>;
 }
 
 /** Resizable элемент, представленный в нормализованном виде */
-const ResizableControl: React.FC<IResizableControlProps> = ({
+export const ResizableControl: React.FC<IResizableControlProps> = ({
   value,
   onChange,
   onStart = noop,
@@ -46,5 +46,3 @@ function useNormalizedCallback(
     [callback, outerBox]
   );
 }
-
-export default ResizableControl;

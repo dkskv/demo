@@ -1,9 +1,9 @@
 import { useMemo } from "react";
-import makeStateful from "../../decorators/makeStateful";
-import NumbersRangeInput, {
+import {
+  NumbersRangeInput,
   INumbersRangeInputProps,
 } from "../NumbersRangeInput";
-import Slider, { ISliderProps } from "../Slider";
+import { Slider, ISliderProps } from "../Slider";
 import { createConverter } from "./utils";
 import { NumbersRange } from "../../utils/numbersRange";
 import { useSmoothControl } from "../../decorators/useSmoothControl";
@@ -15,7 +15,7 @@ interface IProps extends INumbersRangeInputProps, ISliderProps {
   isSmoothSlider?: boolean;
 }
 
-const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
+export const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
   const {
     value,
     onChange,
@@ -56,5 +56,3 @@ const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
     </NumbersRangeInput>
   );
 };
-
-export default makeStateful(NumberRangeInputWithSlider);

@@ -14,7 +14,7 @@ export interface INumbersRangeInputProps {
   direction?: IDirection;
 }
 
-const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
+export const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
   value: range,
   bounds = NumbersRange.infinite(),
   sizeBounds = NumbersRange.infinite(),
@@ -64,5 +64,3 @@ const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
     </Space>
   );
 };
-
-export default NumbersRangeInput;

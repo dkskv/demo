@@ -1,7 +1,7 @@
 import { ComponentStory } from "@storybook/react";
 import { useState } from "react";
 import { ImageBox } from "../components/ImageBox";
-import ResizableControl from "../components/ResizableControl";
+import { ResizableControl } from "../components/ResizableControl";
 import { ScalableImage } from "../components/ScalableImage";
 import { Space } from "../components/Space";
 import { useTheme } from "../decorators/theme";

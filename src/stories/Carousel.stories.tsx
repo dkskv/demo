@@ -1,4 +1,4 @@
-import { ComponentMeta, ComponentStory } from "@storybook/react";
+import { ComponentStory } from "@storybook/react";
 import { times } from "ramda";
 import { SwipeContainer } from "../components/SwipeContainer";
 import { Space } from "../components/Space";
@@ -9,10 +9,7 @@ import { NumbersRange } from "../utils/numbersRange";
 import { BoundingBox } from "../utils/boundingBox";
 import { useTheme } from "../decorators/theme";
 
-export default {
-  title: "Demo",
-  parameters: {},
-} as ComponentMeta<any>;
+export default { title: "Demo" };
 
 export const SwipeContainerStory: ComponentStory<any> = () => {
   const [direction, setDirection] = useState(Directions.horizontal);

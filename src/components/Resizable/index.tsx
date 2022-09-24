@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import makeStateful from "../../decorators/makeStateful";
 import { BoundingBox } from "../../utils/boundingBox";
 import {
   IResizeParams,
@@ -31,7 +30,7 @@ export interface IResizableProps
   isDraggable?: boolean;
 }
 
-const Resizable: React.FC<IResizableProps> = ({
+export const Resizable: React.FC<IResizableProps> = ({
   value,
   onChange,
   onStart = noop,
@@ -98,5 +97,3 @@ const Resizable: React.FC<IResizableProps> = ({
     </>
   );
 };
-
-export default makeStateful(Resizable);

@@ -2,7 +2,7 @@ import { ComponentStory } from "@storybook/react";
 import { useCallback, useEffect, useState } from "react";
 import { Checkbox } from "../components/Checkbox";
 import { Grid } from "../components/Grid";
-import Resizable from "../components/Resizable";
+import { Resizable } from "../components/Resizable";
 import { Space } from "../components/Space";
 import { BoundingBox } from "../utils/boundingBox";
 import { magnetize } from "../utils/common";
