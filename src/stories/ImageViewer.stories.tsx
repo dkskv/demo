@@ -20,7 +20,7 @@ export const ImageViewer: ComponentStory<any> = () => {
   const imageBox = BoundingBox.byDeltas(0, 0, 400, 400);
   const controlBox = BoundingBox.byDeltas(0, 0, 300, 300);
 
-  const scaleBounds = NumbersRange.byDelta(0.2, 1);
+  const scaleBounds = new NumbersRange(0.2, 1);
 
   const theme = useTheme();
 

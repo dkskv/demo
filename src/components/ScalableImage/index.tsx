@@ -19,7 +19,7 @@ export const ScalableImage: React.FC<IProps> = ({
   src,
   viewBox,
   onViewBoxChange,
-  scaleBounds = NumbersRange.byDelta(0.2, 1),
+  scaleBounds = new NumbersRange(0.2, 1),
 }) => {
   const [element, setElement] = useCallbackRef();
 
