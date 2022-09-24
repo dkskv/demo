@@ -1,5 +1,5 @@
 import React from "react";
-import { useCallbackRef } from "../../hooks";
+import { useCallbackRef } from "../../decorators/useCallbackRef";
 import { getPointStyle } from "../../utils/styles";
 import { IDragCallbacks } from "../../utils/drag";
 import { Point } from "../../utils/point";

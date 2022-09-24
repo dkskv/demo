@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useDragMovement } from "../../decorators/dnd";
-import { useCallbackRef } from "../../hooks";
+import { useCallbackRef } from "../../decorators/useCallbackRef";
 import { BoundingBox } from "../../utils/boundingBox";
 import { Directions, IDirection } from "../../utils/direction";
 import { Point } from "../../utils/point";

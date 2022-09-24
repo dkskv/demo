@@ -1,7 +1,7 @@
 import { useDragMovement } from "../../decorators/dnd";
 import { useBooleanState } from "../../decorators/useBooleanState";
 import { useScale } from "../../decorators/useScale";
-import { useCallbackRef } from "../../hooks";
+import { useCallbackRef } from "../../decorators/useCallbackRef";
 import { BoundingBox } from "../../utils/boundingBox";
 import { defineWheelScalingK, noop } from "../../utils/common";
 import { NumbersRange } from "../../utils/numbersRange";
