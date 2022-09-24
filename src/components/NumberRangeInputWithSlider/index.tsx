@@ -20,7 +20,7 @@ export const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
     value,
     onChange,
     bounds,
-    sizeLimits = NumbersRange.endless(0),
+    sizeLimits = NumbersRange.endless(),
     isSmoothSlider = false,
     direction = Directions.horizontal,
     length,

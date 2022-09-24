@@ -56,7 +56,7 @@ export namespace Directions {
       return [box.xsRange, box.ysRange];
     },
     boxFromRanges(parallelRange: NumbersRange, normalRange: NumbersRange) {
-      return BoundingBox.createByRanges(parallelRange, normalRange);
+      return BoundingBox.byRanges(parallelRange, normalRange);
     },
     coordinatesOfPoint({ x, y }: Point) {
       return [x, y];
@@ -94,7 +94,7 @@ export namespace Directions {
       return [box.ysRange, box.xsRange];
     },
     boxFromRanges(parallelRange: NumbersRange, normalRange: NumbersRange) {
-      return BoundingBox.createByRanges(normalRange, parallelRange);
+      return BoundingBox.byRanges(normalRange, parallelRange);
     },
     coordinatesOfPoint({ x, y }: Point) {
       return [y, x];

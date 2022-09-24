@@ -14,13 +14,13 @@ export default { title: "Demo" };
 
 export const ImageViewer: ComponentStory<any> = () => {
   const [controlValue, setControlValue] = useState<BoundingBox>(() =>
-    BoundingBox.createByDimensions(0, 0, 0.25, 0.25)
+    BoundingBox.byDeltas(0, 0, 0.25, 0.25)
   );
 
-  const imageBox = BoundingBox.createByDimensions(0, 0, 400, 400);
-  const controlBox = BoundingBox.createByDimensions(0, 0, 300, 300);
+  const imageBox = BoundingBox.byDeltas(0, 0, 400, 400);
+  const controlBox = BoundingBox.byDeltas(0, 0, 300, 300);
 
-  const scaleBounds = new NumbersRange(0.2, 1);
+  const scaleBounds = NumbersRange.byDelta(0.2, 1);
 
   const theme = useTheme();
 

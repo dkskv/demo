@@ -49,8 +49,8 @@ export const Slider: React.FC<ISliderProps> = ({
   const handleEnd = useDirectedCallback(onEnd, direction);
 
   const outerBox = direction.boxFromRanges(
-    new NumbersRange(0, length),
-    new NumbersRange(0, thickness)
+    NumbersRange.byOnlyDelta(length),
+    NumbersRange.byOnlyDelta(thickness)
   );
 
   function renderExtendedControlArea() {

@@ -19,7 +19,7 @@ export const ScalableImage: React.FC<IProps> = ({
   src,
   viewBox,
   onViewBoxChange,
-  scaleBounds = new NumbersRange(0.2, 1),
+  scaleBounds = NumbersRange.byDelta(0.2, 1),
 }) => {
   const [element, setElement] = useCallbackRef();
 
@@ -28,7 +28,7 @@ export const ScalableImage: React.FC<IProps> = ({
       .scale(defineWheelScalingK(delta))
       .constrainSize(scaleBounds, scaleBounds)
       .placeInSameOrigin(viewBox, p)
-      .clampByOuter(BoundingBox.fromOrigin(1, 1));
+      .clampByOuter(BoundingBox.byOnlyDeltas(1, 1));
 
     onViewBoxChange(nextViewBox);
   }
@@ -42,7 +42,7 @@ export const ScalableImage: React.FC<IProps> = ({
 
     const nextViewBox = viewBox
       .shift(scaledDelta.negate())
-      .clampByOuter(BoundingBox.fromOrigin(1, 1));
+      .clampByOuter(BoundingBox.byOnlyDeltas(1, 1));
 
     onViewBoxChange(nextViewBox);
   };

@@ -11,7 +11,7 @@ export interface IImageBoxProps {
 export const ImageBox: React.FC<IImageBoxProps> = ({
   box,
   src,
-  viewBox = BoundingBox.createByDimensions(0, 0, 1, 1),
+  viewBox = BoundingBox.byDeltas(0, 0, 1, 1),
 }) => {
   const theme = useTheme();
 

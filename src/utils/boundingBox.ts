@@ -4,23 +4,19 @@ import { Point } from "./point";
 
 export class BoundingBox {
   static square(x0: number, y0: number, a: number) {
-    return this.createByDimensions(x0, y0, a, a);
+    return this.byDeltas(x0, y0, a, a);
   }
 
-  static fromOrigin(dx: number, dy: number) {
-    return BoundingBox.createByDimensions(0, 0, dx, dy);
+  static byOnlyDeltas(dx: number, dy: number) {
+    return BoundingBox.byDeltas(0, 0, dx, dy);
   }
 
-  static createByDimensions(x0: number, y0: number, dx: number, dy: number) {
+  static byDeltas(x0: number, y0: number, dx: number, dy: number) {
     return new BoundingBox(x0, x0 + dx, y0, y0 + dy);
   }
 
-  static createByRanges(xRange: NumbersRange, yRange: NumbersRange) {
+  static byRanges(xRange: NumbersRange, yRange: NumbersRange) {
     return new BoundingBox(xRange.start, xRange.end, yRange.start, yRange.end);
-  }
-
-  static nullish() {
-    return new BoundingBox(0, 0, 0, 0);
   }
 
   static infinite() {
@@ -110,7 +106,7 @@ export class BoundingBox {
   }
 
   clampInner(inner: BoundingBox) {
-    return BoundingBox.createByRanges(
+    return BoundingBox.byRanges(
       this.xsRange.clampInner(inner.xsRange),
       this.ysRange.clampInner(inner.ysRange)
     );
@@ -124,7 +120,7 @@ export class BoundingBox {
   shift(offsets: Point): BoundingBox {
     const p = this.origin.add(offsets);
 
-    return BoundingBox.createByDimensions(p.x, p.y, this.dx, this.dy);
+    return BoundingBox.byDeltas(p.x, p.y, this.dx, this.dy);
   }
 
   /** Устанавливает координаты бокса */
@@ -134,18 +130,18 @@ export class BoundingBox {
 
   /** Перемещаем бокс в начало координат */
   resetOrigin() {
-    return BoundingBox.createByDimensions(0, 0, this.dx, this.dy);
+    return BoundingBox.byDeltas(0, 0, this.dx, this.dy);
   }
 
   constrainSize(dxLimits: NumbersRange, dyLimits: NumbersRange) {
     const dx = dxLimits.clampNumber(this.dx);
     const dy = dyLimits.clampNumber(this.dy);
 
-    return BoundingBox.createByDimensions(this.x0, this.y0, dx, dy);
+    return BoundingBox.byDeltas(this.x0, this.y0, dx, dy);
   }
 
   shiftDeltas(offsetX: number, offsetY: number) {
-    return BoundingBox.createByDimensions(
+    return BoundingBox.byDeltas(
       this.x0,
       this.y0,
       this.dx + offsetX,
@@ -154,14 +150,11 @@ export class BoundingBox {
   }
 
   scale(k: number) {
-    return BoundingBox.createByRanges(
-      this.xsRange.scale(k),
-      this.ysRange.scale(k)
-    );
+    return BoundingBox.byRanges(this.xsRange.scale(k), this.ysRange.scale(k));
   }
 
   expandEvenly(value: number) {
-    return BoundingBox.createByRanges(
+    return BoundingBox.byRanges(
       this.xsRange.expandEvenly(value),
       this.ysRange.expandEvenly(value)
     );
@@ -194,7 +187,7 @@ export class BoundingBox {
     const dy = (this.dx + this.dy) / (ratio + 1);
     const dx = ratio * dy;
 
-    return BoundingBox.createByDimensions(this.x0, this.y0, dx, dy);
+    return BoundingBox.byDeltas(this.x0, this.y0, dx, dy);
   }
 
   /** Нормировать внутренний бокс */

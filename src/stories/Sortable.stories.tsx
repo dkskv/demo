@@ -17,7 +17,7 @@ const generateItems = (colors: string[], sizes: number[]) =>
       (color, height) => {
         return {
           key: color,
-          box: BoundingBox.createByDimensions(0, 0, 200, height),
+          box: BoundingBox.byDeltas(0, 0, 200, height),
         };
       },
       colors,
@@ -71,7 +71,7 @@ export const SortableContainers: ComponentStory<any> = () => {
           id="first"
           items={items}
           transitionDuration={300}
-          box={BoundingBox.createByDimensions(0, 0, width, 600)}
+          box={BoundingBox.byDeltas(0, 0, width, 600)}
           style={containerStyle}
           renderItem={renderItem}
         />
@@ -79,7 +79,7 @@ export const SortableContainers: ComponentStory<any> = () => {
           id="second"
           items={items2}
           transitionDuration={300}
-          box={BoundingBox.createByDimensions(0, 0, width, 600)}
+          box={BoundingBox.byDeltas(0, 0, width, 600)}
           style={containerStyle}
           renderItem={renderItem}
         />
@@ -91,7 +91,7 @@ export const SortableContainers: ComponentStory<any> = () => {
               id="third"
               items={[]}
               transitionDuration={300}
-              box={BoundingBox.createByDimensions(0, 0, width, 600)}
+              box={BoundingBox.byDeltas(0, 0, width, 600)}
               style={containerStyle}
               renderItem={renderItem}
             />

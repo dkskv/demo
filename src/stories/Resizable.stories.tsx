@@ -21,11 +21,11 @@ export const ResizableBox: ComponentStory<typeof Resizable> = () => {
   const [isGridEnabled, setIsGridEnabled] = useState(false);
   const [isLockedRatio, setIsLockedRatio] = useState(false);
 
-  const outerBox = BoundingBox.createByDimensions(0, 0, 800, 600).map(
+  const outerBox = BoundingBox.byDeltas(0, 0, 800, 600).map(
     magnetize(gridLargeStep)
   );
   const [value, setValue] = useState(() =>
-    BoundingBox.createByDimensions(50, 60, 200, 150)
+    BoundingBox.byDeltas(50, 60, 200, 150)
   );
 
   function magnetizeBox(b: BoundingBox) {

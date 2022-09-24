@@ -24,7 +24,7 @@ function getOriginOffset(element: Element) {
 export function getBoxOnPage(element: Element) {
   const { x, y, width, height } = element.getBoundingClientRect();
 
-  return BoundingBox.createByDimensions(x, y, width, height);
+  return BoundingBox.byDeltas(x, y, width, height);
 }
 
 export function getOffsetBox(element: HTMLElement) {

@@ -155,7 +155,7 @@ export const SwipeContainer: React.FC<IProps> = ({
           direction={direction}
           length={containerLength}
           thickness={5}
-          viewPort={NumbersRange.createByDelta(
+          viewPort={NumbersRange.byDelta(
             scrollingState.coordinate / contentLength,
             containerLength / contentLength
           )}

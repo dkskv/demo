@@ -125,7 +125,7 @@ export class ScrollConstraints {
   ) {}
 
   public get bounds() {
-    return new NumbersRange(0, this.scrollLength);
+    return NumbersRange.byOnlyDelta(this.scrollLength);
   }
 
   public get overflowBounds() {
@@ -133,16 +133,13 @@ export class ScrollConstraints {
   }
 
   public get startExtrusionZone() {
-    return NumbersRange.createByDelta(
+    return NumbersRange.byDelta(
       -this.extrusionZoneLength,
       this.extrusionZoneLength
     );
   }
 
   public get endExtrusionZone() {
-    return NumbersRange.createByDelta(
-      this.scrollLength,
-      this.extrusionZoneLength
-    );
+    return NumbersRange.byDelta(this.scrollLength, this.extrusionZoneLength);
   }
 }

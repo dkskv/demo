@@ -32,7 +32,7 @@ export const SingleSlider: React.FC<ISingleSliderProps> = ({
   return (
     <Slider
       {...rest}
-      value={new NumbersRange(0, value)}
+      value={NumbersRange.byOnlyDelta(value)}
       onChange={useSingleCallback(onChange)}
       onStart={useSingleCallback(onStart)}
       onEnd={useSingleCallback(onEnd)}

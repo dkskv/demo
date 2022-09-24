@@ -19,13 +19,13 @@ export const Scrollbar: React.FC<IProps> = ({
   isActive,
 }) => {
   const box = direction.boxFromRanges(
-    new NumbersRange(0, length),
-    new NumbersRange(0, thickness)
+    NumbersRange.byOnlyDelta(length),
+    NumbersRange.byOnlyDelta(thickness)
   );
 
   const thumbBox = direction.boxFromRanges(
     viewPort.map((n) => n * length),
-    new NumbersRange(0, thickness)
+    NumbersRange.byOnlyDelta(thickness)
   );
 
   const theme = useTheme();

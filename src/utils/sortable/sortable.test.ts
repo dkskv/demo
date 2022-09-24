@@ -40,7 +40,7 @@ describe("Позиционирование элементов в соответ�
   function testPositioning(heights: number[], expectedYs: number[]) {
     const items = heights.map((h) => ({
       key: String(),
-      box: BoundingBox.fromOrigin(0, h),
+      box: BoundingBox.byOnlyDeltas(0, h),
     }));
 
     const ys = positionInChain(items).map(path(["box", "y0"]));
@@ -59,11 +59,11 @@ describe("Позиционирование элементов в соответ�
 
 describe("Определение нового индекса элемента после его перемещения", () => {
   const items = [
-    BoundingBox.createByDimensions(0, 0, 0, 20),
-    BoundingBox.createByDimensions(0, 20, 0, 40),
-    BoundingBox.createByDimensions(0, 60, 0, 20),
-    BoundingBox.createByDimensions(0, 80, 0, 50),
-    BoundingBox.createByDimensions(0, 130, 0, 10),
+    BoundingBox.byDeltas(0, 0, 0, 20),
+    BoundingBox.byDeltas(0, 20, 0, 40),
+    BoundingBox.byDeltas(0, 60, 0, 20),
+    BoundingBox.byDeltas(0, 80, 0, 50),
+    BoundingBox.byDeltas(0, 130, 0, 10),
   ].map((box) => ({ key: String(), box }));
 
   function testMoving(sourceIndex: number, expectedIndex: number, y: number) {

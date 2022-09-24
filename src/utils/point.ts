@@ -66,7 +66,6 @@ export class Point {
     return this.mulK(-1);
   }
 
-  /** Получить точку, симметричную данной относительно другой точки */
   reflectAroundPoint(p: Point) {
     return p.subtract(this.subtract(p));
   }
@@ -76,7 +75,4 @@ export class Point {
 
     return Math.sqrt(dx * dx + dy * dy);
   }
-
-  /** Сдвинуть вдоль линии, образованной с переданной точкой */
-  // shiftDistanceWith(p: Point, offset: number): Point {}
 }

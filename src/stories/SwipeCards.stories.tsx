@@ -21,15 +21,15 @@ export const SwipeCards: ComponentStory<any> = () => {
   const thickness = 200;
 
   const viewBox = direction.boxFromRanges(
-    new NumbersRange(0, 800),
-    new NumbersRange(0, thickness)
+    NumbersRange.byOnlyDelta(800),
+    NumbersRange.byOnlyDelta(thickness)
   );
 
   const oddItemBox = BoundingBox.square(0, 0, thickness);
 
   const evenItemBox = direction.boxFromRanges(
-    new NumbersRange(0, thickness * 2),
-    new NumbersRange(0, thickness)
+    NumbersRange.byOnlyDelta(thickness * 2),
+    NumbersRange.byOnlyDelta(thickness)
   );
 
   const theme = useTheme();

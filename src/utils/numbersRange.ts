@@ -1,20 +1,24 @@
 import { clamp } from "ramda";
 
 export class NumbersRange implements Iterable<number> {
-  static createByDelta(start: number, delta: number) {
+  static byDelta(start: number, delta: number) {
     return new NumbersRange(start, start + delta);
+  }
+
+  static byOnlyDelta(delta: number) {
+    return NumbersRange.byDelta(0, delta);
   }
 
   static infinite() {
     return new NumbersRange(-Infinity, Infinity);
   }
 
-  static endless(start: number) {
-    return new NumbersRange(start, Infinity);
+  static endless() {
+    return NumbersRange.byOnlyDelta(Infinity);
   }
 
   static normalizationBounds() {
-    return new NumbersRange(0, 1);
+    return NumbersRange.byOnlyDelta(1);
   }
 
   constructor(public start: number, public end: number) {}
@@ -46,7 +50,7 @@ export class NumbersRange implements Iterable<number> {
   constrainSize(bounds: NumbersRange) {
     const delta = bounds.clampNumber(this.delta);
 
-    return NumbersRange.createByDelta(this.start, delta);
+    return NumbersRange.byDelta(this.start, delta);
   }
 
   clipInner(inner: NumbersRange) {
@@ -54,7 +58,7 @@ export class NumbersRange implements Iterable<number> {
   }
 
   clampInner({ start, delta }: NumbersRange) {
-    return NumbersRange.createByDelta(
+    return NumbersRange.byDelta(
       clamp(this.start, this.end - delta, start),
       delta
     );
@@ -76,7 +80,7 @@ export class NumbersRange implements Iterable<number> {
 
   /** Изменить размер в k раз */
   scale(k: number) {
-    return NumbersRange.createByDelta(this.start, this.delta * k);
+    return NumbersRange.byDelta(this.start, this.delta * k);
   }
 
   invert() {
