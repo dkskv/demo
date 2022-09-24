@@ -1,6 +1,10 @@
 import { xprod } from "ramda";
-import { Point } from "../point";
-import { EBoxSide, IHorizontalBoxSide, IVerticalBoxSide } from "../boxParams";
+import { Point } from "../../../utils/point";
+import {
+  EBoxSide,
+  IHorizontalBoxSide,
+  IVerticalBoxSide,
+} from "../../../utils/boxParams";
 import { ResizingHandle } from "./resizingHandle";
 
 export type IEdgeHandleKey = EBoxSide;

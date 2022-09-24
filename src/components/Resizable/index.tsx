@@ -6,7 +6,7 @@ import {
   useResize,
   useScalableBox,
 } from "./hooks";
-import { resizingHandlesPreset } from "../../utils/boxResize/resizingHandlesPreset";
+import { resizingHandlesPreset } from "./utils/resizingHandlesPreset";
 import { getBoxStyle } from "../../utils/styles";
 import { Thumb } from "../Thumb";
 import { useDragBox } from "../../decorators/dnd";

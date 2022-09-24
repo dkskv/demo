@@ -1,5 +1,5 @@
-import { BoundingBox } from "../boundingBox";
-import { Point } from "../point";
+import { BoundingBox } from "../../../utils/boundingBox";
+import { Point } from "../../../utils/point";
 
 /** Ручка, потянув за которую можно изменить размеры бокса (координаты ручки нормированы) */
 export class ResizingHandle extends Point {

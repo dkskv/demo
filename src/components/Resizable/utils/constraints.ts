@@ -1,7 +1,7 @@
-import { BoundingBox } from "../boundingBox";
-import { compareWithPrecision } from "../common";
-import { Point } from "../point";
-import { SizeLimits } from "../sizeLimits";
+import { BoundingBox } from "../../../utils/boundingBox";
+import { compareWithPrecision } from "../../../utils/common";
+import { Point } from "../../../utils/point";
+import { SizeLimits } from "../../../utils/sizeLimits";
 
 interface IBoxConstraints {
   aspectRatio: number | null;
