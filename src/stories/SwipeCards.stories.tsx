@@ -11,7 +11,7 @@ import { useTheme } from "../decorators/theme";
 
 export default { title: "Demo" };
 
-export const SwipeContainerStory: ComponentStory<any> = () => {
+export const SwipeCards: ComponentStory<any> = () => {
   const [direction, setDirection] = useState(Directions.horizontal);
 
   const handleRotate = useCallback(() => {
