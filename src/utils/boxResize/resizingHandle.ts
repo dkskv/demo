@@ -1,15 +1,14 @@
 import { BoundingBox } from "../boundingBox";
 import { Point } from "../point";
 
-// todo: переименовать на ResizingHandle
-/** Точка, меняющая размеры бокса (координаты точки нормированы) */
-export class ResizingPoint extends Point {
+/** Ручка, потянув за которую можно изменить размеры бокса (координаты ручки нормированы) */
+export class ResizingHandle extends Point {
   public get mirroredPoint(): Point {
     return this.reflectAroundPoint(new Point(0.5, 0.5));
   }
 
   /**
-   * Получить положение этой точки относительно `origin`:
+   * Получить положение ручки относительно переданного `origin`:
    *   1  - координата `origin` меньше;
    * (-1) - координата `origin` больше.
    */
@@ -18,9 +17,9 @@ export class ResizingPoint extends Point {
   }
 
   /**
-   * Как изменится бокс, если эта точка (this) сместится в переданные координаты.
+   * Как изменится бокс, если ручка сместится в переданную точку
    * @param box Бокс, размеры которого нужно изменить
-   * @param target Реальные координаты, в которые переместилась эта точка (this)
+   * @param target Абсолютные координаты, в которые переместилась ручка
    * @param origin Точка бокса, остающаяся неподвижной при его трансформировании
    * @returns Трансформированный бокс
    */
@@ -29,13 +28,9 @@ export class ResizingPoint extends Point {
     target: Point,
     origin = this.mirroredPoint
   ): BoundingBox {
-    /** Исходная точка (реальные координаты) */
     const source = box.denormalizePoint(this);
-
-    const signs = this.getSigns(origin);
-
-    /** Вектор перемещения точки */
-    const moveVector = target.subtract(source).mul(signs);
+    /** Вектор перемещения ручки */
+    const moveVector = target.subtract(source).mul(this.getSigns(origin));
 
     /** Изменение размеров бокса на вектор перемещения */
     return box.shiftDeltas(moveVector.x, moveVector.y);

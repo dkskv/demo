@@ -6,7 +6,7 @@ import {
   useResize,
   useScalableBox,
 } from "./hooks";
-import { resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
+import { resizingHandlesPreset } from "../../utils/boxResize/resizingHandlesPreset";
 import { getBoxStyle } from "../../utils/styles";
 import { Thumb } from "../Thumb";
 import { useDragBox } from "../../decorators/dnd";
@@ -20,7 +20,7 @@ export interface IResizableProps
     Partial<IResizeParams>,
     | "sizeBounds"
     | "keepAspectRatio"
-    | "thumbKeys"
+    | "handlesKeys"
     | "onStart"
     | "onEnd"
     | "outerBox"
@@ -38,7 +38,7 @@ export const Resizable: React.FC<IResizableProps> = ({
   sizeBounds = new SizeBounds(),
   outerBox = BoundingBox.infinite(),
   keepAspectRatio = false,
-  thumbKeys = resizingPointsPreset.all,
+  handlesKeys = resizingHandlesPreset.all,
   isDraggable = true,
   children,
 }) => {
@@ -63,22 +63,22 @@ export const Resizable: React.FC<IResizableProps> = ({
     keepAspectRatio,
   });
 
-  const thumbsProps = useResize({
+  const handlesProps = useResize({
     box: value,
     onChange,
     onStart,
     onEnd,
     sizeBounds,
     keepAspectRatio,
-    thumbKeys,
+    handlesKeys,
     outerBox,
   });
 
   const highlightingStage = useHighlightingOnSizeLimit(value, sizeBounds);
 
-  function renderThumbs() {
-    return thumbsProps.map((thumbProps) => (
-      <Draggable isCentered={true} {...thumbProps}>
+  function renderHandles() {
+    return handlesProps.map((handleProps) => (
+      <Draggable isCentered={true} {...handleProps}>
         <Thumb />
       </Draggable>
     ));
@@ -93,7 +93,7 @@ export const Resizable: React.FC<IResizableProps> = ({
       >
         {React.Children.only(children)}
       </div>
-      <div>{renderThumbs()}</div>
+      <div>{renderHandles()}</div>
     </>
   );
 };

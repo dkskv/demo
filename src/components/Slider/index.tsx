@@ -24,7 +24,7 @@ export interface ISliderProps {
   sizeBounds?: NumbersRange;
   direction?: IDirection;
 
-  thumbKeys?: [0] | [1] | [0, 1];
+  handlesKeys?: [0] | [1] | [0, 1];
 }
 
 function getDirectedSizeBounds(bounds: NumbersRange, direction: IDirection) {
@@ -39,7 +39,7 @@ export const Slider: React.FC<ISliderProps> = ({
   onEnd = noop,
   sizeBounds = NumbersRange.infinite(),
   direction = Directions.horizontal,
-  thumbKeys = [0, 1],
+  handlesKeys = [0, 1],
   length,
   thickness,
   isDraggable,
@@ -90,8 +90,8 @@ export const Slider: React.FC<ISliderProps> = ({
         onStart={handleStart}
         onEnd={handleEnd}
         sizeBounds={getDirectedSizeBounds(sizeBounds, direction)}
-        thumbKeys={direction.sides.filter((_, i) =>
-          (thumbKeys as number[]).includes(i)
+        handlesKeys={direction.sides.filter((_, i) =>
+          (handlesKeys as number[]).includes(i)
         )}
       >
         <div

@@ -2,8 +2,8 @@ import { useCallback, useEffect, useRef } from "react";
 import { BoundingBox } from "../../utils/boundingBox";
 import { defineWheelScalingK, noop, type IPressedKeys } from "../../utils/common";
 import { Point } from "../../utils/point";
-import { ResizingPoint } from "../../utils/boxResize/resizingPoint";
-import { IResizeThumbKey, resizingPointsPreset } from "../../utils/boxResize/resizingPointsPreset";
+import { ResizingHandle } from "../../utils/boxResize/resizingHandle";
+import { IResizeHandleKey, resizingHandlesPreset } from "../../utils/boxResize/resizingHandlesPreset";
 import { constrainResizedBox, wasConstrainedBySizeBounds } from "../../utils/boxResize/constraints";
 import { useActualRef } from "../../decorators/useActualRef";
 import { IDragBoxCallback, IDragBoxCallbacks } from "../../decorators/dnd";
@@ -46,10 +46,8 @@ export interface IResizeParams extends Partial<IDragBoxCallbacks> {
   /** Внешний бокс, за пределы которого нельзя выходить */
   outerBox: BoundingBox;
 
-  // Кнопки
-
   /** Ключи отображаемых кнопок, за которые производится resize  */
-  thumbKeys: readonly IResizeThumbKey[];
+  handlesKeys: readonly IResizeHandleKey[];
 }
 
 export function useResize(params: IResizeParams) {
@@ -57,7 +55,7 @@ export function useResize(params: IResizeParams) {
     onChange,
     onStart,
     onEnd,
-    thumbKeys,
+    handlesKeys,
   } = params;
   const aspectRatioRef = useRef<number | null>(null);
   const paramsRef = useActualRef(params);
@@ -75,13 +73,13 @@ export function useResize(params: IResizeParams) {
 
   const handleChangeSize = useCallback(
     (
-      resizingPoint: ResizingPoint,
-      resizingPointTarget: Point,
+      handle: ResizingHandle,
+      movedHandlePoint: Point,
       pressedKeys: IPressedKeys
     ) => {
       const { box, keepAspectRatio, sizeBounds, outerBox } = paramsRef.current;
 
-      const resizedBox = resizingPoint.resizeBox(box, resizingPointTarget);
+      const resizedBox = handle.resizeBox(box, movedHandlePoint);
 
       const constraints = {
         aspectRatio: keepAspectRatio || pressedKeys.shiftKey ? aspectRatioRef.current : null,
@@ -91,7 +89,7 @@ export function useResize(params: IResizeParams) {
 
       const constrainedBox = constrainResizedBox(
         resizedBox,
-        { sourceBox: box, transformOrigin: resizingPoint.mirroredPoint },
+        { sourceBox: box, transformOrigin: handle.mirroredPoint },
         constraints
       );
 
@@ -101,15 +99,15 @@ export function useResize(params: IResizeParams) {
   )
 
   // Кнопки нужно располагать в одной системе координат с resizable-элементом
-  return thumbKeys.map((key) => {
-    const resizingPoint = resizingPointsPreset.get(key);
+  return handlesKeys.map((key) => {
+    const resizingHandle = resizingHandlesPreset.get(key);
     const { box } = paramsRef.current;
 
     return {
       key: String(key),
-      value: box.denormalizePoint(resizingPoint),
+      value: box.denormalizePoint(resizingHandle),
       onChange(point: Point, pressedKeys: IPressedKeys) {
-        handleChangeSize(resizingPoint, point, pressedKeys)
+        handleChangeSize(resizingHandle, point, pressedKeys)
       },
       onStart: handleStart,
       onEnd: handleEnd,

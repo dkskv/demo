@@ -1,14 +1,14 @@
 import { xprod } from "ramda";
 import { Point } from "../point";
 import { EBoxSide, IHorizontalBoxSide, IVerticalBoxSide } from "../boxParams";
-import { ResizingPoint } from "./resizingPoint";
+import { ResizingHandle } from "./resizingHandle";
 
-export type IEdgeThumbKey = EBoxSide;
-export type ICornerThumbKey = `${IVerticalBoxSide}-${IHorizontalBoxSide}`;
-export type IResizeThumbKey = IEdgeThumbKey | ICornerThumbKey;
+export type IEdgeHandleKey = EBoxSide;
+export type ICornerHandleKey = `${IVerticalBoxSide}-${IHorizontalBoxSide}`;
+export type IResizeHandleKey = IEdgeHandleKey | ICornerHandleKey;
 
-/** Набор предустановленных точек для изменения размера бокса */
-class ResizingPointsPreset {
+/** Набор предустановленных ручек для изменения размера бокса */
+class ResizingHandlesPreset {
   constructor() {
     this.get = this.get.bind(this);
   }
@@ -24,7 +24,7 @@ class ResizingPointsPreset {
 
   get corners() {
     return xprod(this.verticalSides, this.horizontalSides).map(
-      ([s1, s2]) => `${s1}-${s2}` as ICornerThumbKey
+      ([s1, s2]) => `${s1}-${s2}` as ICornerHandleKey
     );
   }
 
@@ -36,15 +36,15 @@ class ResizingPointsPreset {
     return [EBoxSide.left, EBoxSide.right] as const;
   }
 
-  get(key: IResizeThumbKey): ResizingPoint {
+  get(key: IResizeHandleKey) {
     const { x, y } = this.isCorner(key)
       ? this.getCornerPoint(key)
       : this.getEdgePoint(key);
 
-    return new ResizingPoint(x, y);
+    return new ResizingHandle(x, y);
   }
 
-  private getCornerPoint(key: ICornerThumbKey): Point {
+  private getCornerPoint(key: ICornerHandleKey): Point {
     const [p1, p2] = (
       key.split("-") as [IVerticalBoxSide, IHorizontalBoxSide]
     ).map(this.getEdgePoint);
@@ -52,7 +52,7 @@ class ResizingPointsPreset {
     return p1.mul(p2).map(Math.round);
   }
 
-  private getEdgePoint(key: IEdgeThumbKey): Point {
+  private getEdgePoint(key: IEdgeHandleKey): Point {
     switch (key) {
       case EBoxSide.left:
         return new Point(0, 0.5);
@@ -63,13 +63,13 @@ class ResizingPointsPreset {
       case EBoxSide.bottom:
         return new Point(0.5, 1);
       default:
-        throw new Error("Incorrect thumb key");
+        throw new Error("Incorrect handle key");
     }
   }
 
-  private isCorner(key: IResizeThumbKey): key is ICornerThumbKey {
+  private isCorner(key: IResizeHandleKey): key is ICornerHandleKey {
     return key.includes("-");
   }
 }
 
-export const resizingPointsPreset = new ResizingPointsPreset();
+export const resizingHandlesPreset = new ResizingHandlesPreset();
