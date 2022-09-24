@@ -9,7 +9,7 @@ import { NumbersRange } from "../utils/numbersRange";
 import { BoundingBox } from "../utils/boundingBox";
 import { useTheme } from "../decorators/theme";
 
-export default { title: "Demo" };
+export default {};
 
 export const SwipeCards: ComponentStory<any> = () => {
   const [direction, setDirection] = useState(Directions.horizontal);

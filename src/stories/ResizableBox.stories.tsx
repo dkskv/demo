@@ -12,7 +12,7 @@ import { getBoxStyle, stretchStyle } from "../utils/styles";
 import { SizeLimits } from "../utils/sizeLimits";
 import { useTheme } from "../decorators/theme";
 
-export default { title: "Demo" };
+export default {};
 
 export const ResizableBox: ComponentStory<typeof Resizable> = () => {
   const gridStep = 20;

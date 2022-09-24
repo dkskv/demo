@@ -10,7 +10,7 @@ import { NumbersRange } from "../utils/numbersRange";
 import { SizeLimits } from "../utils/sizeLimits";
 import { stretchStyle, getBoxStyle } from "../utils/styles";
 
-export default { title: "Demo" };
+export default {};
 
 export const ImageViewer: ComponentStory<any> = () => {
   const [controlValue, setControlValue] = useState<BoundingBox>(() =>

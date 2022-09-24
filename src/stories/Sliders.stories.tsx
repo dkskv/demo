@@ -13,7 +13,7 @@ const NumberRangeInputWithSliderStateful = makeStateful(
   NumberRangeInputWithSlider
 );
 
-export default { title: "Demo" };
+export default {};
 
 export const Sliders: ComponentStory<any> = () => {
   const [direction, setDirection] = useState(Directions.horizontal);

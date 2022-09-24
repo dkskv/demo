@@ -10,7 +10,7 @@ import { useTheme } from "../decorators/theme";
 import { BoundingBox } from "../utils/boundingBox";
 import { stretchStyle } from "../utils/styles";
 
-export default { title: "Demo" };
+export default {};
 
 const width = 200;
 
@@ -28,7 +28,7 @@ const generateItems = (colors: string[], sizes: number[]) =>
     )
   );
 
-export const SortableContainers: ComponentStory<any> = () => {
+export const SortableCards: ComponentStory<any> = () => {
   const theme = useTheme();
 
   const items = generateItems(
