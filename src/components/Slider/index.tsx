@@ -5,7 +5,7 @@ import { BoundingBox } from "../../utils/boundingBox";
 import ResizableControl from "../ResizableControl";
 import { IPressedKeys, noop } from "../../utils/common";
 import { SizeBounds } from "../../utils/sizeBounds";
-import { getBoxStyle, stretchStyle } from "../../utils/styles";
+import { centererStyle, getBoxStyle, stretchStyle } from "../../utils/styles";
 import { useTheme } from "../../decorators/theme";
 
 export interface ISliderProps {
@@ -53,6 +53,21 @@ const Slider: React.FC<ISliderProps> = ({
     new NumbersRange(0, thickness)
   );
 
+  function renderExtendedControlArea() {
+    const extensionSize = 20;
+
+    return (
+      <div
+        style={{
+          width: `calc(100% + ${extensionSize}px)`,
+          height: `calc(100% + ${extensionSize}px)`,
+          flexShrink: 0,
+          // background: "rgba(255,255,255,0.1)",
+        }}
+      />
+    );
+  }
+
   const theme = useTheme();
 
   return (
@@ -82,10 +97,13 @@ const Slider: React.FC<ISliderProps> = ({
         <div
           style={{
             ...stretchStyle,
+            ...centererStyle,
             borderRadius: theme.largeBorderRadius,
             background: theme.primaryColor,
           }}
-        />
+        >
+          {renderExtendedControlArea()}
+        </div>
       </ResizableControl>
     </div>
   );
