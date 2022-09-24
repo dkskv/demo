@@ -4,7 +4,7 @@ import {
   ISortableItem,
   positionInChain,
   moveIndexAccordingToPosition,
-} from "../../utils/sortable/sortable";
+} from "./utils/sortable";
 
 // todo: сначала использовать массивы без оптимизаций, потом подумать над тем, как будет быстрее.
 export class SortableItemsState {

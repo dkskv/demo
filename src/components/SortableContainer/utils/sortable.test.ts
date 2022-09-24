@@ -1,6 +1,6 @@
 import { path } from "ramda";
-import { BoundingBox } from "../boundingBox";
-import { Point } from "../point";
+import { BoundingBox } from "../../../utils/boundingBox";
+import { Point } from "../../../utils/point";
 import {
   defineInsertionIndex,
   defineIndexAfterMove,

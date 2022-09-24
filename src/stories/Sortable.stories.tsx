@@ -1,10 +1,13 @@
 import { ComponentStory } from "@storybook/react";
 import { zipWith } from "ramda";
 import { SortableContainer } from "../components/SortableContainer";
+import {
+  ISortableItem,
+  positionInChain,
+} from "../components/SortableContainer/utils/sortable";
 import { DndConnector } from "../decorators/dndConnection";
 import { useTheme } from "../decorators/theme";
 import { BoundingBox } from "../utils/boundingBox";
-import { ISortableItem, positionInChain } from "../utils/sortable/sortable";
 import { stretchStyle } from "../utils/styles";
 
 export default { title: "Demo" };

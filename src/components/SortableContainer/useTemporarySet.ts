@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import { useForceUpdate } from "./useForceUpdate";
+import { useForceUpdate } from "../../decorators/useForceUpdate";
 
 /**
  * `Set`, элементы которого удаляются через заданное время.

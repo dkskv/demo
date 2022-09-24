@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
-import { ISortableItem } from "../utils/sortable/sortable";
-import { useActualRef } from "./useActualRef";
+import { ISortableItem } from "./utils/sortable";
+import { useActualRef } from "../../decorators/useActualRef";
 import { useTemporarySet } from "./useTemporarySet";
 
 export function useActiveSortableItem(droppingDuration: number) {

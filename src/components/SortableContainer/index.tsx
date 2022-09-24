@@ -2,12 +2,12 @@ import { prop, sortBy } from "ramda";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { IDndElement, useDndConnection } from "../../decorators/dndConnection";
 import { useActualRef } from "../../decorators/useActualRef";
-import { useActiveSortableItem } from "../../decorators/useSortableItems";
+import { useActiveSortableItem } from "./useSortableItems";
 import { BoundingBox } from "../../utils/boundingBox";
-import { ISortableItem } from "../../utils/sortable/sortable";
+import { ISortableItem } from "./utils/sortable";
 import { getBoxStyle } from "../../utils/styles";
 import { DraggableBox } from "../DraggableBox";
-import { SortableItemsState } from "./utils";
+import { SortableItemsState } from "./sortableItemsState";
 
 interface IProps {
   id: string;
