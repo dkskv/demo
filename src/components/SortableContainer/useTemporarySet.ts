@@ -5,7 +5,7 @@ import { useForceUpdate } from "../../decorators/useForceUpdate";
  * `Set`, элементы которого удаляются через заданное время.
  * Изменения в `Set` вызывают обновление компонента.
  */
-export function useTemporarySet<T>() {
+export function useTemporarySet<T>(expirationTime: number) {
   const collectionRef = useRef(new Set());
 
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -22,25 +22,25 @@ export function useTemporarySet<T>() {
   const forceUpdate = useForceUpdate();
 
   const add = useCallback(
-    (value: T, dur: number) => {
+    (value: T) => {
       collectionRef.current.add(value);
       forceUpdate();
 
       timeoutRef.current = setTimeout(() => {
         collectionRef.current.delete(value);
         forceUpdate();
-      }, dur);
+      }, expirationTime);
     },
-    [forceUpdate]
+    [forceUpdate, expirationTime]
   );
 
-  const getAddingIndex = useCallback((value: T) => {
+  const getOrder = useCallback((value: T) => {
     return collectionRef.current.has(value)
       ? Array.from(collectionRef.current.values()).indexOf(value)
       : -1;
   }, []);
 
-  const getSize = useCallback(() => collectionRef.current.size, []);
+  const { size } = collectionRef.current;
 
-  return { add, getAddingIndex, getSize };
+  return { add, getOrder, size } as const;
 }

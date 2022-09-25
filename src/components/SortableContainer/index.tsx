@@ -2,12 +2,12 @@ import { prop, sortBy } from "ramda";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { IDndElement, useDndConnection } from "../../decorators/dndConnection";
 import { useActualRef } from "../../decorators/useActualRef";
-import { useActiveSortableItem } from "./useSortableItems";
 import { BoundingBox } from "../../utils/boundingBox";
 import { ISortableItem } from "./utils/sortable";
 import { getBoxStyle } from "../../utils/styles";
 import { DraggableBox } from "../DraggableBox";
 import { SortableItemsState } from "./sortableItemsState";
+import { useTemporarySet } from "./useTemporarySet";
 
 interface IProps {
   id: string;
@@ -30,13 +30,23 @@ export const SortableContainer: React.FC<IProps> = ({
     () => new SortableItemsState(initialItems)
   );
 
-  const { activeItem, setActiveItem, dropActiveItem, getOverlapIndex } =
-    useActiveSortableItem(transitionDuration);
+  const [activeItem, setActiveItem] = useState<ISortableItem | null>(null);
+  const droppingKeys = useTemporarySet<string>(transitionDuration);
+  const actualDroppingKeys = useActualRef(droppingKeys);
 
   const [beingAcceptingByForeign, setBeingAcceptingByForeign] = useState(false);
   const beingAcceptingFromForeign = useRef(false);
 
   const actualSortableItemsState = useActualRef(sortableItemsState);
+
+  const dropActiveItem = useCallback(() => {
+    setActiveItem((item) => {
+      if (item) {
+        actualDroppingKeys.current.add(item.key);
+      }
+      return null;
+    });
+  }, [actualDroppingKeys]);
 
   const handleForeignItemDragIn = useCallback(
     (item: ISortableItem, isFirstEvent: boolean) => {
@@ -63,14 +73,13 @@ export const SortableContainer: React.FC<IProps> = ({
     [setActiveItem, box, actualSortableItemsState]
   );
 
-  const handleForeignItemDropIn = useCallback(
-    (item: ISortableItem) => {
-      beingAcceptingFromForeign.current && dropActiveItem(item.key);
+  const handleForeignItemDropIn = useCallback(() => {
+    if (beingAcceptingFromForeign.current) {
+      dropActiveItem();
+    }
 
-      return { canBeInserted: beingAcceptingFromForeign.current };
-    },
-    [dropActiveItem]
-  );
+    return { canBeInserted: beingAcceptingFromForeign.current };
+  }, [dropActiveItem]);
 
   const handleForeignItemDragOut = useCallback(
     (key: string) => {
@@ -109,7 +118,7 @@ export const SortableContainer: React.FC<IProps> = ({
       const { canBeInserted, isOutsideOfSource } = onDrop(id, item);
 
       setBeingAcceptingByForeign(false);
-      dropActiveItem(item.key);
+      dropActiveItem();
 
       if (canBeInserted) {
         setSortableItemsState((state) => state.removeByKey(item.key).align());
@@ -150,8 +159,6 @@ export const SortableContainer: React.FC<IProps> = ({
         const { key, box } = item;
         const isActive = activeItem?.key === key;
 
-        const commonStyle = { zIndex: getOverlapIndex(key) };
-
         return (
           <DraggableBox
             key={key}
@@ -161,13 +168,13 @@ export const SortableContainer: React.FC<IProps> = ({
             style={
               isActive
                 ? {
-                    ...commonStyle,
                     visibility: beingAcceptingByForeign ? "hidden" : "visible",
+                    zIndex: droppingKeys.size + 1,
                   }
                 : {
-                    ...commonStyle,
                     transitionDuration: `${transitionDuration}ms`,
                     transitionProperty: "top left",
+                    zIndex: droppingKeys.getOrder(key) + 1,
                   }
             }
           >
