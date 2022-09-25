@@ -32,9 +32,9 @@ export const SortableContainer: React.FC<IProps> = ({
 
   const { activeItem, setActiveItem, dropActiveItem, getOverlapIndex } =
     useActiveSortableItem(transitionDuration);
-  const [isActiveHidden, setIsActiveHidden] = useState(false);
 
-  const isAcceptingInProgress = useRef(false);
+  const [beingAcceptingByForeign, setBeingAcceptingByForeign] = useState(false);
+  const beingAcceptingFromForeign = useRef(false);
 
   const actualSortableItemsState = useActualRef(sortableItemsState);
 
@@ -45,10 +45,10 @@ export const SortableContainer: React.FC<IProps> = ({
           actualSortableItemsState.current.totalHeight + item.box.height <=
           box.height;
 
-        isAcceptingInProgress.current = isEnoughSpace;
+        beingAcceptingFromForeign.current = isEnoughSpace;
       }
 
-      if (isAcceptingInProgress.current) {
+      if (beingAcceptingFromForeign.current) {
         setSortableItemsState((state) =>
           isFirstEvent
             ? state.insertAccordingToPosition(item).align()
@@ -58,24 +58,24 @@ export const SortableContainer: React.FC<IProps> = ({
         setActiveItem(item);
       }
 
-      return { canDrop: isAcceptingInProgress.current };
+      return { canBeInserted: beingAcceptingFromForeign.current };
     },
     [setActiveItem, box, actualSortableItemsState]
   );
 
   const handleForeignItemDropIn = useCallback(
     (item: ISortableItem) => {
-      isAcceptingInProgress.current && dropActiveItem(item.key);
+      beingAcceptingFromForeign.current && dropActiveItem(item.key);
 
-      return { canDrop: isAcceptingInProgress.current };
+      return { canBeInserted: beingAcceptingFromForeign.current };
     },
     [dropActiveItem]
   );
 
   const handleForeignItemDragOut = useCallback(
     (key: string) => {
-      if (isAcceptingInProgress.current) {
-        isAcceptingInProgress.current = false;
+      if (beingAcceptingFromForeign.current) {
+        beingAcceptingFromForeign.current = false;
         setActiveItem(null);
         setSortableItemsState((state) => state.removeByKey(key).align());
       }
@@ -91,12 +91,12 @@ export const SortableContainer: React.FC<IProps> = ({
 
   const handleChange = useCallback(
     (item: ISortableItem) => {
-      const { isOutside, canDrop } = onDrag(id, item);
+      const { isOutsideOfSource, canBeInserted } = onDrag(id, item);
 
-      setIsActiveHidden(canDrop);
+      setBeingAcceptingByForeign(canBeInserted);
       setActiveItem(item);
       setSortableItemsState((state) =>
-        isOutside
+        isOutsideOfSource
           ? state.placeToBottomByKey(item.key).align()
           : state.moveIndexAccordingToPosition(item).align()
       );
@@ -106,17 +106,17 @@ export const SortableContainer: React.FC<IProps> = ({
 
   const handleEnd = useCallback(
     (item: ISortableItem) => {
-      const { canDrop, isOutside } = onDrop(id, item);
+      const { canBeInserted, isOutsideOfSource } = onDrop(id, item);
 
-      setIsActiveHidden(false);
+      setBeingAcceptingByForeign(false);
       dropActiveItem(item.key);
 
-      if (canDrop) {
+      if (canBeInserted) {
         setSortableItemsState((state) => state.removeByKey(item.key).align());
         return;
       }
 
-      if (isOutside) {
+      if (isOutsideOfSource) {
         setSortableItemsState((state) =>
           state.removeByKey(item.key).insertAccordingToPosition(item)
         );
@@ -150,9 +150,7 @@ export const SortableContainer: React.FC<IProps> = ({
         const { key, box } = item;
         const isActive = activeItem?.key === key;
 
-        const commonStyle = {
-          zIndex: getOverlapIndex(key),
-        } as const;
+        const commonStyle = { zIndex: getOverlapIndex(key) };
 
         return (
           <DraggableBox
@@ -164,7 +162,7 @@ export const SortableContainer: React.FC<IProps> = ({
               isActive
                 ? {
                     ...commonStyle,
-                    visibility: isActiveHidden ? "hidden" : "visible",
+                    visibility: beingAcceptingByForeign ? "hidden" : "visible",
                   }
                 : {
                     ...commonStyle,

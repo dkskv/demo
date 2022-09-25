@@ -27,7 +27,7 @@ export interface IDndElement {
 }
 
 interface IContainerResponse {
-  canDrop: boolean;
+  canBeInserted: boolean;
 }
 
 /** Подписка на входящие элементы. Callback'и возвращают разрешение на вход */
@@ -39,7 +39,7 @@ interface IInputConnection {
 }
 
 interface IDropResponse extends IContainerResponse {
-  isOutside: boolean;
+  isOutsideOfSource: boolean;
 }
 
 interface IDragResponse extends IDropResponse {}
@@ -68,16 +68,16 @@ interface IDndContext extends IOutputConnection {
 }
 
 const dragResponseFromVoid: IDragResponse = {
-  canDrop: false,
-  isOutside: true,
+  canBeInserted: false,
+  isOutsideOfSource: true,
 };
 
 const dropResponseFromVoid: IDropResponse = {
-  canDrop: false,
-  isOutside: true,
+  canBeInserted: false,
+  isOutsideOfSource: true,
 };
 
-const voidResponse: IContainerResponse = { canDrop: false };
+const voidResponse: IContainerResponse = { canBeInserted: false };
 const voidContainerHandler = always(voidResponse);
 
 const DndContext = createContext<IDndContext>({
@@ -151,7 +151,7 @@ export const DndConnector: React.FC = ({ children }) => {
       return {
         targetContainer,
         itemOnPage: replaceBox(item, itemBoxOnPage),
-        isOutside: !isContainerOverlapBox(sourceContainer),
+        isOutsideOfSource: !isContainerOverlapBox(sourceContainer),
       };
     },
     [containers]
@@ -161,24 +161,30 @@ export const DndConnector: React.FC = ({ children }) => {
 
   const onDrag = useCallback(
     (containerKey: string, item: IDndElement) => {
-      const { itemOnPage, targetContainer, isOutside } = handleDndEvent(
+      const { itemOnPage, targetContainer, isOutsideOfSource } = handleDndEvent(
         containerKey,
         item
       );
 
-      return { ...notifyAboutDrag(itemOnPage, targetContainer), isOutside };
+      return {
+        ...notifyAboutDrag(itemOnPage, targetContainer),
+        isOutsideOfSource,
+      };
     },
     [handleDndEvent, notifyAboutDrag]
   );
 
   const onDrop = useCallback(
     (containerKey: string, item: IDndElement) => {
-      const { itemOnPage, targetContainer, isOutside } = handleDndEvent(
+      const { itemOnPage, targetContainer, isOutsideOfSource } = handleDndEvent(
         containerKey,
         item
       );
 
-      return { ...notifyAboutDrop(itemOnPage, targetContainer), isOutside };
+      return {
+        ...notifyAboutDrop(itemOnPage, targetContainer),
+        isOutsideOfSource,
+      };
     },
     [handleDndEvent, notifyAboutDrop]
   );
