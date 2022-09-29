@@ -1,5 +1,5 @@
 import { prop, sortBy } from "ramda";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { IDndElement, useDndConnection } from "../../decorators/dndConnection";
 import { useActualRef } from "../../decorators/useActualRef";
 import { BoundingBox } from "../../utils/boundingBox";
@@ -8,6 +8,7 @@ import { getBoxStyle } from "../../utils/styles";
 import { DraggableBox } from "../DraggableBox";
 import { SortableItemsState } from "./sortableItemsState";
 import { useTemporarySet } from "./useTemporarySet";
+import { useThirdPartyItemHandlers } from "./useThirdPartyItemHandlers";
 
 interface IProps {
   id: string;
@@ -26,18 +27,14 @@ export const SortableContainer: React.FC<IProps> = ({
   style,
   renderItem,
 }) => {
-  const [sortableItemsState, setSortableItemsState] = useState(
+  const [itemsState, setItemsState] = useState(
     () => new SortableItemsState(initialItems)
   );
 
   const [activeItem, setActiveItem] = useState<ISortableItem | null>(null);
+  const [isActiveHidden, setIsActiveHidden] = useState(false);
   const droppingKeys = useTemporarySet<string>(transitionDuration);
   const actualDroppingKeys = useActualRef(droppingKeys);
-
-  const [beingAcceptingByForeign, setBeingAcceptingByForeign] = useState(false);
-  const beingAcceptingFromForeign = useRef(false);
-
-  const actualSortableItemsState = useActualRef(sortableItemsState);
 
   const dropActiveItem = useCallback(() => {
     setActiveItem((item) => {
@@ -48,63 +45,33 @@ export const SortableContainer: React.FC<IProps> = ({
     });
   }, [actualDroppingKeys]);
 
-  const handleForeignItemDragIn = useCallback(
-    (item: ISortableItem, isFirstEvent: boolean) => {
-      if (isFirstEvent) {
-        const isEnoughSpace =
-          actualSortableItemsState.current.totalHeight + item.box.height <=
-          box.height;
+  const actualItemsState = useActualRef(itemsState);
 
-        beingAcceptingFromForeign.current = isEnoughSpace;
-      }
-
-      if (beingAcceptingFromForeign.current) {
-        setSortableItemsState((state) =>
-          isFirstEvent
-            ? state.insertAccordingToPosition(item).align()
-            : state.moveIndexAccordingToPosition(item).align()
-        );
-
-        setActiveItem(item);
-      }
-
-      return { canBeInserted: beingAcceptingFromForeign.current };
-    },
-    [setActiveItem, box, actualSortableItemsState]
+  const checkIsEnoughSpace = useCallback(
+    (item: ISortableItem) =>
+      actualItemsState.current.totalHeight + item.box.height <= box.height,
+    [actualItemsState, box]
   );
 
-  const handleForeignItemDropIn = useCallback(() => {
-    if (beingAcceptingFromForeign.current) {
-      dropActiveItem();
-    }
-
-    return { canBeInserted: beingAcceptingFromForeign.current };
-  }, [dropActiveItem]);
-
-  const handleForeignItemDragOut = useCallback(
-    (key: string) => {
-      if (beingAcceptingFromForeign.current) {
-        beingAcceptingFromForeign.current = false;
-        setActiveItem(null);
-        setSortableItemsState((state) => state.removeByKey(key).align());
-      }
-    },
-    [setActiveItem]
-  );
-
-  const { ref, onDrag, onDrop } = useDndConnection<HTMLDivElement>(id, {
-    onDragIn: handleForeignItemDragIn,
-    onDropIn: handleForeignItemDropIn,
-    onDragOut: handleForeignItemDragOut,
+  const thirdPartyItemHandlers = useThirdPartyItemHandlers({
+    setActiveItem,
+    dropActiveItem,
+    setItemsState,
+    checkIsEnoughSpace,
   });
+
+  const { ref, onDrag, onDrop } = useDndConnection<HTMLDivElement>(
+    id,
+    thirdPartyItemHandlers
+  );
 
   const handleChange = useCallback(
     (item: ISortableItem) => {
       const { isOutsideOfSource, canBeInserted } = onDrag(id, item);
 
-      setBeingAcceptingByForeign(canBeInserted);
+      setIsActiveHidden(canBeInserted);
       setActiveItem(item);
-      setSortableItemsState((state) =>
+      setItemsState((state) =>
         isOutsideOfSource
           ? state.placeToBottomByKey(item.key).align()
           : state.moveIndexAccordingToPosition(item).align()
@@ -117,23 +84,23 @@ export const SortableContainer: React.FC<IProps> = ({
     (item: ISortableItem) => {
       const { canBeInserted, isOutsideOfSource } = onDrop(id, item);
 
-      setBeingAcceptingByForeign(false);
+      setIsActiveHidden(false);
       dropActiveItem();
 
       if (canBeInserted) {
-        setSortableItemsState((state) => state.removeByKey(item.key).align());
+        setItemsState((state) => state.removeByKey(item.key).align());
         return;
       }
 
       if (isOutsideOfSource) {
-        setSortableItemsState((state) =>
+        setItemsState((state) =>
           state.removeByKey(item.key).insertAccordingToPosition(item)
         );
-        setTimeout(() => setSortableItemsState((state) => state.align()));
+        setTimeout(() => setItemsState((state) => state.align()));
         return;
       }
 
-      setSortableItemsState((state) =>
+      setItemsState((state) =>
         state.moveIndexAccordingToPosition(item).align()
       );
     },
@@ -146,8 +113,8 @@ export const SortableContainer: React.FC<IProps> = ({
     todo: Попробовать избавиться.
   */
   const sortedItems = useMemo(
-    () => sortBy(prop("key"), sortableItemsState.items),
-    [sortableItemsState.items]
+    () => sortBy(prop("key"), itemsState.items),
+    [itemsState.items]
   );
 
   return (
@@ -159,6 +126,10 @@ export const SortableContainer: React.FC<IProps> = ({
         const { key, box } = item;
         const isActive = activeItem?.key === key;
 
+        if (isActive) {
+          console.log("Свой или чужой");
+        }
+
         return (
           <DraggableBox
             key={key}
@@ -168,7 +139,7 @@ export const SortableContainer: React.FC<IProps> = ({
             style={
               isActive
                 ? {
-                    visibility: beingAcceptingByForeign ? "hidden" : "visible",
+                    visibility: isActiveHidden ? "hidden" : "visible",
                     zIndex: droppingKeys.size + 1,
                   }
                 : {
