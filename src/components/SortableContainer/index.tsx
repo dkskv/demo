@@ -27,35 +27,41 @@ export const SortableContainer: React.FC<IProps> = ({
   style,
   renderItem,
 }) => {
+  /** todo: придумать структуру, не завязанную на origin */
+  const containerBox = useMemo(() => box.resetOrigin(), [box]);
+
   const [itemsState, setItemsState] = useState(
     () => new SortableItemsState(initialItems)
   );
 
-  const [activeItem, setActiveItem] = useState<ISortableItem | null>(null);
+  const [selfActiveItem, setSelfActiveItem] =
+    useState<ISortableItem | null>(null);
+  const [thirdActivePartyItem, setThirdActivePartyItem] =
+    useState<ISortableItem | null>(null);
+  const activeItem = selfActiveItem ?? thirdActivePartyItem;
+
   const [isActiveHidden, setIsActiveHidden] = useState(false);
   const droppingKeys = useTemporarySet<string>(transitionDuration);
-  const actualDroppingKeys = useActualRef(droppingKeys);
-
-  const dropActiveItem = useCallback(() => {
-    setActiveItem((item) => {
-      if (item) {
-        actualDroppingKeys.current.add(item.key);
-      }
-      return null;
-    });
-  }, [actualDroppingKeys]);
 
   const actualItemsState = useActualRef(itemsState);
 
   const checkIsEnoughSpace = useCallback(
     (item: ISortableItem) =>
-      actualItemsState.current.totalHeight + item.box.height <= box.height,
-    [actualItemsState, box]
+      actualItemsState.current.totalHeight + item.box.height <=
+      containerBox.height,
+    [actualItemsState, containerBox]
   );
 
+  const dropThirdPartyItem = useCallback(() => {
+    setThirdActivePartyItem((item) => {
+      item && droppingKeys.add(item.key);
+      return null;
+    });
+  }, [droppingKeys]);
+
   const thirdPartyItemHandlers = useThirdPartyItemHandlers({
-    setActiveItem,
-    dropActiveItem,
+    setActiveItem: setThirdActivePartyItem,
+    dropActiveItem: dropThirdPartyItem,
     setItemsState,
     checkIsEnoughSpace,
   });
@@ -67,32 +73,33 @@ export const SortableContainer: React.FC<IProps> = ({
 
   const handleChange = useCallback(
     (item: ISortableItem) => {
-      const { isOutsideOfSource, canBeInserted } = onDrag(id, item);
+      const { canBeInserted } = onDrag(id, item);
 
       setIsActiveHidden(canBeInserted);
-      setActiveItem(item);
+      setSelfActiveItem(item);
       setItemsState((state) =>
-        isOutsideOfSource
-          ? state.placeToBottomByKey(item.key).align()
-          : state.moveIndexAccordingToPosition(item).align()
+        containerBox.isIntersect(item.box)
+          ? state.moveIndexAccordingToPosition(item).align()
+          : state.placeToBottomByKey(item.key).align()
       );
     },
-    [id, onDrag, setActiveItem]
+    [id, onDrag, containerBox]
   );
 
   const handleEnd = useCallback(
     (item: ISortableItem) => {
-      const { canBeInserted, isOutsideOfSource } = onDrop(id, item);
+      const { canBeInserted } = onDrop(id, item);
 
       setIsActiveHidden(false);
-      dropActiveItem();
+      setSelfActiveItem(null);
+      droppingKeys.add(item.key);
 
       if (canBeInserted) {
         setItemsState((state) => state.removeByKey(item.key).align());
         return;
       }
 
-      if (isOutsideOfSource) {
+      if (!containerBox.isIntersect(item.box)) {
         setItemsState((state) =>
           state.removeByKey(item.key).insertAccordingToPosition(item)
         );
@@ -104,7 +111,7 @@ export const SortableContainer: React.FC<IProps> = ({
         state.moveIndexAccordingToPosition(item).align()
       );
     },
-    [dropActiveItem, onDrop, id]
+    [droppingKeys, onDrop, id, containerBox]
   );
 
   /* 
@@ -120,32 +127,34 @@ export const SortableContainer: React.FC<IProps> = ({
   return (
     <div
       ref={ref}
-      style={{ ...getBoxStyle(box), position: "relative", ...style }}
+      style={{ ...getBoxStyle(containerBox), position: "relative", ...style }}
     >
       {sortedItems.map((item) => {
-        const { key, box } = item;
-        const isActive = activeItem?.key === key;
-
-        if (isActive) {
-          console.log("Свой или чужой");
-        }
+        const isActive = activeItem?.key === item.key;
 
         return (
           <DraggableBox
-            key={key}
-            value={isActive ? activeItem.box : box}
-            onChange={(box) => handleChange({ key, box })}
-            onEnd={(box) => handleEnd({ key, box })}
+            key={item.key}
+            value={isActive ? activeItem.box : item.box}
+            onChange={(box) => handleChange({ key: item.key, box })}
+            onEnd={(box) => handleEnd({ key: item.key, box })}
             style={
               isActive
                 ? {
+                    cursor:
+                      activeItem === thirdActivePartyItem ||
+                      (activeItem === selfActiveItem &&
+                        containerBox.isIntersect(selfActiveItem.box))
+                        ? "move"
+                        : "not-allowed",
                     visibility: isActiveHidden ? "hidden" : "visible",
                     zIndex: droppingKeys.size + 1,
                   }
                 : {
+                    cursor: "move",
                     transitionDuration: `${transitionDuration}ms`,
                     transitionProperty: "top left",
-                    zIndex: droppingKeys.getOrder(key) + 1,
+                    zIndex: droppingKeys.getOrder(item.key) + 1,
                   }
             }
           >

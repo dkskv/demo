@@ -11,8 +11,8 @@ interface IParams {
 
 export function useThirdPartyItemHandlers({
   setActiveItem,
-  setItemsState,
   dropActiveItem,
+  setItemsState,
   checkIsEnoughSpace,
 }: IParams) {
   const isAccepting = useRef(false);

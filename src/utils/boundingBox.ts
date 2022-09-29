@@ -175,6 +175,10 @@ export class BoundingBox {
     return width * height;
   }
 
+  isIntersect(box: BoundingBox) {
+    return this.intersectionArea(box) > 0;
+  }
+
   /** Соотношение сторон (ширина / высота) */
   get aspectRatio() {
     return this.dx / this.dy;

@@ -1,11 +1,17 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useForceUpdate } from "../../decorators/useForceUpdate";
+
+export interface ITemporarySet<T> {
+  add(k: T): void;
+  getOrder(k: T): number;
+  size: number;
+}
 
 /**
  * `Set`, элементы которого удаляются через заданное время.
  * Изменения в `Set` вызывают обновление компонента.
  */
-export function useTemporarySet<T>(expirationTime: number) {
+export function useTemporarySet<T>(expirationTime: number): ITemporarySet<T> {
   const collectionRef = useRef(new Set());
 
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -42,5 +48,5 @@ export function useTemporarySet<T>(expirationTime: number) {
 
   const { size } = collectionRef.current;
 
-  return { add, getOrder, size } as const;
+  return useMemo(() => ({ add, getOrder, size }), [add, getOrder, size]);
 }

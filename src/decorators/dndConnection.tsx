@@ -38,10 +38,7 @@ interface IInputConnection {
   onDragOut(key: string): void;
 }
 
-interface IDropResponse extends IContainerResponse {
-  isOutsideOfSource: boolean;
-}
-
+interface IDropResponse extends IContainerResponse {}
 interface IDragResponse extends IDropResponse {}
 
 interface IDropHandler {
@@ -67,15 +64,8 @@ interface IDndContext extends IOutputConnection {
   register(a: IDndContainer): () => void;
 }
 
-const dragResponseFromVoid: IDragResponse = {
-  canBeInserted: false,
-  isOutsideOfSource: true,
-};
-
-const dropResponseFromVoid: IDropResponse = {
-  canBeInserted: false,
-  isOutsideOfSource: true,
-};
+const dragResponseFromVoid: IDragResponse = { canBeInserted: false };
+const dropResponseFromVoid: IDropResponse = { canBeInserted: false };
 
 const voidResponse: IContainerResponse = { canBeInserted: false };
 const voidContainerHandler = always(voidResponse);
@@ -151,7 +141,6 @@ export const DndConnector: React.FC = ({ children }) => {
       return {
         targetContainer,
         itemOnPage: replaceBox(item, itemBoxOnPage),
-        isOutsideOfSource: !isContainerOverlapBox(sourceContainer),
       };
     },
     [containers]
@@ -161,30 +150,24 @@ export const DndConnector: React.FC = ({ children }) => {
 
   const onDrag = useCallback(
     (containerKey: string, item: IDndElement) => {
-      const { itemOnPage, targetContainer, isOutsideOfSource } = handleDndEvent(
+      const { itemOnPage, targetContainer } = handleDndEvent(
         containerKey,
         item
       );
 
-      return {
-        ...notifyAboutDrag(itemOnPage, targetContainer),
-        isOutsideOfSource,
-      };
+      return notifyAboutDrag(itemOnPage, targetContainer);
     },
     [handleDndEvent, notifyAboutDrag]
   );
 
   const onDrop = useCallback(
     (containerKey: string, item: IDndElement) => {
-      const { itemOnPage, targetContainer, isOutsideOfSource } = handleDndEvent(
+      const { itemOnPage, targetContainer } = handleDndEvent(
         containerKey,
         item
       );
 
-      return {
-        ...notifyAboutDrop(itemOnPage, targetContainer),
-        isOutsideOfSource,
-      };
+      return notifyAboutDrop(itemOnPage, targetContainer);
     },
     [handleDndEvent, notifyAboutDrop]
   );
