@@ -11,7 +11,7 @@ interface IProps {
   isActive: boolean;
 }
 
-export const Scrollbar: React.FC<IProps> = ({
+export const ScrollIndicator: React.FC<IProps> = ({
   direction,
   length,
   thickness,

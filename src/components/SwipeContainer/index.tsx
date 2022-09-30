@@ -9,7 +9,7 @@ import { getBoxOnPage } from "../../utils/dom";
 import { NumbersRange } from "../../utils/numbersRange";
 import { useTheme } from "../../decorators/theme";
 import { ScrollConstraints, ScrollingState } from "./utils";
-import { Scrollbar } from "../Scrollbar";
+import { ScrollIndicator } from "../ScrollIndicator";
 
 interface IProps {
   box: BoundingBox;
@@ -150,7 +150,7 @@ export const SwipeContainer: React.FC<IProps> = ({
           [direction.reversed.cssKeys.normalCoordinate]: 0,
         }}
       >
-        <Scrollbar
+        <ScrollIndicator
           isActive={scrollingState.impulse !== 0 || isDrag}
           direction={direction}
           length={containerLength}
