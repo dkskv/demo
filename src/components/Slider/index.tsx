@@ -93,6 +93,7 @@ export const Slider: React.FC<ISliderProps> = ({
         handlesKeys={direction.sides.filter((_, i) =>
           (handlesKeys as number[]).includes(i)
         )}
+        isScalableByWheel={false}
       >
         <div
           style={{

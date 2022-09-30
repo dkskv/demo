@@ -28,6 +28,7 @@ export interface IResizableProps
   value: BoundingBox;
   onChange: IResizeParams["onChange"];
   isDraggable?: boolean;
+  isScalableByWheel?: boolean;
 }
 
 export const Resizable: React.FC<IResizableProps> = ({
@@ -40,6 +41,7 @@ export const Resizable: React.FC<IResizableProps> = ({
   keepAspectRatio = false,
   handlesKeys = resizingHandlesPreset.all,
   isDraggable = true,
+  isScalableByWheel = true,
   children,
 }) => {
   const [element, setElement] = useState<HTMLElement | null>(null);
@@ -54,7 +56,7 @@ export const Resizable: React.FC<IResizableProps> = ({
 
   useScalableBox({
     box: value,
-    element,
+    element: isScalableByWheel ? element : null,
     sizeLimits,
     outerBox,
     onChange,
