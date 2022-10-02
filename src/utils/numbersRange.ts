@@ -35,6 +35,18 @@ export class NumbersRange implements Iterable<number> {
     return Math.sign(this.delta);
   }
 
+  get min() {
+    return Math.min(this.start, this.end);
+  }
+
+  get max() {
+    return Math.max(this.start, this.end);
+  }
+
+  sortAsc() {
+    return new NumbersRange(this.min, this.max);
+  }
+
   setStart(value: number) {
     return new NumbersRange(value, this.end);
   }
@@ -49,7 +61,6 @@ export class NumbersRange implements Iterable<number> {
 
   constrainSize(bounds: NumbersRange) {
     const delta = bounds.clampNumber(this.delta);
-
     return NumbersRange.byDelta(this.start, delta);
   }
 

@@ -19,12 +19,11 @@ export interface ISliderProps {
   thickness: number;
 
   isDraggable?: boolean;
-
-  /** Диапазон возможных размеров трека */
-  sizeLimits?: NumbersRange;
   direction?: IDirection;
-
   handlesKeys?: [0] | [1] | [0, 1];
+
+  rangeMinSize?: number;
+  rangeMaxSize?: number;
 }
 
 function getDirectedSizeBounds(bounds: NumbersRange, direction: IDirection) {
@@ -37,13 +36,19 @@ export const Slider: React.FC<ISliderProps> = ({
   onChange,
   onStart = noop,
   onEnd = noop,
-  sizeLimits = NumbersRange.infinite(),
   direction = Directions.horizontal,
   handlesKeys = [0, 1],
   length,
   thickness,
   isDraggable,
+  rangeMinSize,
+  rangeMaxSize = Infinity,
 }) => {
+  const sizeLimits = new NumbersRange(
+    rangeMinSize ?? -rangeMaxSize,
+    rangeMaxSize
+  );
+
   const handleChange = useDirectedCallback(onChange, direction);
   const handleStart = useDirectedCallback(onStart, direction);
   const handleEnd = useDirectedCallback(onEnd, direction);

@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { NumbersRange } from "../../utils/numbersRange";
 import { IDirection } from "../../utils/direction";
 import { Space } from "../Space";
@@ -8,20 +8,26 @@ export interface INumbersRangeInputProps {
   onChange(value: NumbersRange): void;
   /** Диапазон минимального и максимального значений */
   bounds?: NumbersRange;
-  /** Минимальный и максимальный размер диапазона */
-  sizeLimits?: NumbersRange;
-
   direction?: IDirection;
+
+  rangeMinSize?: number;
+  rangeMaxSize?: number;
 }
 
 export const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
   value: range,
   bounds = NumbersRange.infinite(),
-  sizeLimits = NumbersRange.infinite(),
   onChange,
   direction,
   children,
+  rangeMinSize = 0,
+  rangeMaxSize = Infinity,
 }) => {
+  const sizeLimits = useMemo(
+    () => new NumbersRange(rangeMinSize, rangeMaxSize),
+    [rangeMinSize, rangeMaxSize]
+  );
+
   const handleChangeStartValue = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = Number(event.target.value);

@@ -41,12 +41,20 @@ export const Sliders: ComponentStory<any> = () => {
           {...commonProps}
           initialValue={new NumbersRange(1, 7)}
           bounds={new NumbersRange(-10, 10)}
+          rangeMinSize={0}
+        />
+        <NumberRangeInputWithSliderStateful
+          {...commonProps}
+          initialValue={new NumbersRange(1, 7)}
+          bounds={new NumbersRange(-10, 10)}
+          rangeMaxSize={6}
         />
         <NumberRangeInputWithSliderStateful
           {...commonProps}
           initialValue={NumbersRange.byOnlyDelta(10)}
           bounds={new NumbersRange(-30, 30)}
-          sizeLimits={new NumbersRange(10, 30)}
+          rangeMinSize={5}
+          rangeMaxSize={20}
         />
         <NumberInputWithSliderStateful
           {...commonProps}

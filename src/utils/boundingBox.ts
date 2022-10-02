@@ -227,6 +227,10 @@ export class BoundingBox {
     return this.origin.add(point.mul(this.deltasVector));
   }
 
+  sortAscCoordinates() {
+    return BoundingBox.byRanges(this.xsRange.sortAsc(), this.ysRange.sortAsc());
+  }
+
   private get deltasVector() {
     return new Point(this.dx, this.dy);
   }

@@ -5,7 +5,6 @@ import {
 } from "../NumbersRangeInput";
 import { Slider, ISliderProps } from "../Slider";
 import { createConverter } from "./utils";
-import { NumbersRange } from "../../utils/numbersRange";
 import { useSmoothControl } from "../../decorators/useSmoothControl";
 import React from "react";
 import { Directions } from "../../utils/direction";
@@ -20,11 +19,12 @@ export const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
     value,
     onChange,
     bounds,
-    sizeLimits = NumbersRange.endless(),
     isSmoothSlider = false,
     direction = Directions.horizontal,
     length,
     thickness,
+    rangeMinSize,
+    rangeMaxSize,
   } = props;
   const converter = useMemo(() => createConverter(bounds), [bounds]);
 
@@ -41,14 +41,16 @@ export const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
       value={value}
       onChange={onChange}
       bounds={bounds}
-      sizeLimits={sizeLimits}
       direction={direction}
+      rangeMinSize={rangeMinSize}
+      rangeMaxSize={rangeMaxSize}
     >
       <Slider
         value={controlValue}
         onChange={handleControlChange}
         onEnd={handleControlEnd}
-        sizeLimits={sizeLimits.map((a) => a / bounds.size)}
+        rangeMinSize={rangeMinSize && rangeMinSize / bounds.size}
+        rangeMaxSize={rangeMaxSize && rangeMaxSize / bounds.size}
         direction={direction}
         length={length}
         thickness={thickness}

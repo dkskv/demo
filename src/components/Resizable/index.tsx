@@ -86,12 +86,21 @@ export const Resizable: React.FC<IResizableProps> = ({
     ));
   }
 
+  const displayedValue = value.sortAscCoordinates();
+
   return (
     <>
-      <OutlineHighlighting box={value} stage={highlightingStage} size={10} />
+      <OutlineHighlighting
+        box={displayedValue}
+        stage={highlightingStage}
+        size={10}
+      />
       <div
         ref={setElement}
-        style={{ ...getBoxStyle(value), position: "absolute" }}
+        style={{
+          ...getBoxStyle(displayedValue),
+          position: "absolute",
+        }}
       >
         {React.Children.only(children)}
       </div>
