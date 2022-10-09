@@ -31,7 +31,7 @@ export class NumbersRange implements Iterable<number> {
     return Math.abs(this.delta);
   }
 
-  get direction() {
+  get dir() {
     return Math.sign(this.delta);
   }
 
@@ -45,6 +45,22 @@ export class NumbersRange implements Iterable<number> {
 
   sortAsc() {
     return new NumbersRange(this.min, this.max);
+  }
+
+  sortDesc() {
+    return new NumbersRange(this.max, this.min);
+  }
+
+  setDir(sign: number) {
+    return sign === 0 ? this : sign > 0 ? this.sortAsc() : this.sortDesc();
+  }
+
+  setMin(value: number) {
+    return this.sortAsc().setStart(value).setDir(this.dir);
+  }
+
+  setMax(value: number) {
+    return this.sortAsc().setEnd(value).setDir(this.dir);
   }
 
   setStart(value: number) {
@@ -100,7 +116,9 @@ export class NumbersRange implements Iterable<number> {
 
   /** Разместить в точке */
   moveTo(x: number, origin = 0) {
-    return this.shift(x - this.denormalizeNumber(origin));
+    return isFinite(origin)
+      ? this.shift(x - this.denormalizeNumber(origin))
+      : this;
   }
 
   includes(x: number) {

@@ -10,6 +10,7 @@ interface IParams<ControlValue, Value> {
   onChange(value: Value): void;
   /** Конвертер из альтернативного значения в целевое */
   converter: IConverter<ControlValue, Value>;
+  // todo: вынести наружу
   isSmooth: boolean;
 }
 

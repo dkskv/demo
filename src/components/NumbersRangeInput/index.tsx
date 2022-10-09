@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback } from "react";
 import { NumbersRange } from "../../utils/numbersRange";
 import { IDirection } from "../../utils/direction";
 import { Space } from "../Space";
@@ -10,8 +10,7 @@ export interface INumbersRangeInputProps {
   bounds?: NumbersRange;
   direction?: IDirection;
 
-  rangeMinSize?: number;
-  rangeMaxSize?: number;
+  sizeLimits?: NumbersRange;
 }
 
 export const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
@@ -20,31 +19,31 @@ export const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
   onChange,
   direction,
   children,
-  rangeMinSize = 0,
-  rangeMaxSize = Infinity,
+  sizeLimits = NumbersRange.infinite(),
 }) => {
-  const sizeLimits = useMemo(
-    () => new NumbersRange(rangeMinSize, rangeMaxSize),
-    [rangeMinSize, rangeMaxSize]
-  );
-
-  const handleChangeStartValue = useCallback(
+  const handleChangeMinValue = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = Number(event.target.value);
 
       onChange(
-        range.setStart(value).constrainSize(sizeLimits).moveTo(range.end, 1)
+        range
+          .setMin(Math.min(range.max, value))
+          .constrainSize(sizeLimits)
+          .moveTo(range.max, range.normalizeNumber(range.max))
       );
     },
     [range, sizeLimits, onChange]
   );
 
-  const handleChangeEndValue = useCallback(
+  const handleChangeMaxValue = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
       const value = Number(event.target.value);
 
       onChange(
-        range.setEnd(value).constrainSize(sizeLimits).moveTo(range.start, 0)
+        range
+          .setMax(Math.max(range.min, value))
+          .constrainSize(sizeLimits)
+          .moveTo(range.min, range.normalizeNumber(range.min))
       );
     },
     [range, sizeLimits, onChange]
@@ -54,16 +53,16 @@ export const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
     <Space direction={direction} size={20} align="center">
       <input
         type="number"
-        onChange={handleChangeStartValue}
-        value={range.start}
+        onChange={handleChangeMinValue}
+        value={range.min}
         min={bounds.start}
         max={bounds.end}
       />
       {children}
       <input
         type="number"
-        onChange={handleChangeEndValue}
-        value={range.end}
+        onChange={handleChangeMaxValue}
+        value={range.max}
         min={bounds.start}
         max={bounds.end}
       />

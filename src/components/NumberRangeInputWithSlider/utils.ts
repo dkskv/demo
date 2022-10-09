@@ -11,9 +11,9 @@ export const createConverter = (
 ): IConverter<NumbersRange, NumbersRange> => {
   return {
     toDestination(normalizedRange: NumbersRange) {
-      return normalizedRange
-        .map((n) => Math.round(bounds.denormalizeNumber(n)))
-        .sortAsc();
+      return normalizedRange.map((n) =>
+        Math.round(bounds.denormalizeNumber(n))
+      );
     },
     fromDestination(numbersRange: NumbersRange) {
       return numbersRange.map((n) => bounds.normalizeNumber(n));
