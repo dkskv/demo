@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { IDirection, Directions } from "../../utils/direction";
+import { IDirection, Directions, EDirection } from "../../utils/direction";
 import { NumbersRange } from "../../utils/numbersRange";
 import { BoundingBox } from "../../utils/boundingBox";
 import { ResizableControl } from "../ResizableControl";
@@ -7,6 +7,7 @@ import { IPressedKeys, noop } from "../../utils/common";
 import { SizeLimits } from "../../utils/sizeLimits";
 import { centererStyle, getBoxStyle, stretchStyle } from "../../utils/styles";
 import { useTheme } from "../../decorators/theme";
+import { AutoSizer } from "../../decorators/autosizer";
 
 export interface ISliderProps {
   /** Нормированный диапазон (в пределах от 0 до 1) */
@@ -15,7 +16,6 @@ export interface ISliderProps {
   onStart?(value: NumbersRange): void;
   onEnd?(value: NumbersRange): void;
 
-  length: number;
   thickness: number;
 
   isDraggable?: boolean;
@@ -37,7 +37,6 @@ export const Slider: React.FC<ISliderProps> = ({
   onEnd = noop,
   direction = Directions.horizontal,
   handlesKeys = [0, 1],
-  length,
   thickness,
   isDraggable,
   sizeLimits = NumbersRange.infinite(),
@@ -45,11 +44,6 @@ export const Slider: React.FC<ISliderProps> = ({
   const handleChange = useDirectedCallback(onChange, direction);
   const handleStart = useDirectedCallback(onStart, direction);
   const handleEnd = useDirectedCallback(onEnd, direction);
-
-  const outerBox = direction.boxFromRanges(
-    NumbersRange.byOnlyDelta(length),
-    NumbersRange.byOnlyDelta(thickness)
-  );
 
   function renderExtendedControlArea() {
     const extensionSize = 20;
@@ -69,42 +63,55 @@ export const Slider: React.FC<ISliderProps> = ({
   const theme = useTheme();
 
   return (
-    <div
-      style={{
-        position: "relative",
-        background: theme.backgroundColor,
-        borderRadius: theme.largeBorderRadius,
-        ...getBoxStyle(outerBox),
-      }}
+    <AutoSizer
+      disableHeight={direction.key === EDirection.horizontal}
+      disableWidth={direction.key === EDirection.vertical}
     >
-      <ResizableControl
-        isDraggable={isDraggable}
-        outerBox={outerBox}
-        value={direction.boxFromRanges(
-          directRange(value, direction),
-          NumbersRange.normalizationBounds()
-        )}
-        onChange={handleChange}
-        onStart={handleStart}
-        onEnd={handleEnd}
-        sizeLimits={getDirectedSizeBounds(sizeLimits, direction)}
-        handlesKeys={direction.sides.filter((_, i) =>
-          (handlesKeys as number[]).includes(i)
-        )}
-        isScalableByWheel={false}
-      >
-        <div
-          style={{
-            ...stretchStyle,
-            ...centererStyle,
-            borderRadius: theme.largeBorderRadius,
-            background: theme.primaryColor,
-          }}
-        >
-          {renderExtendedControlArea()}
-        </div>
-      </ResizableControl>
-    </div>
+      {(size) => {
+        const outerBox = direction.boxFromRanges(
+          NumbersRange.byOnlyDelta(direction.length(size)),
+          NumbersRange.byOnlyDelta(thickness)
+        );
+        return (
+          <div
+            style={{
+              position: "relative",
+              background: theme.backgroundColor,
+              borderRadius: theme.largeBorderRadius,
+              ...getBoxStyle(outerBox),
+            }}
+          >
+            <ResizableControl
+              isDraggable={isDraggable}
+              outerBox={outerBox}
+              value={direction.boxFromRanges(
+                directRange(value, direction),
+                NumbersRange.normalizationBounds()
+              )}
+              onChange={handleChange}
+              onStart={handleStart}
+              onEnd={handleEnd}
+              sizeLimits={getDirectedSizeBounds(sizeLimits, direction)}
+              handlesKeys={direction.sides.filter((_, i) =>
+                (handlesKeys as number[]).includes(i)
+              )}
+              isScalableByWheel={false}
+            >
+              <div
+                style={{
+                  ...stretchStyle,
+                  ...centererStyle,
+                  borderRadius: theme.largeBorderRadius,
+                  background: theme.primaryColor,
+                }}
+              >
+                {renderExtendedControlArea()}
+              </div>
+            </ResizableControl>
+          </div>
+        );
+      }}
+    </AutoSizer>
   );
 };
 

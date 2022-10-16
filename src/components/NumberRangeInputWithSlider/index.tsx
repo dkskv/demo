@@ -26,7 +26,6 @@ export const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
     bounds,
     isSmoothSlider = false,
     direction = Directions.horizontal,
-    length,
     thickness,
     rangeMinSize,
     rangeMaxSize = Infinity,
@@ -60,7 +59,6 @@ export const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
         onEnd={handleControlEnd}
         sizeLimits={sizeLimits.map((n) => n / bounds.size)}
         direction={direction}
-        length={length}
         thickness={thickness}
       />
     </NumbersRangeInput>

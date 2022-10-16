@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useSmoothControl } from "../../decorators/useSmoothControl";
+import { Directions } from "../../utils/direction";
 import { SingleSlider, ISingleSliderProps } from "../SingleSlider";
 import { Space } from "../Space";
 
@@ -13,8 +14,7 @@ export const NumberInputWithSlider: React.FC<IProps> = ({
   onChange,
   max,
   isSmoothSlider = false,
-  direction,
-  length,
+  direction = Directions.horizontal,
   thickness,
 }) => {
   const converter = useMemo(() => {
@@ -50,7 +50,6 @@ export const NumberInputWithSlider: React.FC<IProps> = ({
         onChange={handleControlChange}
         onEnd={handleControlEnd}
         direction={direction}
-        length={length}
         thickness={thickness}
       />
       <input

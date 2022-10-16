@@ -1,6 +1,7 @@
 import { clamp } from "ramda";
 import { NumbersRange } from "./numbersRange";
 import { Point } from "./point";
+import { Size } from "./size";
 
 export class BoundingBox {
   static square(x0: number, y0: number, a: number) {
@@ -48,6 +49,10 @@ export class BoundingBox {
 
   get dy() {
     return this.y2 - this.y1;
+  }
+
+  get size() {
+    return new Size(this.dx, this.dy);
   }
 
   get width() {

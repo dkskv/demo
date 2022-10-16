@@ -1,28 +1,32 @@
-import { CSSProperties } from "react";
+import { CSSProperties, forwardRef, ReactNode } from "react";
 import { IDirection, Directions } from "../../utils/direction";
 
 interface IProps {
   direction?: IDirection;
   size: number;
   align?: CSSProperties["alignItems"];
+  style?: CSSProperties;
+  children?: ReactNode;
 }
 
-export const Space: React.FC<IProps> = ({
-  direction = Directions.horizontal,
-  size,
-  children,
-  align,
-}) => {
-  return (
-    <div
-      style={{
-        display: "flex",
-        alignItems: align,
-        flexDirection: direction.cssValues.direction,
-        [direction.cssKeys.gap]: size,
-      }}
-    >
-      {children}
-    </div>
-  );
-};
+export const Space = forwardRef<HTMLDivElement, IProps>(
+  (
+    { direction = Directions.horizontal, size, children, align, style },
+    ref
+  ) => {
+    return (
+      <div
+        ref={ref}
+        style={{
+          display: "flex",
+          alignItems: align,
+          flexDirection: direction.cssValues.direction,
+          [direction.cssKeys.gap]: size,
+          ...style,
+        }}
+      >
+        {children}
+      </div>
+    );
+  }
+);

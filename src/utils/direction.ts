@@ -3,6 +3,7 @@ import { BoundingBox } from "./boundingBox";
 import { EBoxLength, EBoxSide } from "./boxParams";
 import { NumbersRange } from "./numbersRange";
 import { Point } from "./point";
+import { Size } from "./size";
 
 export const enum EDirection {
   horizontal = "horizontal",
@@ -12,6 +13,8 @@ export const enum EDirection {
 /** Интерфейс для работы компонентов в разных направлениях */
 export interface IDirection {
   key: EDirection;
+  length(size: Size): number;
+  thickness(size: Size): number;
   /** Возвращает диапазоны (параллельный и перпендикулярный) из переданного бокса */
   rangesOfBox(box: BoundingBox): [NumbersRange, NumbersRange];
   /** Строит бокс из заданных диапазонов (параллельного и перпендикулярного) */
@@ -52,6 +55,12 @@ export interface IDirection {
 export namespace Directions {
   export const horizontal: IDirection = {
     key: EDirection.horizontal,
+    length({ width }: Size) {
+      return width;
+    },
+    thickness({ height }: Size) {
+      return height;
+    },
     rangesOfBox(box: BoundingBox) {
       return [box.xsRange, box.ysRange];
     },
@@ -90,6 +99,12 @@ export namespace Directions {
 
   export const vertical: IDirection = {
     key: EDirection.vertical,
+    length({ height }: Size) {
+      return height;
+    },
+    thickness({ width }: Size) {
+      return width;
+    },
     rangesOfBox(box: BoundingBox) {
       return [box.ysRange, box.xsRange];
     },
