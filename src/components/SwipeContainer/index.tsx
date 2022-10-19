@@ -85,10 +85,6 @@ export const SwipeContainer: React.FC<IProps> = ({
     })();
   };
 
-  function handleDragStart() {
-    cancelAnimationFrame(request.current);
-  }
-
   function handleDrag(delta: Point) {
     dragTimestamp.current = performance.now();
     const impulse = -direction.coordinatesOfPoint(delta)[0];
@@ -98,7 +94,16 @@ export const SwipeContainer: React.FC<IProps> = ({
     );
   }
 
+  const [isDrag, setIsDrag] = useState(false);
+
+  function handleDragStart() {
+    setIsDrag(true);
+    cancelAnimationFrame(request.current);
+  }
+
   const handleDragEnd = () => {
+    setIsDrag(false);
+
     if (
       performance.now() - dragTimestamp.current < 40 ||
       scrollingState.inExtrusionZone
@@ -109,7 +114,7 @@ export const SwipeContainer: React.FC<IProps> = ({
     }
   };
 
-  const { isDrag } = useDragMovement({
+  useDragMovement({
     element,
     onChange: handleDrag,
     onStart: handleDragStart,

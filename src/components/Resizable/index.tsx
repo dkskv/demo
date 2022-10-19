@@ -14,6 +14,7 @@ import { noop } from "../../utils/common";
 import { SizeLimits } from "../../utils/sizeLimits";
 import { Draggable } from "../Draggable";
 import { OutlineHighlighting } from "../OutlineHighlighting";
+import { useActivityFlag } from "../../decorators/useActivityFlag";
 
 export interface IResizableProps
   extends Pick<
@@ -45,13 +46,13 @@ export const Resizable: React.FC<IResizableProps> = ({
   children,
 }) => {
   const [element, setElement] = useState<HTMLElement | null>(null);
+  const [isActive, edgeCallbacks] = useActivityFlag(onStart, onEnd);
 
   useDragBox({
     element: isDraggable ? element : null,
     outerBox,
     onChange,
-    onStart,
-    onEnd,
+    ...edgeCallbacks,
   });
 
   useScalableBox({
@@ -60,23 +61,24 @@ export const Resizable: React.FC<IResizableProps> = ({
     sizeLimits,
     outerBox,
     onChange,
-    onStart,
-    onEnd,
     keepAspectRatio,
+    ...edgeCallbacks,
   });
 
   const handlesProps = useResize({
     box: value,
     onChange,
-    onStart,
-    onEnd,
     sizeLimits,
     keepAspectRatio,
     handlesKeys,
     outerBox,
+    ...edgeCallbacks,
   });
 
-  const highlightingStage = useHighlightingOnSizeLimit(value, sizeLimits);
+  const highlightingStage = useHighlightingOnSizeLimit(
+    isActive ? value : null,
+    sizeLimits
+  );
 
   function renderHandles() {
     return handlesProps.map((handleProps) => (

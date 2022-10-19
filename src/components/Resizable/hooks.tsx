@@ -13,15 +13,16 @@ import { SizeLimits } from "../../utils/sizeLimits";
 import { useAnimationStage } from "../../decorators/useAnimationStage";
 import { usePrevious } from "../../decorators/usePrevious";
 
-export function useHighlightingOnSizeLimit(value: BoundingBox, sizeLimits: SizeLimits) {
-  const prevValue = usePrevious(value);
+export function useHighlightingOnSizeLimit(value: BoundingBox | null, sizeLimits: SizeLimits) {
   const [highlightingStage, highlight] = useAnimationStage({
     duration: 300,
     shouldResetOnEnd: true,
   });
 
+  const prevValue = usePrevious(value);
+
   useEffect(() => {
-    if (prevValue && wasConstrainedBySizeLimits(prevValue, value, sizeLimits)) {
+    if (prevValue && value && wasConstrainedBySizeLimits(prevValue, value, sizeLimits)) {
       highlight();
     }
   }, [value, prevValue, highlight, sizeLimits]);
@@ -135,10 +136,17 @@ export function useScalableBox({
   const actualBox = useActualRef(box);
 
   const handleScaleStart = useCallback(
-    (p: Point, pressedKeys: IPressedKeys) => {
+    (_: Point, pressedKeys: IPressedKeys) => {
       onStart(actualBox.current, pressedKeys);
     },
     [actualBox, onStart]
+  );
+
+  const handleScaleEnd = useCallback(
+    (_: Point, pressedKeys: IPressedKeys) => {
+      onEnd(actualBox.current, pressedKeys);
+    },
+    [actualBox, onEnd]
   );
 
   const handleScale = useCallback(
@@ -155,13 +163,6 @@ export function useScalableBox({
       onChange(nextBox, pressedKeys);
     },
     [actualBox, onChange, outerBox, sizeLimits, keepAspectRatio]
-  );
-
-  const handleScaleEnd = useCallback(
-    (p: Point, pressedKeys: IPressedKeys) => {
-      onEnd(actualBox.current, pressedKeys);
-    },
-    [actualBox, onEnd]
   );
 
   useScale(element, {
