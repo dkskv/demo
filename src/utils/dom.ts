@@ -1,8 +1,6 @@
 import { BoundingBox } from "./boundingBox";
 import { Point } from "./point";
 
-// Утилиты для работы с Element
-
 export function getPointOnPage(element: Element) {
   const { x, y } = element.getBoundingClientRect();
   return new Point(x, y);

@@ -15,8 +15,7 @@ import { useActualRef } from "./useActualRef";
 export interface IDragParams extends Partial<IDragCallbacks> {
   /** Перемещаемый элемент */
   element: HTMLElement | null;
-
-  /** Оповещать об изменении координат элемента относительно его `offsetParent` */
+  /** Использовать координаты относительно `offsetParent` элемента */
   isInOwnCoordinates?: boolean;
 }
 
@@ -101,7 +100,6 @@ export interface IDragBoxCallbacks {
 export interface IDragBoxParams
   extends Pick<IDragParams, "element" | "isInOwnCoordinates">,
     Partial<IDragBoxCallbacks> {
-  // todo: мб лучше обрабатывать снаружи?
   /** Внешний бокс, в чьих пределах может перемещаться данный */
   outerBox?: BoundingBox;
 }

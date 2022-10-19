@@ -27,7 +27,6 @@ export const SortableContainer: React.FC<IProps> = ({
   style,
   renderItem,
 }) => {
-  /** todo: придумать структуру, не завязанную на origin */
   const containerBox = useMemo(() => box.resetOrigin(), [box]);
 
   const [itemsState, setItemsState] = useState(

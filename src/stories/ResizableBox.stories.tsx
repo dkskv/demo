@@ -90,7 +90,6 @@ export const ResizableBox: ComponentStory<typeof Resizable> = () => {
             )
           }
           onEnd={handleEnd}
-          // todo: устранить необходимость вызывать `resetOrigin`
           outerBox={outerBox.resetOrigin()}
           onChange={setValue}
           keepAspectRatio={isLockedRatio}
