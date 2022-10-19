@@ -5,7 +5,6 @@ import { Point } from "./point";
 
 export function getPointOnPage(element: Element) {
   const { x, y } = element.getBoundingClientRect();
-
   return new Point(x, y);
 }
 
@@ -17,7 +16,6 @@ export function getOriginOnPage(element: Element) {
 function getOriginOffset(element: Element) {
   const { transform } = getComputedStyle(element);
   const { m41: translateX, m42: translateY } = new DOMMatrixReadOnly(transform);
-
   return new Point(translateX, translateY);
 }
 
@@ -29,26 +27,19 @@ export function getBoxOnPage(element: Element) {
   return getBoxByDomRect(element.getBoundingClientRect());
 }
 
-export function getOffsetBox(element: HTMLElement) {
-  const parent = element?.offsetParent;
-
-  return parent ? getBoxOnPage(parent).resetOrigin() : BoundingBox.infinite();
+export function getOffsetBox({ offsetParent }: HTMLElement) {
+  return offsetParent
+    ? getBoxOnPage(offsetParent).resetOrigin()
+    : BoundingBox.infinite();
 }
-
-// export function getPosition(element: HTMLElement) {
-//   return new Point(element.offsetLeft, element.offsetTop);
-// }
 
 /** Получить координаты мыши внутри `currentTarget` */
 export function getMouseOffsetPoint(mouseEvent: MouseEvent): Point {
   const targetOrigin = getOriginOnPage(mouseEvent.currentTarget as Element);
-  const mousePoint = getMousePoint(mouseEvent);
-
-  return mousePoint.subtract(targetOrigin);
+  return getMousePoint(mouseEvent).subtract(targetOrigin);
 }
 
-/** Координаты мыши на странице */
+/** Координаты мыши во viewport */
 export function getMousePoint(event: MouseEvent) {
-  /** todo: Почему не clientX? */
-  return new Point(event.pageX, event.pageY);
+  return new Point(event.clientX, event.clientY);
 }
