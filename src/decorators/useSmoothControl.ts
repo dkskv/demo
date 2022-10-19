@@ -10,8 +10,6 @@ interface IParams<ControlValue, Value> {
   onChange(value: Value): void;
   /** Конвертер из альтернативного значения в целевое */
   converter: IConverter<ControlValue, Value>;
-  // todo: вынести наружу
-  isSmooth: boolean;
 }
 
 /** Использовать более плавный способ управлять значением */
@@ -19,7 +17,6 @@ export function useSmoothControl<ControlValue, Value>({
   value: externalValue,
   onChange,
   converter,
-  isSmooth,
 }: IParams<ControlValue, Value>) {
   const [isActive, setIsActive] = useState(false);
   const [selfValue, setSelfValue] = useState(() =>
@@ -53,10 +50,8 @@ export function useSmoothControl<ControlValue, Value>({
   }, [isActive, externalValue, converter]);
 
   return {
-    controlValue: isSmooth
-      ? selfValue
-      : converter.fromDestination(externalValue),
-    handleControlChange,
-    handleControlEnd,
+    smoothValue: selfValue,
+    onChange: handleControlChange,
+    onEnd: handleControlEnd,
   } as const;
 }

@@ -17,24 +17,23 @@ export const NumberInputWithSlider: React.FC<IProps> = ({
   direction = Directions.horizontal,
   thickness,
 }) => {
-  const converter = useMemo(() => {
-    return {
+  const converter = useMemo(
+    () => ({
       toDestination(n: number) {
         return Math.round(n * max);
       },
       fromDestination(n: number) {
         return n / max;
       },
-    };
-  }, [max]);
+    }),
+    [max]
+  );
 
-  const { controlValue, handleControlChange, handleControlEnd } =
-    useSmoothControl({
-      value,
-      onChange,
-      converter,
-      isSmooth: isSmoothSlider,
-    });
+  const { smoothValue, ...sliderCallbacks } = useSmoothControl({
+    value,
+    onChange,
+    converter,
+  });
 
   const handleInputChange = useCallback(
     (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,9 +45,8 @@ export const NumberInputWithSlider: React.FC<IProps> = ({
   return (
     <Space size={20} direction={direction} align="center">
       <SingleSlider
-        value={controlValue}
-        onChange={handleControlChange}
-        onEnd={handleControlEnd}
+        {...sliderCallbacks}
+        value={isSmoothSlider ? smoothValue : converter.fromDestination(value)}
         direction={direction}
         thickness={thickness}
       />

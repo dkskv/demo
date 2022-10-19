@@ -32,13 +32,11 @@ export const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
   } = props;
   const converter = useMemo(() => createConverter(bounds), [bounds]);
 
-  const { controlValue, handleControlChange, handleControlEnd } =
-    useSmoothControl({
-      value,
-      onChange,
-      converter,
-      isSmooth: isSmoothSlider,
-    });
+  const { smoothValue, ...sliderCallbacks } = useSmoothControl({
+    value,
+    onChange,
+    converter,
+  });
 
   const sizeLimits = useMemo(
     () => new NumbersRange(rangeMinSize ?? -rangeMaxSize, rangeMaxSize),
@@ -54,9 +52,8 @@ export const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
       sizeLimits={sizeLimits}
     >
       <Slider
-        value={controlValue}
-        onChange={handleControlChange}
-        onEnd={handleControlEnd}
+        {...sliderCallbacks}
+        value={isSmoothSlider ? smoothValue : converter.fromDestination(value)}
         sizeLimits={sizeLimits.map((n) => n / bounds.size)}
         direction={direction}
         thickness={thickness}
