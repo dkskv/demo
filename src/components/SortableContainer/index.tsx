@@ -1,6 +1,6 @@
 import { prop, sortBy } from "ramda";
 import { useCallback, useMemo, useState } from "react";
-import { IDndElement, useDndConnection } from "../../decorators/dndConnection";
+import { DndElement, useDndConnection } from "../../decorators/dndConnection";
 import { useActualRef } from "../../decorators/useActualRef";
 import { BoundingBox } from "../../utils/boundingBox";
 import { ISortableItem } from "./utils/sortable";
@@ -13,7 +13,7 @@ import { useThirdPartyItemHandlers } from "./useThirdPartyItemHandlers";
 interface IProps {
   id: string;
   box: BoundingBox;
-  items: IDndElement[];
+  items: ISortableItem[];
   transitionDuration?: number;
   style?: React.CSSProperties;
   renderItem(item: ISortableItem): React.ReactNode;
@@ -44,37 +44,30 @@ export const SortableContainer: React.FC<IProps> = ({
 
   const actualItemsState = useActualRef(itemsState);
 
-  const checkIsEnoughSpace = useCallback(
-    (item: ISortableItem) =>
-      actualItemsState.current.totalHeight + item.box.height <=
-      containerBox.height,
-    [actualItemsState, containerBox]
-  );
-
-  const dropThirdPartyItem = useCallback(() => {
-    setThirdActivePartyItem((item) => {
-      item && droppingKeys.add(item.key);
-      return null;
-    });
-  }, [droppingKeys]);
-
-  const thirdPartyItemHandlers = useThirdPartyItemHandlers({
-    setActiveItem: setThirdActivePartyItem,
-    dropActiveItem: dropThirdPartyItem,
-    setItemsState,
-    checkIsEnoughSpace,
+  const { ref, onDrag, onDrop } = useDndConnection<HTMLDivElement>(id, {
+    ...useThirdPartyItemHandlers({
+      setActiveItem: setThirdActivePartyItem,
+      setItemsState,
+    }),
+    canDrop: useCallback(
+      (item: ISortableItem) =>
+        actualItemsState.current.totalHeight + item.box.height <=
+        containerBox.height,
+      [actualItemsState, containerBox]
+    ),
+    onDropIn: useCallback(() => {
+      setThirdActivePartyItem((item) => {
+        item && droppingKeys.add(item.key);
+        return null;
+      });
+    }, [droppingKeys]),
   });
 
-  const { ref, onDrag, onDrop } = useDndConnection<HTMLDivElement>(
-    id,
-    thirdPartyItemHandlers
-  );
-
   const handleChange = useCallback(
-    (item: ISortableItem) => {
-      const { canBeInserted } = onDrag(id, item);
+    (item: DndElement) => {
+      const { canDrop } = onDrag(id, item);
 
-      setIsActiveHidden(canBeInserted);
+      setIsActiveHidden(canDrop);
       setSelfActiveItem(item);
       setItemsState((state) =>
         containerBox.isIntersect(item.box)
@@ -86,14 +79,14 @@ export const SortableContainer: React.FC<IProps> = ({
   );
 
   const handleEnd = useCallback(
-    (item: ISortableItem) => {
-      const { canBeInserted } = onDrop(id, item);
+    (item: DndElement) => {
+      const { canDrop } = onDrop(id, item);
 
       setIsActiveHidden(false);
       setSelfActiveItem(null);
       droppingKeys.add(item.key);
 
-      if (canBeInserted) {
+      if (canDrop) {
         setItemsState((state) => state.removeByKey(item.key).align());
         return;
       }
@@ -135,8 +128,8 @@ export const SortableContainer: React.FC<IProps> = ({
           <DraggableBox
             key={item.key}
             value={isActive ? activeItem.box : item.box}
-            onChange={(box) => handleChange({ key: item.key, box })}
-            onEnd={(box) => handleEnd({ key: item.key, box })}
+            onChange={(box) => handleChange(new DndElement(item.key, box))}
+            onEnd={(box) => handleEnd(new DndElement(item.key, box))}
             style={
               isActive
                 ? {

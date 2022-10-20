@@ -3,6 +3,7 @@ import {
   append,
   both,
   complement,
+  compose,
   find,
   identical,
   propEq,
@@ -15,44 +16,27 @@ import {
   useEffect,
   useMemo,
   useState,
-  useRef,
 } from "react";
 import { BoundingBox } from "../utils/boundingBox";
 import { noop } from "../utils/common";
 import { getBoxOnPage } from "../utils/dom";
-
-export interface IDndElement {
-  key: string;
-  box: BoundingBox;
-}
-
-interface IContainerResponse {
-  canBeInserted: boolean;
-}
+import { useCallbackRef } from "./useCallbackRef";
 
 /** Подписка на входящие элементы. Callback'и возвращают разрешение на вход */
 interface IInputConnection {
-  // todo: подумать над внедрением дополнительного callback'а вместо использования isFirstEvent.
-  onDragIn(a: IDndElement, isFirstEvent: boolean): IContainerResponse;
-  onDropIn(a: IDndElement): IContainerResponse;
+  onDragIn(a: DndElement): void;
+  onDragOn(a: DndElement): void;
+  onDropIn(a: DndElement): void;
   onDragOut(key: string): void;
+  canDrop(a: DndElement): boolean;
 }
 
-interface IDropResponse extends IContainerResponse {}
-interface IDragResponse extends IDropResponse {}
-
-interface IDropHandler {
-  (containerKey: string, a: IDndElement): IDropResponse;
+interface IDndResponse {
+  canDrop: boolean;
 }
 
-interface IDragHandler {
-  (containerKey: string, a: IDndElement): IDragResponse;
-}
-
-/** Оповещение об исходящих элементах. Callback'и возвращают разрешение на выход */
-interface IOutputConnection {
-  onDrag: IDragHandler;
-  onDrop: IDropHandler;
+interface IDndHandler {
+  (containerKey: string, a: DndElement): IDndResponse;
 }
 
 interface IDndContainer extends IInputConnection {
@@ -60,65 +44,93 @@ interface IDndContainer extends IInputConnection {
   element: Element;
 }
 
-interface IDndContext extends IOutputConnection {
+// todo:
+// class DndContainer
+
+function isContainerOverlapWith(box: BoundingBox) {
+  return ({ element }: IDndContainer) =>
+    getBoxOnPage(element).intersectionArea(box) > 0;
+}
+
+export class DndElement {
+  constructor(public key: string, public box: BoundingBox) {}
+
+  placeRelative({ element }: IDndContainer) {
+    return this.replaceBox(getBoxOnPage(element).placeInside(this.box));
+  }
+
+  replaceBox(box: BoundingBox) {
+    return new DndElement(this.key, box);
+  }
+}
+
+interface IPreparedDndEvent {
+  itemOnViewport: DndElement;
+  targetContainer: IDndContainer | null;
+}
+
+interface IDndContext {
+  onDrag: IDndHandler;
+  onDrop: IDndHandler;
   register(a: IDndContainer): () => void;
 }
 
-const dragResponseFromVoid: IDragResponse = { canBeInserted: false };
-const dropResponseFromVoid: IDropResponse = { canBeInserted: false };
-
-const voidResponse: IContainerResponse = { canBeInserted: false };
-const voidContainerHandler = always(voidResponse);
-
 const DndContext = createContext<IDndContext>({
   register: always(noop),
-  onDrag: always(dragResponseFromVoid),
-  onDrop: always(dropResponseFromVoid),
+  onDrag: always({ canDrop: false }),
+  onDrop: always({ canDrop: false }),
 });
 
-export function useDndConnection<T extends Element = Element>(
+export function useDndConnection<T extends HTMLElement = HTMLElement>(
   key: string,
   input: Partial<IInputConnection>
 ) {
   const { onDrag, onDrop, register } = useContext(DndContext);
 
-  const ref = useRef<T>(null);
+  const [element, setElement] = useCallbackRef<T>();
 
-  // todo: доделать
+  // todo: реализовать обновление входных данных для контейнера
   useEffect(() => {
-    if (ref.current) {
+    if (element) {
       const {
-        onDragIn = voidContainerHandler,
-        onDropIn = voidContainerHandler,
+        onDragIn = noop,
+        onDragOn = noop,
+        onDropIn = noop,
         onDragOut = noop,
+        canDrop = always(false),
       } = input;
 
       return register({
         key,
-        element: ref.current,
+        element,
         onDragIn,
+        onDragOn,
         onDropIn,
         onDragOut,
+        canDrop,
       });
     }
-  }, []);
+  }, [element]);
 
-  return { ref, onDrag, onDrop } as const;
+  return { ref: setElement, onDrag, onDrop } as const;
 }
 
-/** Компонент выступает в роли сервера между контейнерами, которые хотят обменяться элементами */
+/** Выступает в роли сервера между контейнерами, которые хотят обменяться элементами */
 export const DndConnector: React.FC = ({ children }) => {
   const [containers, setContainers] = useState<IDndContainer[]>([]);
 
   const register = useCallback((item: IDndContainer) => {
     setContainers(append(item));
-    const unregister = () => setContainers(reject(propEq("key", item.key)));
-    return unregister;
+
+    return function unregister() {
+      setContainers(reject(propEq("key", item.key)));
+    };
   }, []);
 
-  /** Возвращает независимо позиционированный бокс для перемещаемого элемента и целевой контейнер */
-  const handleDndEvent = useCallback(
-    (containerKey: string, item: IDndElement) => {
+  const prepareDndEvent = useCallback<
+    (...p: Parameters<IDndHandler>) => IPreparedDndEvent
+  >(
+    (containerKey, item) => {
       const sourceContainer = find(propEq("key", containerKey), containers);
 
       if (!sourceContainer) {
@@ -127,20 +139,18 @@ export const DndConnector: React.FC = ({ children }) => {
         );
       }
 
-      const itemBoxOnPage = getBoxOnPage(sourceContainer.element).placeOutside(
-        item.box
-      );
+      const itemBoxOnViewport = getBoxOnPage(
+        sourceContainer.element
+      ).placeOutside(item.box);
 
       const isNotSourceContainer = complement(identical(sourceContainer));
-      const isContainerOverlapBox = isContainerOverlapWith(itemBoxOnPage);
-
-      const targetContainer = containers.find(
-        both(isNotSourceContainer, isContainerOverlapBox)
-      );
+      const isContainerOverlapBox = isContainerOverlapWith(itemBoxOnViewport);
 
       return {
-        targetContainer,
-        itemOnPage: replaceBox(item, itemBoxOnPage),
+        targetContainer:
+          containers.find(both(isNotSourceContainer, isContainerOverlapBox)) ??
+          null,
+        itemOnViewport: item.replaceBox(itemBoxOnViewport),
       };
     },
     [containers]
@@ -148,95 +158,97 @@ export const DndConnector: React.FC = ({ children }) => {
 
   const { notifyAboutDrag, notifyAboutDrop } = useDndNotifier();
 
-  const onDrag = useCallback(
-    (containerKey: string, item: IDndElement) => {
-      const { itemOnPage, targetContainer } = handleDndEvent(
-        containerKey,
-        item
-      );
+  const onDrag = useCallback(compose(notifyAboutDrag, prepareDndEvent), [
+    notifyAboutDrag,
+    prepareDndEvent,
+  ]);
 
-      return notifyAboutDrag(itemOnPage, targetContainer);
-    },
-    [handleDndEvent, notifyAboutDrag]
+  const onDrop = useCallback(compose(notifyAboutDrop, prepareDndEvent), [
+    notifyAboutDrop,
+    prepareDndEvent,
+  ]);
+
+  return (
+    <DndContext.Provider
+      value={useMemo(
+        () => ({ register, onDrag, onDrop }),
+        [register, onDrag, onDrop]
+      )}
+    >
+      {children}
+    </DndContext.Provider>
   );
-
-  const onDrop = useCallback(
-    (containerKey: string, item: IDndElement) => {
-      const { itemOnPage, targetContainer } = handleDndEvent(
-        containerKey,
-        item
-      );
-
-      return notifyAboutDrop(itemOnPage, targetContainer);
-    },
-    [handleDndEvent, notifyAboutDrop]
-  );
-
-  const value = useMemo<IDndContext>(
-    () => ({ register, onDrag, onDrop }),
-    [register, onDrag, onDrop]
-  );
-
-  return <DndContext.Provider value={value}>{children}</DndContext.Provider>;
 };
 
 /** В ответ на dnd-событие оповещает затронутые контейнеры */
 function useDndNotifier() {
-  const visitedRef = useRef(new Map<string, IDndContainer | undefined>());
-  const visited = visitedRef.current;
+  const availableContainers = useState(
+    () => new Map<string, IDndContainer | null>()
+  )[0];
+  const visitedContainers = useState(
+    () => new Map<string, IDndContainer | null>()
+  )[0];
 
   const notifyAboutDrag = useCallback(
-    (item: IDndElement, container: IDndContainer | undefined) => {
-      const previous = visited.get(item.key);
-      visited.set(item.key, container);
+    ({
+      itemOnViewport: item,
+      targetContainer: container,
+    }: IPreparedDndEvent): IDndResponse => {
+      const previousContainer = visitedContainers.get(item.key);
+      visitedContainers.set(item.key, container);
 
-      const isContainerChanged = previous !== container;
+      // todo: сравнивать по ключам, а не по ссылкам
+      const isDragOut = previousContainer && previousContainer !== container;
 
-      if (isContainerChanged && previous) {
-        previous.onDragOut(item.key);
+      if (
+        isDragOut &&
+        previousContainer === availableContainers.get(item.key)
+      ) {
+        availableContainers.delete(item.key);
+        previousContainer.onDragOut(item.key);
       }
 
       if (!container) {
-        return dragResponseFromVoid;
+        return { canDrop: false };
       }
 
-      const relativeItemBox = getBoxOnPage(container.element).placeInside(
-        item.box
-      );
+      const isDragIn = previousContainer !== container;
+      const relativeItem = item.placeRelative(container);
 
-      return container.onDragIn(
-        replaceBox(item, relativeItemBox),
-        isContainerChanged
-      );
+      if (isDragIn && container.canDrop(relativeItem)) {
+        availableContainers.set(item.key, container);
+        container.onDragIn(relativeItem);
+        return { canDrop: true };
+      }
+
+      if (availableContainers.has(item.key)) {
+        container.onDragOn(relativeItem);
+        return { canDrop: true };
+      }
+
+      return { canDrop: false };
     },
-    [visited]
+    [availableContainers, visitedContainers]
   );
 
   const notifyAboutDrop = useCallback(
-    (item: IDndElement, container: IDndContainer | undefined) => {
-      visited.delete(item.key);
+    ({
+      itemOnViewport: item,
+      targetContainer: container,
+    }: IPreparedDndEvent): IDndResponse => {
+      visitedContainers.delete(item.key);
+      const canDrop = availableContainers.delete(item.key);
 
-      if (!container) {
-        return dropResponseFromVoid;
+      if (!canDrop || !container) {
+        return { canDrop: false };
       }
 
-      const relativeItemBox = getBoxOnPage(container.element).placeInside(
-        item.box
-      );
+      container.onDropIn(item.placeRelative(container));
 
-      return container.onDropIn(replaceBox(item, relativeItemBox));
+      return { canDrop: true };
     },
-    [visited]
+    [availableContainers, visitedContainers]
   );
 
   return { notifyAboutDrag, notifyAboutDrop } as const;
-}
-
-function isContainerOverlapWith(box: BoundingBox) {
-  return ({ element }: IDndContainer) =>
-    getBoxOnPage(element).intersectionArea(box) > 0;
-}
-
-function replaceBox(item: IDndElement, box: BoundingBox) {
-  return { ...item, box };
 }
