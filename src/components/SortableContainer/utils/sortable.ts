@@ -66,38 +66,28 @@ export function defineIndexAfterMove(
   items: ISortableItem[]
 ): number {
   const sourceBox = items[sourceIndex].box;
-  const actionBox = sourceBox.moveTo(endPoint);
-
+  const movedBox = sourceBox.moveTo(endPoint);
   const searchDirection = Math.sign(endPoint.y - sourceBox.y0);
 
-  let nextIndex = sourceIndex;
-
-  while (true) {
-    if (nextIndex < 0) {
-      nextIndex = 0;
-      break;
+  for (let index = sourceIndex; true; index += searchDirection) {
+    if (index < 0) {
+      return 0;
     }
 
-    if (nextIndex > items.length - 1) {
-      nextIndex = items.length - 1;
-      break;
+    if (index > items.length - 1) {
+      return items.length - 1;
     }
 
-    const boxCy = getBoxCenterY(items[nextIndex].box);
-    const { y1, y2 } = actionBox;
+    const currentBoxCy = getBoxCenterY(items[index].box);
 
-    if (
-      (searchDirection === -1 && y1 < boxCy) ||
-      (searchDirection === 1 && y2 > boxCy)
-    ) {
-      nextIndex += searchDirection;
-    } else {
-      nextIndex -= searchDirection;
-      break;
+    const isOverstep =
+      (searchDirection === 1 && movedBox.y2 > currentBoxCy) ||
+      (searchDirection === -1 && movedBox.y1 < currentBoxCy);
+
+    if (!isOverstep) {
+      return index - searchDirection;
     }
   }
-
-  return nextIndex;
 }
 
 /** Получить `y` координату центра бокса */
@@ -114,7 +104,6 @@ export function positionInChain(
 
   for (const { key, box } of items) {
     nextItems.push({ key, box: box.moveTo(new Point(0, lastY)) });
-
     lastY += box.height;
   }
 
