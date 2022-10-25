@@ -128,8 +128,8 @@ export const SortableContainer: React.FC<IProps> = ({
           <DraggableBox
             key={item.key}
             value={isActive ? activeItem.box : item.box}
-            onChange={(box) => handleChange(new DndElement(item.key, box))}
-            onEnd={(box) => handleEnd(new DndElement(item.key, box))}
+            onChange={({ box }) => handleChange(new DndElement(item.key, box))}
+            onEnd={({ box }) => handleEnd(new DndElement(item.key, box))}
             style={
               isActive
                 ? {

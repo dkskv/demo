@@ -3,14 +3,16 @@ import { extractPressedKeys, IPressedKeys, noop } from "../utils/common";
 import { getBoxOnPage, getMouseOffsetPoint } from "../utils/dom";
 import { Point } from "../utils/point";
 
+export interface IScaleEvent {
+  delta: number;
+  origin: Point;
+  pressedKeys: IPressedKeys;
+}
+
 interface IParams {
-  onChange(
-    delta: number,
-    scalingOrigin: Point,
-    pressedKeys: IPressedKeys
-  ): void;
-  onStart?(scalingOrigin: Point, pressedKeys: IPressedKeys): void;
-  onEnd?(scalingOrigin: Point, pressedKeys: IPressedKeys): void;
+  onChange(e: IScaleEvent): void;
+  onStart?(e: IScaleEvent): void;
+  onEnd?(e: IScaleEvent): void;
   delayToEnd?: number;
 }
 
@@ -30,20 +32,20 @@ export function useScale(
       const targetBox = getBoxOnPage(wheelEvent.currentTarget as Element);
       const offsetPoint = getMouseOffsetPoint(wheelEvent);
 
-      const scalingOrigin = targetBox.resetOrigin().normalizePoint(offsetPoint);
+      const origin = targetBox.resetOrigin().normalizePoint(offsetPoint);
       const pressedKeys = extractPressedKeys(wheelEvent);
 
       if (timerId.current === undefined) {
-        onStart(scalingOrigin, pressedKeys);
+        onStart({ delta: 0, origin, pressedKeys });
       }
 
-      onChange(wheelEvent.deltaY, scalingOrigin, pressedKeys);
+      onChange({ delta: wheelEvent.deltaY, origin, pressedKeys });
 
       timerId.current && clearTimeout(timerId.current);
 
       timerId.current = setTimeout(() => {
         timerId.current = undefined;
-        onEnd(scalingOrigin, pressedKeys);
+        onEnd({ delta: 0, origin, pressedKeys });
       }, delayToEnd);
     },
     [onChange, onStart, onEnd, delayToEnd]

@@ -1,15 +1,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useDragMovement } from "../../decorators/dnd";
 import { useCallbackRef } from "../../decorators/useCallbackRef";
 import { BoundingBox } from "../../utils/boundingBox";
 import { Directions, IDirection } from "../../utils/direction";
-import { Point } from "../../utils/point";
 import { getBoxStyle } from "../../utils/styles";
 import { getBoxOnPage } from "../../utils/dom";
 import { NumbersRange } from "../../utils/numbersRange";
 import { useTheme } from "../../decorators/theme";
 import { ScrollConstraints, ScrollingState } from "./utils";
 import { ScrollIndicator } from "../ScrollIndicator";
+import { useDrag } from "../../decorators/dnd";
+import { IDragEvent } from "../../utils/drag";
 
 interface IProps {
   box: BoundingBox;
@@ -85,9 +85,9 @@ export const SwipeContainer: React.FC<IProps> = ({
     })();
   };
 
-  function handleDrag(delta: Point) {
+  function handleDrag({ movement }: IDragEvent) {
     dragTimestamp.current = performance.now();
-    const impulse = -direction.coordinatesOfPoint(delta)[0];
+    const impulse = -direction.coordinatesOfPoint(movement)[0];
 
     setScrollingState((state) =>
       state.setImpulse(impulse).suppressEscapeImpulse().moveByImpulse()
@@ -114,7 +114,7 @@ export const SwipeContainer: React.FC<IProps> = ({
     }
   };
 
-  useDragMovement({
+  useDrag({
     element,
     onChange: handleDrag,
     onStart: handleDragStart,

@@ -1,6 +1,7 @@
 import { BoundingBox } from "../../../utils/boundingBox";
 import { Point } from "../../../utils/point";
 
+// todo: подумать над названием
 /** Ручка, потянув за которую можно изменить размеры бокса (координаты ручки нормированы) */
 export class ResizingHandle extends Point {
   public get mirroredPoint(): Point {

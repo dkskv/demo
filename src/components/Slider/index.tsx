@@ -1,20 +1,24 @@
 import React, { useCallback } from "react";
 import { IDirection, Directions, EDirection } from "../../utils/direction";
 import { NumbersRange } from "../../utils/numbersRange";
-import { BoundingBox } from "../../utils/boundingBox";
 import { ResizableControl } from "../ResizableControl";
-import { IPressedKeys, noop } from "../../utils/common";
+import { noop } from "../../utils/common";
 import { SizeLimits } from "../../utils/sizeLimits";
 import { centererStyle, getBoxStyle, stretchStyle } from "../../utils/styles";
 import { useTheme } from "../../decorators/theme";
 import { AutoSizer } from "../../decorators/autosizer";
+import { IResizeEvent } from "../Resizable/hooks";
+
+interface ISliderCallback {
+  (value: NumbersRange): void;
+}
 
 export interface ISliderProps {
   /** Нормированный диапазон (в пределах от 0 до 1) */
   value: NumbersRange;
-  onChange(value: NumbersRange): void;
-  onStart?(value: NumbersRange): void;
-  onEnd?(value: NumbersRange): void;
+  onChange: ISliderCallback;
+  onStart?: ISliderCallback;
+  onEnd?: ISliderCallback;
 
   thickness: number;
 
@@ -119,15 +123,11 @@ function directRange(range: NumbersRange, direction: IDirection) {
   return direction.isReversed ? range.map((a) => 1 - a).invert() : range;
 }
 
-function useDirectedCallback(
-  callback: (box: NumbersRange, pressedKeys: IPressedKeys) => void,
-  direction: IDirection
-) {
+function useDirectedCallback(callback: ISliderCallback, direction: IDirection) {
   return useCallback(
-    (box: BoundingBox, pressedKeys: IPressedKeys) => {
+    ({ box }: IResizeEvent) => {
       const range = direction.rangesOfBox(box)[0];
-
-      callback(directRange(range, direction), pressedKeys);
+      callback(directRange(range, direction));
     },
     [callback, direction]
   );

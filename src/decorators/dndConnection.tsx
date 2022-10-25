@@ -44,9 +44,6 @@ interface IDndContainer extends IInputConnection {
   element: Element;
 }
 
-// todo:
-// class DndContainer
-
 function isContainerOverlapWith(box: BoundingBox) {
   return ({ element }: IDndContainer) =>
     getBoxOnPage(element).intersectionArea(box) > 0;

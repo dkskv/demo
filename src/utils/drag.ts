@@ -2,8 +2,15 @@ import { extractPressedKeys, IPressedKeys, noop } from "./common";
 import { getMouseOffsetPoint, getMousePoint } from "./dom";
 import { Point } from "./point";
 
+export interface IDragEvent {
+  point: Point;
+  movement: Point;
+  element: HTMLElement;
+  pressedKeys: IPressedKeys;
+}
+
 export interface IDragCallback {
-  (a: Point, pressedKeys: IPressedKeys): void;
+  (e: IDragEvent): void;
 }
 
 export interface IDragCallbacks {
@@ -12,15 +19,18 @@ export interface IDragCallbacks {
   onEnd: IDragCallback;
 }
 
-export abstract class DragListener {
-  protected callbacks: IDragCallbacks = {
+export class DragListener {
+  /** Смещение точки захвата относительно origin элемента */
+  private offset = Point.nullish;
+
+  private callbacks: IDragCallbacks = {
     onStart: noop,
     onChange: noop,
     onEnd: noop,
   };
 
-  constructor(protected element: Element) {
-    this.handleDown = this.handleDown.bind(this);
+  constructor(private element: HTMLElement) {
+    this.handleStart = this.handleStart.bind(this);
     this.handleMove = this.handleMove.bind(this);
     this.handleEnd = this.handleEnd.bind(this);
   }
@@ -29,9 +39,11 @@ export abstract class DragListener {
     this.callbacks = callbacks;
   }
 
-  /** Возвращает disposer, отменяющий прослушку начала новых перетаскиваний */
   public launch() {
-    this.element.addEventListener("mousedown", this.handleDown);
+    this.element.addEventListener(
+      "mousedown",
+      this.handleStart as (e: Event) => void
+    );
 
     return () => this.dispose();
   }
@@ -49,65 +61,37 @@ export abstract class DragListener {
   }
 
   private dispose() {
-    this.element.removeEventListener("mousedown", this.handleDown);
+    this.element.removeEventListener(
+      "mousedown",
+      this.handleStart as (e: Event) => void
+    );
     this.removeActiveElementListeners();
   }
 
-  protected abstract handleStart(downEvent: MouseEvent): void;
-  protected abstract handleMove(moveEvent: MouseEvent): void;
-  protected abstract handleEnd(upEvent: MouseEvent): void;
+  private handleStart(mouseEvent: MouseEvent) {
+    mouseEvent.preventDefault();
+    mouseEvent.stopPropagation();
 
-  private handleDown(event: Event) {
-    const downEvent = event as MouseEvent;
-    downEvent.preventDefault();
-    downEvent.stopPropagation();
-
-    this.handleStart(downEvent);
-
+    this.offset = getMouseOffsetPoint(mouseEvent);
+    this.callbacks.onStart(this.mapEvent(mouseEvent));
     this.addActiveElementListeners();
   }
-}
 
-/** Подписывает на координаты элемента (на странице) */
-export class DragCoordinatesListener extends DragListener {
-  /** Смещение точки захвата относительно origin элемента */
-  private offset = Point.nullish;
-
-  protected handleStart(downEvent: MouseEvent) {
-    this.offset = getMouseOffsetPoint(downEvent);
-
-    const point = getMousePoint(downEvent).subtract(this.offset);
-
-    this.callbacks.onStart(point, extractPressedKeys(downEvent));
+  private handleMove(mouseEvent: MouseEvent) {
+    this.callbacks.onChange(this.mapEvent(mouseEvent));
   }
 
-  protected handleMove(moveEvent: MouseEvent) {
-    const point = getMousePoint(moveEvent).subtract(this.offset);
-
-    this.callbacks.onChange(point, extractPressedKeys(moveEvent));
-  }
-
-  protected handleEnd(upEvent: MouseEvent) {
-    const point = getMousePoint(upEvent).subtract(this.offset);
-
-    this.callbacks.onEnd(point, extractPressedKeys(upEvent));
+  private handleEnd(mouseEvent: MouseEvent) {
+    this.callbacks.onEnd(this.mapEvent(mouseEvent));
     this.removeActiveElementListeners();
   }
-}
 
-/** Подписывает на последовательные смещения координат */
-export class DragMovementListener extends DragListener {
-  protected handleStart(downEvent: MouseEvent) {
-    this.callbacks.onStart(Point.nullish, extractPressedKeys(downEvent));
-  }
-
-  protected handleMove(moveEvent: MouseEvent) {
-    const point = new Point(moveEvent.movementX, moveEvent.movementY);
-    this.callbacks.onChange(point, extractPressedKeys(moveEvent));
-  }
-
-  protected handleEnd(upEvent: MouseEvent) {
-    this.callbacks.onEnd(Point.nullish, extractPressedKeys(upEvent));
-    this.removeActiveElementListeners();
+  private mapEvent(mouseEvent: MouseEvent): IDragEvent {
+    return {
+      point: getMousePoint(mouseEvent).subtract(this.offset),
+      movement: new Point(mouseEvent.movementX, mouseEvent.movementY),
+      element: this.element,
+      pressedKeys: extractPressedKeys(mouseEvent),
+    };
   }
 }

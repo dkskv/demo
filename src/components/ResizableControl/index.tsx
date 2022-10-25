@@ -1,8 +1,9 @@
 import React, { useCallback } from "react";
 import { BoundingBox } from "../../utils/boundingBox";
-import { IPressedKeys, noop } from "../../utils/common";
+import { noop } from "../../utils/common";
 import { SizeLimits } from "../../utils/sizeLimits";
 import { Resizable, IResizableProps } from "../Resizable";
+import { IResizeCallback } from "../Resizable/hooks";
 
 export interface IResizableControlProps extends IResizableProps {
   outerBox: NonNullable<IResizableProps["outerBox"]>;
@@ -36,13 +37,11 @@ export const ResizableControl: React.FC<IResizableControlProps> = ({
 };
 
 function useNormalizedCallback(
-  callback: (box: BoundingBox, pressedKeys: IPressedKeys) => void,
+  callback: IResizeCallback,
   outerBox: BoundingBox
 ) {
-  return useCallback<typeof callback>(
-    (box, pressedKeys) => {
-      callback(outerBox.normalizeInner(box), pressedKeys);
-    },
+  return useCallback<IResizeCallback>(
+    (event) => callback({ ...event, box: outerBox.normalizeInner(event.box) }),
     [callback, outerBox]
   );
 }

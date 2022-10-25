@@ -11,6 +11,7 @@ import { Directions } from "../utils/direction";
 import { getBoxStyle, stretchStyle } from "../utils/styles";
 import { SizeLimits } from "../utils/sizeLimits";
 import { useTheme } from "../decorators/theme";
+import { IResizeEvent } from "../components/Resizable/hooks";
 
 export default {};
 
@@ -37,6 +38,11 @@ export const ResizableBox: ComponentStory<typeof Resizable> = () => {
       setValue(magnetizeBox);
     }
   }, [isGridEnabled]);
+
+  const handleChange = useCallback(
+    ({ box }: IResizeEvent) => setValue(box),
+    []
+  );
 
   const handleEnd = useCallback(() => {
     if (isGridEnabled) {
@@ -91,7 +97,7 @@ export const ResizableBox: ComponentStory<typeof Resizable> = () => {
           }
           onEnd={handleEnd}
           outerBox={outerBox.resetOrigin()}
-          onChange={setValue}
+          onChange={handleChange}
           keepAspectRatio={isLockedRatio}
         >
           <div

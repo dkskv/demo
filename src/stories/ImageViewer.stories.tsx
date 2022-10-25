@@ -1,6 +1,7 @@
 import { ComponentStory } from "@storybook/react";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { ImageBox } from "../components/ImageBox";
+import { IResizeEvent } from "../components/Resizable/hooks";
 import { ResizableControl } from "../components/ResizableControl";
 import { ScalableImage } from "../components/ScalableImage";
 import { Space } from "../components/Space";
@@ -23,6 +24,11 @@ export const ImageViewer: ComponentStory<any> = () => {
   const scaleBounds = new NumbersRange(0.2, 1);
 
   const theme = useTheme();
+
+  const handleControlChange = useCallback(
+    ({ box }: IResizeEvent) => setControlValue(box),
+    []
+  );
 
   function renderOverlay() {
     return (
@@ -55,7 +61,7 @@ export const ImageViewer: ComponentStory<any> = () => {
     <Space size={20}>
       <ScalableImage
         viewBox={controlValue}
-        onViewBoxChange={setControlValue}
+        onViewBoxChange={handleControlChange}
         src={src}
         box={imageBox}
         scaleBounds={scaleBounds}
@@ -71,7 +77,7 @@ export const ImageViewer: ComponentStory<any> = () => {
         {renderOverlay()}
         <ResizableControl
           value={controlValue}
-          onChange={setControlValue}
+          onChange={handleControlChange}
           outerBox={controlBox.resetOrigin()}
           keepAspectRatio={true}
           sizeLimits={new SizeLimits(scaleBounds, scaleBounds)}

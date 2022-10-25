@@ -1,14 +1,13 @@
 import { identity, mapObjIndexed } from "ramda";
 import { useCallback, useEffect, useMemo } from "react";
 import { BoundingBox } from "../utils/boundingBox";
-import { IPressedKeys, noop } from "../utils/common";
+import { noop } from "../utils/common";
 import { getBoxOnPage, getPointOnPage } from "../utils/dom";
 import {
-  DragCoordinatesListener,
   DragListener,
-  DragMovementListener,
   IDragCallback,
   IDragCallbacks,
+  IDragEvent,
 } from "../utils/drag";
 import { useActualRef } from "./useActualRef";
 
@@ -17,34 +16,6 @@ export interface IDragParams extends Partial<IDragCallbacks> {
   element: HTMLElement | null;
   /** Использовать координаты относительно `offsetParent` элемента */
   isInOwnCoordinates?: boolean;
-}
-
-function useDndListener(
-  Listener: { new (element: Element): DragListener },
-  element: Element | null,
-  callbacks: IDragCallbacks
-) {
-  const instance = useMemo(
-    () => element && new Listener(element),
-    [Listener, element]
-  );
-
-  useEffect(() => instance?.launch(), [instance]);
-
-  instance?.setCallbacks(callbacks);
-}
-
-export function useDragMovement({
-  element,
-  onChange = noop,
-  onStart = noop,
-  onEnd = noop,
-}: IDragParams) {
-  return useDndListener(DragMovementListener, element, {
-    onStart,
-    onChange,
-    onEnd,
-  });
 }
 
 export function useDrag({
@@ -56,39 +27,39 @@ export function useDrag({
 }: IDragParams) {
   /** Обертка, преобразующая координаты внутри страницы к координатам внутри offsetParent */
   const offsetParentDecorator = useCallback(
-    (dndCallback: IDragCallback): IDragCallback => {
-      return (point, pressedKeys) => {
-        if (!element) {
-          return;
-        }
-
-        const { offsetParent } = element;
+    (dndCallback: IDragCallback): IDragCallback =>
+      (event) => {
+        const { offsetParent } = event.element;
 
         if (!offsetParent) {
           console.error("Не найден offsetParent");
-          dndCallback(point, pressedKeys);
           return;
         }
 
         const offset = getPointOnPage(offsetParent);
-
-        dndCallback(point.subtract(offset), pressedKeys);
-      };
-    },
-    [element]
+        dndCallback({ ...event, point: event.point.subtract(offset) });
+      },
+    []
   );
 
   const wrapper = isInOwnCoordinates ? offsetParentDecorator : identity;
 
-  return useDndListener(
-    DragCoordinatesListener,
-    element,
-    mapObjIndexed(wrapper, { onStart, onChange, onEnd })
+  const listener = useMemo(
+    () => (element ? new DragListener(element) : null),
+    [element]
   );
+
+  useEffect(() => listener?.launch(), [listener]);
+
+  listener?.setCallbacks(mapObjIndexed(wrapper, { onStart, onChange, onEnd }));
+}
+
+interface IDragBoxEvent extends IDragEvent {
+  box: BoundingBox;
 }
 
 export interface IDragBoxCallback {
-  (a: BoundingBox, pressedKeys: IPressedKeys): void;
+  (e: IDragBoxEvent): void;
 }
 
 export interface IDragBoxCallbacks {
@@ -113,14 +84,16 @@ export function useDragBox({
   const paramsRef = useActualRef(rest);
 
   const addBoxWrapper = useCallback(
-    (dndCallback: IDragBoxCallback): IDragCallback => {
-      return (point, pressedKeys) => {
-        const { outerBox, element } = paramsRef.current;
-        const box = getBoxOnPage(element!).moveTo(point);
+    (dndCallback: IDragBoxCallback): IDragCallback =>
+      (event) => {
+        const { outerBox } = paramsRef.current;
+        const box = getBoxOnPage(event.element).moveTo(event.point);
 
-        dndCallback(outerBox ? outerBox.clampInner(box) : box, pressedKeys);
-      };
-    },
+        dndCallback({
+          ...event,
+          box: outerBox ? outerBox.clampInner(box) : box,
+        });
+      },
     [paramsRef]
   );
 
