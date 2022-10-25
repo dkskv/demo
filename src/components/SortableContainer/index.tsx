@@ -6,9 +6,9 @@ import { BoundingBox } from "../../utils/boundingBox";
 import { ISortableItem } from "./utils/sortable";
 import { getBoxStyle } from "../../utils/styles";
 import { DraggableBox } from "../DraggableBox";
-import { SortableItemsState } from "./sortableItemsState";
-import { useTemporarySet } from "./useTemporarySet";
-import { useThirdPartyItemHandlers } from "./useThirdPartyItemHandlers";
+import { SortableItemsState } from "./utils/sortableItemsState";
+import { useTemporarySet } from "./hooks/useTemporarySet";
+import { useThirdPartyItemHandlers } from "./hooks/useThirdPartyItemHandlers";
 
 interface IProps {
   id: string;

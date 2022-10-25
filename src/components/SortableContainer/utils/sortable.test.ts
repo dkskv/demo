@@ -67,7 +67,7 @@ describe("Определение нового индекса элемента п
   ].map((box) => ({ key: String(), box }));
 
   function testMoving(sourceIndex: number, expectedIndex: number, y: number) {
-    const action = { sourceIndex, point: new Point(0, y) };
+    const action = { sourceIndex, endPoint: new Point(0, y) };
     const resultIndex = defineIndexAfterMove(action, items);
 
     expect(resultIndex).toEqual(expectedIndex);

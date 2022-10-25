@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import { SortableItemsState } from "./sortableItemsState";
-import { ISortableItem } from "./utils/sortable";
+import { SortableItemsState } from "../utils/sortableItemsState";
+import { ISortableItem } from "./../utils/sortable";
 
 interface IParams {
   setActiveItem(i: ISortableItem | null): void;

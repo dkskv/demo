@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { useForceUpdate } from "../../decorators/useForceUpdate";
+import { useForceUpdate } from "../../../decorators/useForceUpdate";
 
 export interface ITemporarySet<T> {
   add(k: T): void;

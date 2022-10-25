@@ -7,9 +7,11 @@ export interface ISortableItem {
   box: BoundingBox;
 }
 
-export interface IMovingAction {
+interface IMovingAction {
+  /** Начальный индекс перемещаемого элемента */
   sourceIndex: number;
-  point: Point;
+  /** Точка, в которую переместили элемент */
+  endPoint: Point;
 }
 
 export function moveIndexAccordingToPosition(
@@ -60,44 +62,46 @@ export function defineInsertionIndex(
 }
 
 export function defineIndexAfterMove(
-  { point, sourceIndex }: IMovingAction,
+  { endPoint, sourceIndex }: IMovingAction,
   items: ISortableItem[]
 ): number {
   const sourceBox = items[sourceIndex].box;
-  const actionBox = sourceBox.moveTo(point);
+  const actionBox = sourceBox.moveTo(endPoint);
 
-  /** Направление поиска новой позиции перемещаемого элемента */
-  const dir = Math.sign(point.y - sourceBox.y0);
+  const searchDirection = Math.sign(endPoint.y - sourceBox.y0);
 
-  let shiftedIndex = sourceIndex;
+  let nextIndex = sourceIndex;
 
   while (true) {
-    if (shiftedIndex < 0) {
-      shiftedIndex = 0;
+    if (nextIndex < 0) {
+      nextIndex = 0;
       break;
     }
 
-    if (shiftedIndex > items.length - 1) {
-      shiftedIndex = items.length - 1;
+    if (nextIndex > items.length - 1) {
+      nextIndex = items.length - 1;
       break;
     }
 
-    const boxCy = getBoxCy(items[shiftedIndex].box);
+    const boxCy = getBoxCenterY(items[nextIndex].box);
     const { y1, y2 } = actionBox;
 
-    if ((dir === -1 && y1 < boxCy) || (dir === 1 && y2 > boxCy)) {
-      shiftedIndex += dir;
+    if (
+      (searchDirection === -1 && y1 < boxCy) ||
+      (searchDirection === 1 && y2 > boxCy)
+    ) {
+      nextIndex += searchDirection;
     } else {
-      shiftedIndex -= dir;
+      nextIndex -= searchDirection;
       break;
     }
   }
 
-  return shiftedIndex;
+  return nextIndex;
 }
 
 /** Получить `y` координату центра бокса */
-function getBoxCy(box: BoundingBox) {
+function getBoxCenterY(box: BoundingBox) {
   return box.ysRange.denormalizeNumber(0.5);
 }
 

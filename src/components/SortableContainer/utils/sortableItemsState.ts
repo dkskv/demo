@@ -4,7 +4,7 @@ import {
   ISortableItem,
   positionInChain,
   moveIndexAccordingToPosition,
-} from "./utils/sortable";
+} from "./sortable";
 
 // todo: сначала использовать массивы без оптимизаций, потом подумать над тем, как будет быстрее.
 export class SortableItemsState {
@@ -30,7 +30,7 @@ export class SortableItemsState {
     const sourceIndex = this.findIndex(item.key);
     return new SortableItemsState(
       moveIndexAccordingToPosition(
-        { sourceIndex, point: item.box.origin },
+        { sourceIndex, endPoint: item.box.origin },
         this.items
       )
     );
