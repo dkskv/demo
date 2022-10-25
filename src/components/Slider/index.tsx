@@ -7,7 +7,7 @@ import { SizeLimits } from "../../utils/sizeLimits";
 import { centererStyle, getBoxStyle, stretchStyle } from "../../utils/styles";
 import { useTheme } from "../../decorators/theme";
 import { AutoSizer } from "../../decorators/autosizer";
-import { IResizeEvent } from "../Resizable/hooks";
+import { IResizeEvent } from "../Resizable/index.types";
 
 interface ISliderCallback {
   (value: NumbersRange): void;

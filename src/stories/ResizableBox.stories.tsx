@@ -11,7 +11,7 @@ import { Directions } from "../utils/direction";
 import { getBoxStyle, stretchStyle } from "../utils/styles";
 import { SizeLimits } from "../utils/sizeLimits";
 import { useTheme } from "../decorators/theme";
-import { IResizeEvent } from "../components/Resizable/hooks";
+import { IResizeEvent } from "../components/Resizable/index.types";
 
 export default {};
 

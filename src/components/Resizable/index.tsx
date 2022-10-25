@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import { BoundingBox } from "../../utils/boundingBox";
+import { useResize } from "./hooks/useResize";
 import {
-  IResizeParams,
-  useHighlightingOnSizeLimit,
-  useResize,
-  useScalableBox,
-} from "./hooks";
-import { resizingHandlesPreset } from "./utils/resizingHandlesPreset";
+  IResizeHandleKey,
+  resizingHandlesPreset,
+} from "./utils/resizingHandlesPreset";
 import { getBoxStyle } from "../../utils/styles";
 import { Thumb } from "../Thumb";
 import { useDragBox } from "../../decorators/dnd";
@@ -15,21 +13,18 @@ import { SizeLimits } from "../../utils/sizeLimits";
 import { Draggable } from "../Draggable";
 import { OutlineHighlighting } from "../OutlineHighlighting";
 import { useActivityFlag } from "../../decorators/useActivityFlag";
+import { useScalableBox } from "./hooks/useScalableBox";
+import { useHighlightingOnSizeLimit } from "./hooks/useHighlightingOnSizeLimit";
+import { IResizeCallbacks, IResizeConstrains } from "./index.types";
 
 export interface IResizableProps
-  extends Pick<
-    Partial<IResizeParams>,
-    | "sizeLimits"
-    | "keepAspectRatio"
-    | "handlesKeys"
-    | "onStart"
-    | "onEnd"
-    | "outerBox"
-  > {
+  extends IResizeCallbacks,
+    Partial<IResizeConstrains> {
   value: BoundingBox;
-  onChange: IResizeParams["onChange"];
   isDraggable?: boolean;
   isScalableByWheel?: boolean;
+  /** Ключи отображаемых кнопок, за которые производится resize  */
+  handlesKeys?: readonly IResizeHandleKey[];
 }
 
 export const Resizable: React.FC<IResizableProps> = ({
@@ -80,14 +75,6 @@ export const Resizable: React.FC<IResizableProps> = ({
     sizeLimits
   );
 
-  function renderHandles() {
-    return handlesProps.map((handleProps) => (
-      <Draggable isCentered={true} {...handleProps}>
-        <Thumb />
-      </Draggable>
-    ));
-  }
-
   const displayedValue = value.sortAscCoordinates();
 
   return (
@@ -106,7 +93,13 @@ export const Resizable: React.FC<IResizableProps> = ({
       >
         {React.Children.only(children)}
       </div>
-      <div>{renderHandles()}</div>
+      <div>
+        {handlesProps.map((handleProps) => (
+          <Draggable isCentered={true} {...handleProps}>
+            <Thumb />
+          </Draggable>
+        ))}
+      </div>
     </>
   );
 };

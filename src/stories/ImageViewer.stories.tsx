@@ -1,7 +1,7 @@
 import { ComponentStory } from "@storybook/react";
 import { useCallback, useState } from "react";
 import { ImageBox } from "../components/ImageBox";
-import { IResizeEvent } from "../components/Resizable/hooks";
+import { IResizeEvent } from "../components/Resizable/index.types";
 import { ResizableControl } from "../components/ResizableControl";
 import { ScalableImage } from "../components/ScalableImage";
 import { Space } from "../components/Space";

@@ -7,7 +7,7 @@ import { defineWheelScalingK, noop } from "../../utils/common";
 import { NumbersRange } from "../../utils/numbersRange";
 import { Point } from "../../utils/point";
 import { IImageBoxProps, ImageBox } from "../ImageBox";
-import { IResizeCallback } from "../Resizable/hooks";
+import { IResizeCallback } from "../Resizable/index.types";
 import { IDragEvent } from "../../utils/drag";
 
 interface IProps extends IImageBoxProps {

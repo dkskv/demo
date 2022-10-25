@@ -3,7 +3,7 @@ import { BoundingBox } from "../../utils/boundingBox";
 import { noop } from "../../utils/common";
 import { SizeLimits } from "../../utils/sizeLimits";
 import { Resizable, IResizableProps } from "../Resizable";
-import { IResizeCallback } from "../Resizable/hooks";
+import { IResizeCallback } from "../Resizable/index.types";
 
 export interface IResizableControlProps extends IResizableProps {
   outerBox: NonNullable<IResizableProps["outerBox"]>;
