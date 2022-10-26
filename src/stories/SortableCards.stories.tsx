@@ -7,7 +7,7 @@ import {
 } from "../components/SortableContainer/utils/sortable";
 import { DndConnector } from "../decorators/dndConnection";
 import { useTheme } from "../decorators/theme";
-import { BoundingBox } from "../utils/boundingBox";
+import { BoundingBox } from "../entities/boundingBox";
 import { stretchStyle } from "../utils/styles";
 
 export default {};

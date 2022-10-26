@@ -7,8 +7,8 @@ import { Slider, ISliderProps } from "../Slider";
 import { createConverter } from "./utils";
 import { useSmoothControl } from "../../decorators/useSmoothControl";
 import React from "react";
-import { Directions } from "../../utils/direction";
-import { NumbersRange } from "../../utils/numbersRange";
+import { Directions } from "../../entities/direction";
+import { NumbersRange } from "../../entities/numbersRange";
 
 interface IProps
   extends Omit<INumbersRangeInputProps, "sizeLimits">,

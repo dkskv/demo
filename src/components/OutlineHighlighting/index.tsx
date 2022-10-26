@@ -1,6 +1,6 @@
 import React from "react";
 import { useTheme } from "../../decorators/theme";
-import { BoundingBox } from "../../utils/boundingBox";
+import { BoundingBox } from "../../entities/boundingBox";
 import { getBoxStyle } from "../../utils/styles";
 
 interface IProps {

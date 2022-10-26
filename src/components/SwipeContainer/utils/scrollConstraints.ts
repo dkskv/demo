@@ -1,4 +1,4 @@
-import { NumbersRange } from "../../../utils/numbersRange";
+import { NumbersRange } from "../../../entities/numbersRange";
 
 export class ScrollConstraints {
   constructor(

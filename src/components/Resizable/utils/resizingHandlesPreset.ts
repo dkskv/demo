@@ -1,5 +1,5 @@
 import { xprod } from "ramda";
-import { EBoxSide } from "../../../utils/boundingBox";
+import { EBoxSide } from "../../../entities/boundingBox";
 import { ResizingHandle } from "./resizingHandle";
 
 type IVerticalBoxSide = EBoxSide.left | EBoxSide.right;

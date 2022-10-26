@@ -1,5 +1,5 @@
-import { BoundingBox } from "./boundingBox";
-import { Point } from "./point";
+import { BoundingBox } from "../entities/boundingBox";
+import { Point } from "../entities/point";
 
 export function getPointOnPage(element: Element) {
   const { x, y } = element.getBoundingClientRect();

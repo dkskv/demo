@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { BoundingBox } from "../../utils/boundingBox";
+import { BoundingBox } from "../../entities/boundingBox";
 import { useResizeWithHandles } from "./hooks/useResizeWithHandles";
 import { getBoxStyle } from "../../utils/styles";
 import { Thumb } from "../Thumb";
 import { useDragBox } from "../DraggableBox/useDragBox";
 import { noop } from "../../utils/common";
-import { SizeLimits } from "../../utils/sizeLimits";
+import { SizeLimits } from "../../entities/sizeLimits";
 import { Draggable } from "../Draggable";
 import { OutlineHighlighting } from "../OutlineHighlighting";
 import { useActivityFlag } from "../../decorators/useActivityFlag";

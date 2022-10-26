@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { Size } from "../utils/size";
+import { Size } from "../entities/size";
 import { useCallbackRef } from "./useCallbackRef";
 import { useSize } from "./useSize";
 

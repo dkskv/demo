@@ -1,6 +1,6 @@
-import { BoundingBox } from "../../../utils/boundingBox";
-import { Point } from "../../../utils/point";
-import { SizeLimits } from "../../../utils/sizeLimits";
+import { BoundingBox } from "../../../entities/boundingBox";
+import { Point } from "../../../entities/point";
+import { SizeLimits } from "../../../entities/sizeLimits";
 
 interface IBoxConstraints {
   aspectRatio: number | null;

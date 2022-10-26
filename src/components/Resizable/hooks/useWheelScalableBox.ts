@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { BoundingBox } from "../../../utils/boundingBox";
+import { BoundingBox } from "../../../entities/boundingBox";
 import { useActualRef } from "../../../decorators/useActualRef";
 import {
   IScaleEvent,

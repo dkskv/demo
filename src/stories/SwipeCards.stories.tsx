@@ -2,11 +2,11 @@ import { ComponentStory } from "@storybook/react";
 import { times } from "ramda";
 import { SwipeContainer } from "../components/SwipeContainer";
 import { Space } from "../components/Space";
-import { Directions } from "../utils/direction";
+import { Directions } from "../entities/direction";
 import { centererStyle, getBoxStyle } from "../utils/styles";
 import { useCallback, useState } from "react";
-import { NumbersRange } from "../utils/numbersRange";
-import { BoundingBox } from "../utils/boundingBox";
+import { NumbersRange } from "../entities/numbersRange";
+import { BoundingBox } from "../entities/boundingBox";
 import { useTheme } from "../decorators/theme";
 
 export default {};

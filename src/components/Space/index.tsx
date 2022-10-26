@@ -1,5 +1,5 @@
 import { CSSProperties, forwardRef, ReactNode } from "react";
-import { IDirection, Directions } from "../../utils/direction";
+import { IDirection, Directions } from "../../entities/direction";
 
 interface IProps {
   direction?: IDirection;

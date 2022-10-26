@@ -6,7 +6,7 @@ import {
   getMouseOffsetPoint,
   IPressedKeys,
 } from "../utils/dom";
-import { Point } from "../utils/point";
+import { Point } from "../entities/point";
 
 export interface IScaleEvent {
   scalingK: number;

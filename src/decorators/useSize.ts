@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { getBoxByDomRect } from "../utils/dom";
-import { Size } from "../utils/size";
+import { Size } from "../entities/size";
 
 export function useSize(element: HTMLElement | null) {
   const [size, setSize] = useState(() => Size.nullish());

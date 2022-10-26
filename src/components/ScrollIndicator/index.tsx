@@ -1,6 +1,6 @@
 import { useTheme } from "../../decorators/theme";
-import { IDirection } from "../../utils/direction";
-import { NumbersRange } from "../../utils/numbersRange";
+import { IDirection } from "../../entities/direction";
+import { NumbersRange } from "../../entities/numbersRange";
 import { getBoxStyle } from "../../utils/styles";
 
 interface IProps {

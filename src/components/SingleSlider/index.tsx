@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { noop } from "../../utils/common";
-import { NumbersRange } from "../../utils/numbersRange";
-import { Directions } from "../../utils/direction";
+import { NumbersRange } from "../../entities/numbersRange";
+import { Directions } from "../../entities/direction";
 import { Slider, ISliderProps } from "../Slider";
 
 export interface ISingleSliderProps

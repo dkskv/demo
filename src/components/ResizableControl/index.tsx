@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
-import { BoundingBox } from "../../utils/boundingBox";
+import { BoundingBox } from "../../entities/boundingBox";
 import { noop } from "../../utils/common";
-import { SizeLimits } from "../../utils/sizeLimits";
+import { SizeLimits } from "../../entities/sizeLimits";
 import { Resizable, IResizableProps } from "../Resizable";
 import { IResizeCallback } from "../Resizable/index.types";
 

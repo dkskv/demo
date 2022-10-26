@@ -17,7 +17,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { BoundingBox } from "../utils/boundingBox";
+import { BoundingBox } from "../entities/boundingBox";
 import { noop } from "../utils/common";
 import { getBoxOnPage } from "../utils/dom";
 import { useCallbackRef } from "./useCallbackRef";

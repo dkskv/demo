@@ -2,7 +2,7 @@ import { prop, sortBy } from "ramda";
 import { useCallback, useMemo, useState } from "react";
 import { DndElement, useDndConnection } from "../../decorators/dndConnection";
 import { useActualRef } from "../../decorators/useActualRef";
-import { BoundingBox } from "../../utils/boundingBox";
+import { BoundingBox } from "../../entities/boundingBox";
 import { ISortableItem } from "./utils/sortable";
 import { getBoxStyle } from "../../utils/styles";
 import { DraggableBox } from "../DraggableBox";

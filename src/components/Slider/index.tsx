@@ -1,9 +1,9 @@
 import React, { useCallback } from "react";
-import { IDirection, Directions, EOrientation } from "../../utils/direction";
-import { NumbersRange } from "../../utils/numbersRange";
+import { IDirection, Directions, EOrientation } from "../../entities/direction";
+import { NumbersRange } from "../../entities/numbersRange";
 import { ResizableControl } from "../ResizableControl";
 import { noop } from "../../utils/common";
-import { SizeLimits } from "../../utils/sizeLimits";
+import { SizeLimits } from "../../entities/sizeLimits";
 import { centererStyle, getBoxStyle, stretchStyle } from "../../utils/styles";
 import { useTheme } from "../../decorators/theme";
 import { AutoSizer } from "../../decorators/autosizer";

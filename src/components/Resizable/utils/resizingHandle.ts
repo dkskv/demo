@@ -1,5 +1,5 @@
-import { BoundingBox } from "../../../utils/boundingBox";
-import { Point } from "../../../utils/point";
+import { BoundingBox } from "../../../entities/boundingBox";
+import { Point } from "../../../entities/point";
 
 // todo: подумать над названием
 /** Ручка, потянув за которую можно изменить размеры бокса (координаты ручки нормированы) */

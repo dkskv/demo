@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import { NumbersRange } from "../../utils/numbersRange";
-import { IDirection } from "../../utils/direction";
+import { NumbersRange } from "../../entities/numbersRange";
+import { IDirection } from "../../entities/direction";
 import { Space } from "../Space";
 
 export interface INumbersRangeInputProps {

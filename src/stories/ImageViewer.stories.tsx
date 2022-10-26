@@ -6,9 +6,9 @@ import { ResizableControl } from "../components/ResizableControl";
 import { ScalableImage } from "../components/ScalableImage";
 import { Space } from "../components/Space";
 import { useTheme } from "../decorators/theme";
-import { BoundingBox } from "../utils/boundingBox";
-import { NumbersRange } from "../utils/numbersRange";
-import { SizeLimits } from "../utils/sizeLimits";
+import { BoundingBox } from "../entities/boundingBox";
+import { NumbersRange } from "../entities/numbersRange";
+import { SizeLimits } from "../entities/sizeLimits";
 import { stretchStyle, getBoxStyle } from "../utils/styles";
 
 export default {};

@@ -1,6 +1,6 @@
 import React from "react";
 import { useCallbackRef } from "../../decorators/useCallbackRef";
-import { BoundingBox } from "../../utils/boundingBox";
+import { BoundingBox } from "../../entities/boundingBox";
 import { getBoxStyle } from "../../utils/styles";
 import { IDragBoxCallbacks } from "./index.types";
 import { useDragBox } from "./useDragBox";

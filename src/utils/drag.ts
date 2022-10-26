@@ -5,7 +5,7 @@ import {
   getMousePoint,
   IPressedKeys,
 } from "./dom";
-import { Point } from "./point";
+import { Point } from "../entities/point";
 
 export interface IDragEvent {
   point: Point;

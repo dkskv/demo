@@ -1,4 +1,4 @@
-import { IDirection } from "../../utils/direction";
+import { IDirection } from "../../entities/direction";
 
 export interface IPattern {
   /** Шаг между линиями, в % */

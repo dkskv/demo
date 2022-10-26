@@ -1,5 +1,5 @@
 import { zipWith } from "ramda";
-import { IDirection, Directions } from "../../utils/direction";
+import { IDirection, Directions } from "../../entities/direction";
 import { stretchStyle } from "../../utils/styles";
 import { createDef, getMarking, IPattern } from "./utils";
 

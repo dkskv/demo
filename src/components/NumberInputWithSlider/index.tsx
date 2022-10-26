@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useSmoothControl } from "../../decorators/useSmoothControl";
-import { Directions } from "../../utils/direction";
+import { Directions } from "../../entities/direction";
 import { SingleSlider, ISingleSliderProps } from "../SingleSlider";
 import { Space } from "../Space";
 

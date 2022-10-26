@@ -2,7 +2,7 @@ import React from "react";
 import { useCallbackRef } from "../../decorators/useCallbackRef";
 import { getPointStyle } from "../../utils/styles";
 import { IDragCallbacks } from "../../utils/drag";
-import { Point } from "../../utils/point";
+import { Point } from "../../entities/point";
 import { useDrag } from "./useDrag";
 
 interface IProps extends IDragCallbacks {

@@ -1,5 +1,5 @@
 import { IConverter } from "../../decorators/useSmoothControl";
-import { NumbersRange } from "../../utils/numbersRange";
+import { NumbersRange } from "../../entities/numbersRange";
 
 /** @param bounds Границы, в которых происходит нормирование */
 export const createConverter = (

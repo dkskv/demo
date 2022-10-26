@@ -1,8 +1,8 @@
 import { useEffect } from "react";
 import { useAnimationStage } from "../../../decorators/useAnimationStage";
 import { usePrevious } from "../../../decorators/usePrevious";
-import { BoundingBox } from "../../../utils/boundingBox";
-import { SizeLimits } from "../../../utils/sizeLimits";
+import { BoundingBox } from "../../../entities/boundingBox";
+import { SizeLimits } from "../../../entities/sizeLimits";
 import { wasConstrainedBySizeLimits } from "../utils/constraints";
 
 export function useHighlightingOnSizeLimit(

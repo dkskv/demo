@@ -5,7 +5,7 @@ import { constrainResizedBox } from "../utils/constraints";
 import { useActualRef } from "../../../decorators/useActualRef";
 import { IDragCallback, IDragEvent } from "../../../utils/drag";
 import { IResizeCallbacks, IResizableSettings } from "../index.types";
-import { BoundingBox } from "../../../utils/boundingBox";
+import { BoundingBox } from "../../../entities/boundingBox";
 
 interface IParams extends IResizeCallbacks, IResizableSettings {
   box: BoundingBox;

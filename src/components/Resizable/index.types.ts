@@ -1,6 +1,6 @@
-import { BoundingBox } from "../../utils/boundingBox";
+import { BoundingBox } from "../../entities/boundingBox";
 import { IPressedKeys } from "../../utils/dom";
-import { SizeLimits } from "../../utils/sizeLimits";
+import { SizeLimits } from "../../entities/sizeLimits";
 import { IResizeHandleKey } from "./utils/resizingHandlesPreset";
 
 export interface IResizeEvent {

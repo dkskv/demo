@@ -1,8 +1,8 @@
 import { ComponentStory } from "@storybook/react";
 import { useState } from "react";
 import { Space } from "../components/Space";
-import { NumbersRange } from "../utils/numbersRange";
-import { Directions } from "../utils/direction";
+import { NumbersRange } from "../entities/numbersRange";
+import { Directions } from "../entities/direction";
 import { Checkbox } from "../components/Checkbox";
 import { NumberInputWithSlider } from "../components/NumberInputWithSlider";
 import { NumberRangeInputWithSlider } from "../components/NumberRangeInputWithSlider";

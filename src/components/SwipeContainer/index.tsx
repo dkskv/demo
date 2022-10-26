@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCallbackRef } from "../../decorators/useCallbackRef";
-import { BoundingBox } from "../../utils/boundingBox";
-import { Directions, IDirection } from "../../utils/direction";
+import { BoundingBox } from "../../entities/boundingBox";
+import { Directions, IDirection } from "../../entities/direction";
 import { getBoxStyle } from "../../utils/styles";
 import { getBoxOnPage } from "../../utils/dom";
-import { NumbersRange } from "../../utils/numbersRange";
+import { NumbersRange } from "../../entities/numbersRange";
 import { useTheme } from "../../decorators/theme";
 import { ScrollIndicator } from "../ScrollIndicator";
 import { useDrag } from "../Draggable/useDrag";
