@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { Size } from "../entities/size";
 import { useCallbackRef } from "./useCallbackRef";
-import { useSize } from "./useSize";
+import { useElementSize } from "./useElementSize";
 
 interface IProps {
   children(size: Size): ReactNode;
@@ -15,7 +15,7 @@ export const AutoSizer: React.FC<IProps> = ({
   disableWidth = false,
 }) => {
   const [element, setElement] = useCallbackRef();
-  const size = useSize(element);
+  const size = useElementSize(element);
 
   return (
     <div

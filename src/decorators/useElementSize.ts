@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { mapDomRectToBox } from "../utils/dom";
 import { Size } from "../entities/size";
 
-export function useSize(element: HTMLElement | null) {
+export function useElementSize(element: HTMLElement | null) {
   const [size, setSize] = useState(() => Size.nullish());
 
   useEffect(() => {
