@@ -1,13 +1,12 @@
 import React from "react";
 import { useCallbackRef } from "../../decorators/useCallbackRef";
 import { getPointStyle } from "../../utils/styles";
-import { IDragCallback, IDragCallbacks } from "../../utils/drag";
+import { IDragCallbacks } from "../../utils/drag";
 import { Point } from "../../utils/point";
-import { useDrag } from "../../decorators/dnd";
+import { useDrag } from "./useDrag";
 
-interface IProps extends Partial<IDragCallbacks> {
+interface IProps extends IDragCallbacks {
   value: Point;
-  onChange: IDragCallback;
   /** Установить origin элемента в центр */
   isCentered?: boolean;
   style?: React.CSSProperties;

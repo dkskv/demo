@@ -14,16 +14,16 @@ export interface IDragCallback {
 }
 
 export interface IDragCallbacks {
-  onStart: IDragCallback;
   onChange: IDragCallback;
-  onEnd: IDragCallback;
+  onStart?: IDragCallback;
+  onEnd?: IDragCallback;
 }
 
 export class DragListener {
   /** Смещение точки захвата относительно origin элемента */
   private offset = Point.nullish;
 
-  private callbacks: IDragCallbacks = {
+  private callbacks: Required<IDragCallbacks> = {
     onStart: noop,
     onChange: noop,
     onEnd: noop,
@@ -36,7 +36,7 @@ export class DragListener {
   }
 
   public setCallbacks(callbacks: IDragCallbacks) {
-    this.callbacks = callbacks;
+    this.callbacks = { ...this.callbacks, ...callbacks };
   }
 
   public launch() {

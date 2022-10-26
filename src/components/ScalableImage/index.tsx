@@ -1,4 +1,4 @@
-import { useDrag } from "../../decorators/dnd";
+import { useDrag } from "../Draggable/useDrag";
 import { useBooleanState } from "../../decorators/useBooleanState";
 import { IScaleEvent, useScale } from "../../decorators/useScale";
 import { useCallbackRef } from "../../decorators/useCallbackRef";
@@ -52,6 +52,7 @@ export const ScalableImage: React.FC<IProps> = ({
   const isScaled = viewBox.dx < 1 || viewBox.dy < 1;
 
   const [isDrag, enableDragFlag, disableDragFlag] = useBooleanState(false);
+
   useDrag({
     element,
     onChange: isScaled ? handleDrag : noop,

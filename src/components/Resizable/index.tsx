@@ -7,7 +7,7 @@ import {
 } from "./utils/resizingHandlesPreset";
 import { getBoxStyle } from "../../utils/styles";
 import { Thumb } from "../Thumb";
-import { useDragBox } from "../../decorators/dnd";
+import { useDragBox } from "../DraggableBox/useDragBox";
 import { noop } from "../../utils/common";
 import { SizeLimits } from "../../utils/sizeLimits";
 import { Draggable } from "../Draggable";

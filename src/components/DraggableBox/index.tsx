@@ -2,8 +2,10 @@ import React from "react";
 import { useCallbackRef } from "../../decorators/useCallbackRef";
 import { BoundingBox } from "../../utils/boundingBox";
 import { getBoxStyle } from "../../utils/styles";
-import { IDragBoxParams, useDragBox } from "../../decorators/dnd";
-interface IProps extends Partial<IDragBoxParams> {
+import { IDragBoxCallbacks } from "./index.types";
+import { useDragBox } from "./useDragBox";
+
+interface IProps extends IDragBoxCallbacks {
   value: BoundingBox;
   style?: React.CSSProperties;
 }

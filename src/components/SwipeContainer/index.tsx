@@ -8,7 +8,7 @@ import { NumbersRange } from "../../utils/numbersRange";
 import { useTheme } from "../../decorators/theme";
 import { ScrollConstraints, ScrollingState } from "./utils";
 import { ScrollIndicator } from "../ScrollIndicator";
-import { useDrag } from "../../decorators/dnd";
+import { useDrag } from "../Draggable/useDrag";
 import { IDragEvent } from "../../utils/drag";
 
 interface IProps {
