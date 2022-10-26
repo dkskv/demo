@@ -21,7 +21,7 @@ export function useResizeWithHandles(params: IParams) {
   const aspectRatioRef = useRef<number | null>(null);
   const paramsRef = useActualRef(params);
 
-  const handleStart: IDragCallback = useCallback(
+  const handleItemStart: IDragCallback = useCallback(
     ({ pressedKeys }) => {
       const { box } = paramsRef.current;
       aspectRatioRef.current = box.aspectRatio;
@@ -30,7 +30,7 @@ export function useResizeWithHandles(params: IParams) {
     [paramsRef, onStart]
   );
 
-  const handleEnd: IDragCallback = useCallback(
+  const handleItemEnd: IDragCallback = useCallback(
     ({ pressedKeys }) => {
       const { box } = paramsRef.current;
       onEnd?.({ pressedKeys, box });
@@ -38,7 +38,7 @@ export function useResizeWithHandles(params: IParams) {
     [paramsRef, onEnd]
   );
 
-  const handleHandleDrag = useCallback(
+  const handleItemDrag = useCallback(
     (handle: ResizingHandle, event: IDragEvent) => {
       const { box, keepAspectRatio, sizeLimits, outerBox } = paramsRef.current;
       const { point, pressedKeys } = event;
@@ -66,16 +66,16 @@ export function useResizeWithHandles(params: IParams) {
 
   // Кнопки нужно располагать в одной системе координат с resizable-элементом
   return handlesKeys.map((key) => {
-    const resizingHandle = resizingHandlesPreset.get(key);
+    const handle = resizingHandlesPreset.get(key);
 
     return {
       key: String(key),
-      value: params.box.denormalizePoint(resizingHandle),
+      value: params.box.denormalizePoint(handle),
       onChange(event: IDragEvent) {
-        handleHandleDrag(resizingHandle, event);
+        handleItemDrag(handle, event);
       },
-      onStart: handleStart,
-      onEnd: handleEnd,
+      onStart: handleItemStart,
+      onEnd: handleItemEnd,
     } as const;
   });
 }
