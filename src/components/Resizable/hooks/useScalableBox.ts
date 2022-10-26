@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { BoundingBox } from "../../../utils/boundingBox";
 import { useActualRef } from "./../../../decorators/useActualRef";
 import { IScaleEvent, useScale } from "./../../../decorators/useScale";
-import { defineWheelScalingK, noop } from "./../../../utils/common";
+import { noop } from "./../../../utils/common";
 import { IResizeCallbacks, IResizeConstraints } from "./../index.types";
 import { constrainResizedBox } from "./../utils/constraints";
 
@@ -38,9 +38,9 @@ export function useScalableBox({
   );
 
   const handleScale = useCallback(
-    ({ pressedKeys, delta, origin }: IScaleEvent) => {
+    ({ pressedKeys, scalingK, origin }: IScaleEvent) => {
       const value = actualBox.current;
-      const scaledBox = value.scale(defineWheelScalingK(delta));
+      const scaledBox = value.scale(scalingK);
       const constraints = {
         aspectRatio: keepAspectRatio ? scaledBox.aspectRatio : null,
         outerBox,

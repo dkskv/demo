@@ -5,15 +5,20 @@ import { Grid } from "../components/Grid";
 import { Resizable } from "../components/Resizable";
 import { Space } from "../components/Space";
 import { BoundingBox } from "../utils/boundingBox";
-import { magnetize } from "../utils/common";
 import { NumbersRange } from "../utils/numbersRange";
 import { Directions } from "../utils/direction";
 import { getBoxStyle, stretchStyle } from "../utils/styles";
 import { SizeLimits } from "../utils/sizeLimits";
 import { useTheme } from "../decorators/theme";
 import { IResizeEvent } from "../components/Resizable/index.types";
+import { curryN } from "ramda";
 
 export default {};
+
+const magnetize = curryN(
+  2,
+  (step: number, n: number) => Math.round(n / step) * step
+);
 
 export const ResizableBox: ComponentStory<typeof Resizable> = () => {
   const gridStep = 20;

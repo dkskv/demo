@@ -1,10 +1,15 @@
 import { useCallback, useEffect, useRef } from "react";
-import { extractPressedKeys, IPressedKeys, noop } from "../utils/common";
-import { getBoxOnPage, getMouseOffsetPoint } from "../utils/dom";
+import { noop } from "../utils/common";
+import {
+  extractPressedKeys,
+  getBoxOnPage,
+  getMouseOffsetPoint,
+  IPressedKeys,
+} from "../utils/dom";
 import { Point } from "../utils/point";
 
 export interface IScaleEvent {
-  delta: number;
+  scalingK: number;
   origin: Point;
   pressedKeys: IPressedKeys;
 }
@@ -36,16 +41,20 @@ export function useScale(
       const pressedKeys = extractPressedKeys(wheelEvent);
 
       if (timerId.current === undefined) {
-        onStart({ delta: 0, origin, pressedKeys });
+        onStart({ scalingK: 0, origin, pressedKeys });
       }
 
-      onChange({ delta: wheelEvent.deltaY, origin, pressedKeys });
+      onChange({
+        scalingK: defineWheelScalingK(wheelEvent.deltaY),
+        origin,
+        pressedKeys,
+      });
 
       timerId.current && clearTimeout(timerId.current);
 
       timerId.current = setTimeout(() => {
         timerId.current = undefined;
-        onEnd({ delta: 0, origin, pressedKeys });
+        onEnd({ scalingK: 0, origin, pressedKeys });
       }, delayToEnd);
     },
     [onChange, onStart, onEnd, delayToEnd]
@@ -60,4 +69,8 @@ export function useScale(
       };
     }
   }, [element, handleChange]);
+}
+
+function defineWheelScalingK(wheelDeltaY: number, sensitivity = 0.001) {
+  return 1 + wheelDeltaY * sensitivity;
 }

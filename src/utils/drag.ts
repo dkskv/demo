@@ -1,5 +1,10 @@
-import { extractPressedKeys, IPressedKeys, noop } from "./common";
-import { getMouseOffsetPoint, getMousePoint } from "./dom";
+import { noop } from "./common";
+import {
+  extractPressedKeys,
+  getMouseOffsetPoint,
+  getMousePoint,
+  IPressedKeys,
+} from "./dom";
 import { Point } from "./point";
 
 export interface IDragEvent {

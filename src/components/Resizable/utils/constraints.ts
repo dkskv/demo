@@ -1,5 +1,4 @@
 import { BoundingBox } from "../../../utils/boundingBox";
-import { compareWithPrecision } from "../../../utils/common";
 import { Point } from "../../../utils/point";
 import { SizeLimits } from "../../../utils/sizeLimits";
 
@@ -67,5 +66,11 @@ export function wasConstrainedBySizeLimits(
   return (
     (!dxLimits.isEdge(sourceDx) && dxLimits.isEdge(constrainedDx)) ||
     (!dyLimits.isEdge(sourceDy) && dyLimits.isEdge(constrainedDy))
+  );
+}
+
+function compareWithPrecision(a: number, b: number, precision: number) {
+  return Math.sign(
+    Number(a.toPrecision(precision)) - Number(b.toPrecision(precision))
   );
 }

@@ -41,3 +41,17 @@ export function getMouseOffsetPoint(mouseEvent: MouseEvent): Point {
 export function getMousePoint(event: MouseEvent) {
   return new Point(event.clientX, event.clientY);
 }
+
+export interface IPressedKeys {
+  shiftKey: boolean;
+  altKey: boolean;
+  ctrlKey: boolean;
+}
+
+export function extractPressedKeys({
+  altKey,
+  shiftKey,
+  ctrlKey,
+}: MouseEvent): IPressedKeys {
+  return { altKey, shiftKey, ctrlKey };
+}

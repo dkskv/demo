@@ -1,5 +1,5 @@
 import { BoundingBox } from "../../utils/boundingBox";
-import { IPressedKeys } from "../../utils/common";
+import { IPressedKeys } from "../../utils/dom";
 import { SizeLimits } from "../../utils/sizeLimits";
 import { IResizeHandleKey } from "./utils/resizingHandlesPreset";
 
