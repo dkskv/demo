@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef } from "react";
 import { noop } from "../utils/common";
 import {
   extractPressedKeys,
-  getBoxOnPage,
+  getBoxOnViewport,
   getMouseOffsetPoint,
   IPressedKeys,
 } from "../utils/dom";
@@ -34,7 +34,7 @@ export function useWheelScaling(
       wheelEvent.stopPropagation();
       wheelEvent.preventDefault();
 
-      const targetBox = getBoxOnPage(wheelEvent.currentTarget as Element);
+      const targetBox = getBoxOnViewport(wheelEvent.currentTarget as Element);
       const offsetPoint = getMouseOffsetPoint(wheelEvent);
 
       const origin = targetBox.resetOrigin().normalizePoint(offsetPoint);

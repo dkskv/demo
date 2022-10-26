@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getBoxByDomRect } from "../utils/dom";
+import { mapDomRectToBox } from "../utils/dom";
 import { Size } from "../entities/size";
 
 export function useSize(element: HTMLElement | null) {
@@ -11,7 +11,7 @@ export function useSize(element: HTMLElement | null) {
         const rect = entries[0]?.contentRect;
 
         if (rect) {
-          setSize(getBoxByDomRect(rect).size);
+          setSize(mapDomRectToBox(rect).size);
         }
       });
 

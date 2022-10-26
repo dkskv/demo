@@ -1,7 +1,7 @@
 import { identity, mapObjIndexed } from "ramda";
 import { useCallback, useEffect, useMemo } from "react";
 import { noop } from "../../utils/common";
-import { getPointOnPage } from "../../utils/dom";
+import { getPointOnViewport } from "../../utils/dom";
 import { DragListener, IDragCallback, IDragCallbacks } from "../../utils/drag";
 import { IDragSettings } from "./index.types";
 
@@ -27,7 +27,7 @@ export function useDrag({
           return;
         }
 
-        const offset = getPointOnPage(offsetParent);
+        const offset = getPointOnViewport(offsetParent);
         dndCallback({ ...event, point: event.point.subtract(offset) });
       },
     []

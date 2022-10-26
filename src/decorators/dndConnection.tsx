@@ -19,7 +19,7 @@ import {
 } from "react";
 import { BoundingBox } from "../entities/boundingBox";
 import { noop } from "../utils/common";
-import { getBoxOnPage } from "../utils/dom";
+import { getBoxOnViewport } from "../utils/dom";
 import { useCallbackRef } from "./useCallbackRef";
 
 /** Подписка на входящие элементы. Callback'и возвращают разрешение на вход */
@@ -46,14 +46,14 @@ interface IDndContainer extends IInputConnection {
 
 function isContainerOverlapWith(box: BoundingBox) {
   return ({ element }: IDndContainer) =>
-    getBoxOnPage(element).intersectionArea(box) > 0;
+    getBoxOnViewport(element).intersectionArea(box) > 0;
 }
 
 export class DndElement {
   constructor(public key: string, public box: BoundingBox) {}
 
   placeRelative({ element }: IDndContainer) {
-    return this.replaceBox(getBoxOnPage(element).placeInside(this.box));
+    return this.replaceBox(getBoxOnViewport(element).placeInside(this.box));
   }
 
   replaceBox(box: BoundingBox) {
@@ -136,7 +136,7 @@ export const DndConnector: React.FC = ({ children }) => {
         );
       }
 
-      const itemBoxOnViewport = getBoxOnPage(
+      const itemBoxOnViewport = getBoxOnViewport(
         sourceContainer.element
       ).placeOutside(item.box);
 

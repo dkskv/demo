@@ -1,13 +1,13 @@
 import { BoundingBox } from "../entities/boundingBox";
 import { Point } from "../entities/point";
 
-export function getPointOnPage(element: Element) {
+export function getPointOnViewport(element: Element) {
   const { x, y } = element.getBoundingClientRect();
   return new Point(x, y);
 }
 
-export function getOriginOnPage(element: Element) {
-  return getPointOnPage(element).subtract(getOriginOffset(element));
+export function getOriginOnViewport(element: Element) {
+  return getPointOnViewport(element).subtract(getOriginOffset(element));
 }
 
 /** Положение origin внутри элемента */
@@ -17,23 +17,23 @@ function getOriginOffset(element: Element) {
   return new Point(translateX, translateY);
 }
 
-export function getBoxByDomRect({ x, y, width, height }: DOMRect) {
+export function mapDomRectToBox({ x, y, width, height }: DOMRect) {
   return BoundingBox.byDeltas(x, y, width, height);
 }
 
-export function getBoxOnPage(element: Element) {
-  return getBoxByDomRect(element.getBoundingClientRect());
+export function getBoxOnViewport(element: Element) {
+  return mapDomRectToBox(element.getBoundingClientRect());
 }
 
 export function getOffsetBox({ offsetParent }: HTMLElement) {
   return offsetParent
-    ? getBoxOnPage(offsetParent).resetOrigin()
+    ? getBoxOnViewport(offsetParent).resetOrigin()
     : BoundingBox.infinite();
 }
 
 /** Получить координаты мыши внутри `currentTarget` */
 export function getMouseOffsetPoint(mouseEvent: MouseEvent): Point {
-  const targetOrigin = getOriginOnPage(mouseEvent.currentTarget as Element);
+  const targetOrigin = getOriginOnViewport(mouseEvent.currentTarget as Element);
   return getMousePoint(mouseEvent).subtract(targetOrigin);
 }
 

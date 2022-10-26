@@ -53,13 +53,13 @@ export class DragListener {
     return () => this.dispose();
   }
 
-  private addActiveElementListeners() {
+  private startListeners() {
     document.addEventListener("mousemove", this.handleMove);
     document.addEventListener("mouseup", this.handleEnd, { once: true });
     document.addEventListener("mouseleave", this.handleEnd, { once: true });
   }
 
-  protected removeActiveElementListeners() {
+  protected stopListeners() {
     document.removeEventListener("mousemove", this.handleMove);
     document.removeEventListener("mouseup", this.handleEnd);
     document.removeEventListener("mouseleave", this.handleEnd);
@@ -70,7 +70,7 @@ export class DragListener {
       "mousedown",
       this.handleStart as (e: Event) => void
     );
-    this.removeActiveElementListeners();
+    this.stopListeners();
   }
 
   private handleStart(mouseEvent: MouseEvent) {
@@ -79,7 +79,7 @@ export class DragListener {
 
     this.offset = getMouseOffsetPoint(mouseEvent);
     this.callbacks.onStart(this.mapEvent(mouseEvent));
-    this.addActiveElementListeners();
+    this.startListeners();
   }
 
   private handleMove(mouseEvent: MouseEvent) {
@@ -88,7 +88,7 @@ export class DragListener {
 
   private handleEnd(mouseEvent: MouseEvent) {
     this.callbacks.onEnd(this.mapEvent(mouseEvent));
-    this.removeActiveElementListeners();
+    this.stopListeners();
   }
 
   private mapEvent(mouseEvent: MouseEvent): IDragEvent {

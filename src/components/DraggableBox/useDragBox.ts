@@ -2,7 +2,7 @@ import { mapObjIndexed } from "ramda";
 import { useCallback } from "react";
 import { useActualRef } from "../../decorators/useActualRef";
 import { noop } from "../../utils/common";
-import { getBoxOnPage } from "../../utils/dom";
+import { getBoxOnViewport } from "../../utils/dom";
 import { IDragCallback } from "../../utils/drag";
 import { useDrag } from "../Draggable/useDrag";
 import {
@@ -27,7 +27,7 @@ export function useDragBox({
     (dndCallback: IDragBoxCallback): IDragCallback =>
       (event) => {
         const { outerBox } = paramsRef.current;
-        const box = getBoxOnPage(event.element).moveTo(event.point);
+        const box = getBoxOnViewport(event.element).moveTo(event.point);
 
         dndCallback({
           ...event,

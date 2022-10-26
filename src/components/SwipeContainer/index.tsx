@@ -3,7 +3,7 @@ import { useCallbackRef } from "../../decorators/useCallbackRef";
 import { BoundingBox } from "../../entities/boundingBox";
 import { Directions, IDirection } from "../../entities/direction";
 import { getBoxStyle } from "../../utils/styles";
-import { getBoxOnPage } from "../../utils/dom";
+import { getBoxOnViewport } from "../../utils/dom";
 import { NumbersRange } from "../../entities/numbersRange";
 import { useTheme } from "../../decorators/theme";
 import { ScrollIndicator } from "../ScrollIndicator";
@@ -33,7 +33,7 @@ export const SwipeContainer: React.FC<IProps> = ({
     const content = element?.childNodes?.[0];
 
     if (content instanceof HTMLElement) {
-      const contentBox = getBoxOnPage(content);
+      const contentBox = getBoxOnViewport(content);
       setContentLength(direction.length(contentBox.size));
     }
   }, [element, direction]);
