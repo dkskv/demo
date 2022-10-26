@@ -1,18 +1,18 @@
 import { CSSProperties } from "react";
 import { BoundingBox } from "./boundingBox";
-import { EBoxLength, EBoxSide } from "./boxParams";
+import { EBoxSide } from "./boxParams";
 import { NumbersRange } from "./numbersRange";
 import { Point } from "./point";
 import { Size } from "./size";
 
-export const enum EDirection {
+export const enum EOrientation {
   horizontal = "horizontal",
   vertical = "vertical",
 }
 
 /** Интерфейс для работы компонентов в разных направлениях */
 export interface IDirection {
-  key: EDirection;
+  orientation: EOrientation;
   length(size: Size): number;
   thickness(size: Size): number;
   /** Возвращает диапазоны (параллельный и перпендикулярный) из переданного бокса */
@@ -22,14 +22,13 @@ export interface IDirection {
     parallelRange: NumbersRange,
     normalRange: NumbersRange
   ): BoundingBox;
-  /** Возвращает координаты (параллельную и перпендикулярную) из переданного бокса */
+  /** Возвращает координаты (параллельную и перпендикулярную) из переданной точки */
   coordinatesOfPoint(p: Point): [number, number];
   /** Строит точку из заданных координат (параллельной и перпендикулярной) */
   pointOfCoordinates(
     parallelCoordinate: number,
     normalCoordinate: number
   ): Point;
-  lengthKey: EBoxLength;
   /** Стороны бокса, перпендикулярные оси направления */
   sides: readonly [EBoxSide, EBoxSide];
   cssKeys: {
@@ -54,7 +53,7 @@ export interface IDirection {
 
 export namespace Directions {
   export const horizontal: IDirection = {
-    key: EDirection.horizontal,
+    orientation: EOrientation.horizontal,
     length({ width }: Size) {
       return width;
     },
@@ -73,7 +72,6 @@ export namespace Directions {
     pointOfCoordinates(x: number, y: number) {
       return new Point(x, y);
     },
-    lengthKey: EBoxLength.width,
     sides: [EBoxSide.left, EBoxSide.right],
     cssKeys: {
       length: "width",
@@ -98,7 +96,7 @@ export namespace Directions {
   };
 
   export const vertical: IDirection = {
-    key: EDirection.vertical,
+    orientation: EOrientation.vertical,
     length({ height }: Size) {
       return height;
     },
@@ -117,7 +115,6 @@ export namespace Directions {
     pointOfCoordinates(y: number, x: number) {
       return new Point(x, y);
     },
-    lengthKey: EBoxLength.height,
     sides: [EBoxSide.top, EBoxSide.bottom],
     cssKeys: {
       length: "height",

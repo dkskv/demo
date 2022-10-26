@@ -18,10 +18,6 @@ interface IProps {
   direction?: IDirection;
 }
 
-function getBoxLength(box: BoundingBox, direction: IDirection) {
-  return direction.rangesOfBox(box)[0].size;
-}
-
 export const SwipeContainer: React.FC<IProps> = ({
   box,
   children,
@@ -38,7 +34,7 @@ export const SwipeContainer: React.FC<IProps> = ({
 
     if (content instanceof HTMLElement) {
       const contentBox = getBoxOnPage(content);
-      setContentLength(getBoxLength(contentBox, direction));
+      setContentLength(direction.length(contentBox.size));
     }
   }, [element, direction]);
 
@@ -46,10 +42,8 @@ export const SwipeContainer: React.FC<IProps> = ({
     setScrollingState((state) => state.reset());
   }, [direction]);
 
-  const maxCoordinate = Math.max(
-    0,
-    contentLength - getBoxLength(box, direction)
-  );
+  const containerLength = direction.length(box.size);
+  const maxCoordinate = Math.max(0, contentLength - containerLength);
 
   const scrollingConstraints = useMemo(
     () => new ScrollConstraints(maxCoordinate, 100),
@@ -122,7 +116,6 @@ export const SwipeContainer: React.FC<IProps> = ({
     onEnd: handleDragEnd,
   });
 
-  const containerLength = getBoxLength(box, direction);
   const viewPort = NumbersRange.byDelta(
     scrollingState.coordinate,
     containerLength

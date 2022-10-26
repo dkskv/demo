@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { IDirection, Directions, EDirection } from "../../utils/direction";
+import { IDirection, Directions, EOrientation } from "../../utils/direction";
 import { NumbersRange } from "../../utils/numbersRange";
 import { ResizableControl } from "../ResizableControl";
 import { noop } from "../../utils/common";
@@ -14,7 +14,7 @@ interface ISliderCallback {
 }
 
 export interface ISliderProps {
-  /** Нормированный диапазон (в пределах от 0 до 1) */
+  /** Нормированный диапазон (от 0 до 1) */
   value: NumbersRange;
   onChange: ISliderCallback;
   onStart?: ISliderCallback;
@@ -27,11 +27,6 @@ export interface ISliderProps {
   handlesKeys?: [0] | [1] | [0, 1];
 
   sizeLimits?: NumbersRange;
-}
-
-function getDirectedSizeBounds(bounds: NumbersRange, direction: IDirection) {
-  const boxOfBounds = direction.boxFromRanges(bounds, NumbersRange.infinite());
-  return new SizeLimits(boxOfBounds.xsRange, boxOfBounds.ysRange);
 }
 
 export const Slider: React.FC<ISliderProps> = ({
@@ -65,11 +60,12 @@ export const Slider: React.FC<ISliderProps> = ({
   }
 
   const theme = useTheme();
+  const { orientation } = direction;
 
   return (
     <AutoSizer
-      disableHeight={direction.key === EDirection.horizontal}
-      disableWidth={direction.key === EDirection.vertical}
+      disableHeight={orientation === EOrientation.horizontal}
+      disableWidth={orientation === EOrientation.vertical}
     >
       {(size) => {
         const outerBox = direction.boxFromRanges(
@@ -95,7 +91,7 @@ export const Slider: React.FC<ISliderProps> = ({
               onChange={handleChange}
               onStart={handleStart}
               onEnd={handleEnd}
-              sizeLimits={getDirectedSizeBounds(sizeLimits, direction)}
+              sizeLimits={directSizeBounds(sizeLimits, direction)}
               handlesKeys={direction.sides.filter((_, i) =>
                 (handlesKeys as number[]).includes(i)
               )}
@@ -118,6 +114,11 @@ export const Slider: React.FC<ISliderProps> = ({
     </AutoSizer>
   );
 };
+
+function directSizeBounds(bounds: NumbersRange, direction: IDirection) {
+  const boxOfBounds = direction.boxFromRanges(bounds, NumbersRange.infinite());
+  return new SizeLimits(boxOfBounds.xsRange, boxOfBounds.ysRange);
+}
 
 function directRange(range: NumbersRange, direction: IDirection) {
   return direction.isReversed ? range.map((a) => 1 - a).invert() : range;
