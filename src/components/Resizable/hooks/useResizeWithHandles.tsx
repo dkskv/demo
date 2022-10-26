@@ -1,22 +1,23 @@
 import { useCallback, useRef } from "react";
-import { ResizingHandle } from "./../utils/resizingHandle";
-import {
-  IResizeHandleKey,
-  resizingHandlesPreset,
-} from "./../utils/resizingHandlesPreset";
-import { constrainResizedBox } from "./../utils/constraints";
-import { useActualRef } from "./../../../decorators/useActualRef";
-import { IDragCallback, IDragEvent } from "./../../../utils/drag";
-import { IResizeCallbacks, IResizeConstrains } from "./../index.types";
+import { ResizingHandle } from "../utils/resizingHandle";
+import { resizingHandlesPreset } from "../utils/resizingHandlesPreset";
+import { constrainResizedBox } from "../utils/constraints";
+import { useActualRef } from "../../../decorators/useActualRef";
+import { IDragCallback, IDragEvent } from "../../../utils/drag";
+import { IResizeCallbacks, IResizableSettings } from "../index.types";
 import { BoundingBox } from "../../../utils/boundingBox";
 
-interface IParams extends IResizeCallbacks, IResizeConstrains {
+interface IParams extends IResizeCallbacks, IResizableSettings {
   box: BoundingBox;
-  handlesKeys: readonly IResizeHandleKey[];
 }
 
-export function useResize(params: IParams) {
-  const { onChange, onStart, onEnd, handlesKeys } = params;
+export function useResizeWithHandles(params: IParams) {
+  const {
+    onChange,
+    onStart,
+    onEnd,
+    handlesKeys = resizingHandlesPreset.all,
+  } = params;
   const aspectRatioRef = useRef<number | null>(null);
   const paramsRef = useActualRef(params);
 

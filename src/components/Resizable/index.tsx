@@ -1,10 +1,6 @@
 import React, { useState } from "react";
 import { BoundingBox } from "../../utils/boundingBox";
-import { useResize } from "./hooks/useResize";
-import {
-  IResizeHandleKey,
-  resizingHandlesPreset,
-} from "./utils/resizingHandlesPreset";
+import { useResizeWithHandles } from "./hooks/useResizeWithHandles";
 import { getBoxStyle } from "../../utils/styles";
 import { Thumb } from "../Thumb";
 import { useDragBox } from "../DraggableBox/useDragBox";
@@ -15,16 +11,14 @@ import { OutlineHighlighting } from "../OutlineHighlighting";
 import { useActivityFlag } from "../../decorators/useActivityFlag";
 import { useScalableBox } from "./hooks/useScalableBox";
 import { useHighlightingOnSizeLimit } from "./hooks/useHighlightingOnSizeLimit";
-import { IResizeCallbacks, IResizeConstrains } from "./index.types";
+import { IResizeCallbacks, IResizableSettings } from "./index.types";
 
 export interface IResizableProps
   extends IResizeCallbacks,
-    Partial<IResizeConstrains> {
+    Partial<IResizableSettings> {
   value: BoundingBox;
   isDraggable?: boolean;
   isScalableByWheel?: boolean;
-  /** Ключи отображаемых кнопок, за которые производится resize  */
-  handlesKeys?: readonly IResizeHandleKey[];
 }
 
 export const Resizable: React.FC<IResizableProps> = ({
@@ -35,7 +29,7 @@ export const Resizable: React.FC<IResizableProps> = ({
   sizeLimits = new SizeLimits(),
   outerBox = BoundingBox.infinite(),
   keepAspectRatio = false,
-  handlesKeys = resizingHandlesPreset.all,
+  handlesKeys,
   isDraggable = true,
   isScalableByWheel = true,
   children,
@@ -60,7 +54,7 @@ export const Resizable: React.FC<IResizableProps> = ({
     ...edgeCallbacks,
   });
 
-  const handlesProps = useResize({
+  const handlesProps = useResizeWithHandles({
     box: value,
     onChange,
     sizeLimits,
