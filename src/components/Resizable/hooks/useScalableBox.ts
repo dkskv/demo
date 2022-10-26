@@ -3,10 +3,10 @@ import { BoundingBox } from "../../../utils/boundingBox";
 import { useActualRef } from "./../../../decorators/useActualRef";
 import { IScaleEvent, useScale } from "./../../../decorators/useScale";
 import { defineWheelScalingK, noop } from "./../../../utils/common";
-import { IResizeCallbacks, IResizeConstrains } from "./../index.types";
+import { IResizeCallbacks, IResizeConstraints } from "./../index.types";
 import { constrainResizedBox } from "./../utils/constraints";
 
-interface IParams extends IResizeCallbacks, IResizeConstrains {
+interface IParams extends IResizeCallbacks, IResizeConstraints {
   box: BoundingBox;
   element: Element | null;
 }
@@ -41,7 +41,7 @@ export function useScalableBox({
     ({ pressedKeys, delta, origin }: IScaleEvent) => {
       const value = actualBox.current;
       const scaledBox = value.scale(defineWheelScalingK(delta));
-      const constrains = {
+      const constraints = {
         aspectRatio: keepAspectRatio ? scaledBox.aspectRatio : null,
         outerBox,
         sizeLimits,
@@ -50,7 +50,7 @@ export function useScalableBox({
       const nextBox = constrainResizedBox(
         scaledBox,
         { sourceBox: value, transformOrigin: origin },
-        constrains
+        constraints
       );
 
       onChange({ box: nextBox, pressedKeys });
