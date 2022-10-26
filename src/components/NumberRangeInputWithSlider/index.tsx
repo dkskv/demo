@@ -53,7 +53,7 @@ export const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
     >
       <Slider
         {...sliderCallbacks}
-        value={isSmoothSlider ? smoothValue : converter.fromDestination(value)}
+        value={isSmoothSlider ? smoothValue : converter.normalize(value)}
         sizeLimits={sizeLimits.map((n) => n / bounds.size)}
         direction={direction}
         thickness={thickness}

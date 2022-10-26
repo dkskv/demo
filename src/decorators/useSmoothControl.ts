@@ -1,35 +1,39 @@
 import { equals } from "ramda";
 import { useCallback, useEffect, useState } from "react";
-import { IConverter } from "../utils/converter";
 import { useActualRef } from "./useActualRef";
 
-interface IParams<ControlValue, Value> {
-  /** Целевое значение */
-  value: Value;
-  /** Callback на изменение целевого значения */
-  onChange(value: Value): void;
-  /** Конвертер из альтернативного значения в целевое */
-  converter: IConverter<ControlValue, Value>;
+export interface IConverter<TOriginalValue, TSmoothValue> {
+  normalize(x: TOriginalValue): TSmoothValue;
+  denormalize(a: TSmoothValue): TOriginalValue;
+}
+
+interface IParams<TOriginalValue, TSmoothValue> {
+  /** Оригинальное значение */
+  value: TOriginalValue;
+  /** Callback на изменение оригинального значения */
+  onChange(value: TOriginalValue): void;
+  /** Конвертер между оригинальным значением и `smooth` значением */
+  converter: IConverter<TOriginalValue, TSmoothValue>;
 }
 
 /** Использовать более плавный способ управлять значением */
-export function useSmoothControl<ControlValue, Value>({
-  value: externalValue,
+export function useSmoothControl<TOriginalValue, TSmoothValue>({
+  value: originalValue,
   onChange,
   converter,
-}: IParams<ControlValue, Value>) {
+}: IParams<TOriginalValue, TSmoothValue>) {
   const [isActive, setIsActive] = useState(false);
-  const [selfValue, setSelfValue] = useState(() =>
-    converter.fromDestination(externalValue)
+  const [smoothValue, setSmoothValue] = useState(() =>
+    converter.normalize(originalValue)
   );
-  const actualExternalValue = useActualRef(externalValue);
+  const actualExternalValue = useActualRef(originalValue);
 
   const handleControlChange = useCallback(
-    (nextSelfValue: ControlValue) => {
+    (nextSmoothValue: TSmoothValue) => {
       setIsActive(true);
-      setSelfValue(nextSelfValue);
+      setSmoothValue(nextSmoothValue);
 
-      const outputValue = converter.toDestination(nextSelfValue);
+      const outputValue = converter.denormalize(nextSmoothValue);
 
       if (!equals(actualExternalValue.current, outputValue)) {
         onChange(outputValue);
@@ -45,12 +49,12 @@ export function useSmoothControl<ControlValue, Value>({
   /** Эффект сброса значения из state, если оно не соответствует значению из props */
   useEffect(() => {
     if (!isActive) {
-      setSelfValue(converter.fromDestination(externalValue));
+      setSmoothValue(converter.normalize(originalValue));
     }
-  }, [isActive, externalValue, converter]);
+  }, [isActive, originalValue, converter]);
 
   return {
-    smoothValue: selfValue,
+    smoothValue,
     onChange: handleControlChange,
     onEnd: handleControlEnd,
   } as const;

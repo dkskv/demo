@@ -19,11 +19,11 @@ export const NumberInputWithSlider: React.FC<IProps> = ({
 }) => {
   const converter = useMemo(
     () => ({
-      toDestination(n: number) {
-        return Math.round(n * max);
-      },
-      fromDestination(n: number) {
+      normalize(n: number) {
         return n / max;
+      },
+      denormalize(n: number) {
+        return Math.round(n * max);
       },
     }),
     [max]
@@ -46,7 +46,7 @@ export const NumberInputWithSlider: React.FC<IProps> = ({
     <Space size={20} direction={direction} align="center">
       <SingleSlider
         {...sliderCallbacks}
-        value={isSmoothSlider ? smoothValue : converter.fromDestination(value)}
+        value={isSmoothSlider ? smoothValue : converter.normalize(value)}
         direction={direction}
         thickness={thickness}
       />
