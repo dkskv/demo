@@ -1,5 +1,5 @@
 import { minBy } from "ramda";
-import { NumbersRange } from "../../utils/numbersRange";
+import { ScrollConstraints } from "./scrollConstraints";
 
 export class ScrollingState {
   private readonly friction = 0.03;
@@ -14,6 +14,11 @@ export class ScrollingState {
       this.impulse = 0;
       this.coordinate = constraints.overflowBounds.clampNumber(coordinate);
     }
+  }
+
+  private get velocity() {
+    const mass = 1;
+    return this.impulse / mass;
   }
 
   public reset() {
@@ -64,9 +69,8 @@ export class ScrollingState {
   }
 
   public moveByImpulse() {
-    const velocity = this.impulse / 1;
     return new ScrollingState(
-      this.coordinate + velocity,
+      this.coordinate + this.velocity,
       this.constraints,
       this.impulse
     );
@@ -115,31 +119,5 @@ export class ScrollingState {
         ? -this.extrusion
         : 0)
     );
-  }
-}
-
-export class ScrollConstraints {
-  constructor(
-    private scrollLength: number,
-    private extrusionZoneLength: number
-  ) {}
-
-  public get bounds() {
-    return NumbersRange.byOnlyDelta(this.scrollLength);
-  }
-
-  public get overflowBounds() {
-    return this.bounds.expandEvenly(this.extrusionZoneLength);
-  }
-
-  public get startExtrusionZone() {
-    return NumbersRange.byDelta(
-      -this.extrusionZoneLength,
-      this.extrusionZoneLength
-    );
-  }
-
-  public get endExtrusionZone() {
-    return NumbersRange.byDelta(this.scrollLength, this.extrusionZoneLength);
   }
 }

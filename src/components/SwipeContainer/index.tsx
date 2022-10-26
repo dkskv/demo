@@ -6,10 +6,11 @@ import { getBoxStyle } from "../../utils/styles";
 import { getBoxOnPage } from "../../utils/dom";
 import { NumbersRange } from "../../utils/numbersRange";
 import { useTheme } from "../../decorators/theme";
-import { ScrollConstraints, ScrollingState } from "./utils";
 import { ScrollIndicator } from "../ScrollIndicator";
 import { useDrag } from "../Draggable/useDrag";
 import { IDragEvent } from "../../utils/drag";
+import { ScrollConstraints } from "./utils/scrollConstraints";
+import { ScrollingState } from "./utils/scrollingState";
 
 interface IProps {
   box: BoundingBox;
@@ -122,6 +123,10 @@ export const SwipeContainer: React.FC<IProps> = ({
   });
 
   const containerLength = getBoxLength(box, direction);
+  const viewPort = NumbersRange.byDelta(
+    scrollingState.coordinate,
+    containerLength
+  );
 
   const theme = useTheme();
 
@@ -160,10 +165,7 @@ export const SwipeContainer: React.FC<IProps> = ({
           direction={direction}
           length={containerLength}
           thickness={5}
-          viewPort={NumbersRange.byDelta(
-            scrollingState.coordinate / contentLength,
-            containerLength / contentLength
-          )}
+          viewPort={viewPort.map((n) => n / contentLength)}
         />
       </div>
     </div>
