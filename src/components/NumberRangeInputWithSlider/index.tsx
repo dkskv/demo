@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { CSSProperties, useMemo } from "react";
 import {
   NumbersRangeInput,
   INumbersRangeInputProps,
@@ -17,6 +17,7 @@ interface IProps
   isSmoothSlider?: boolean;
   rangeMinSize?: number;
   rangeMaxSize?: number;
+  inputStyle?: CSSProperties;
 }
 
 export const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
@@ -29,6 +30,7 @@ export const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
     thickness,
     rangeMinSize,
     rangeMaxSize = Infinity,
+    inputStyle,
   } = props;
   const converter = useMemo(() => createConverter(bounds), [bounds]);
 
@@ -50,6 +52,7 @@ export const NumberRangeInputWithSlider: React.FC<IProps> = (props) => {
       bounds={bounds}
       direction={direction}
       sizeLimits={sizeLimits}
+      inputStyle={inputStyle}
     >
       <Slider
         {...sliderCallbacks}

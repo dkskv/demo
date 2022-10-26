@@ -28,6 +28,7 @@ export const Sliders: ComponentStory<any> = () => {
     thickness: 12,
     isSmoothSlider: isSmooth,
     direction,
+    inputStyle: { width: 50, flexShrink: 0 } as const,
   };
 
   return (

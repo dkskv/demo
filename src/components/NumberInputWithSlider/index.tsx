@@ -1,12 +1,14 @@
-import { useCallback, useMemo } from "react";
+import { CSSProperties, useMemo } from "react";
 import { useSmoothControl } from "../../decorators/useSmoothControl";
 import { Directions } from "../../entities/direction";
+import { InputNumber } from "../InputNumber";
 import { SingleSlider, ISingleSliderProps } from "../SingleSlider";
 import { Space } from "../Space";
 
 interface IProps extends ISingleSliderProps {
   max: number;
   isSmoothSlider?: boolean;
+  inputStyle?: CSSProperties;
 }
 
 export const NumberInputWithSlider: React.FC<IProps> = ({
@@ -16,6 +18,7 @@ export const NumberInputWithSlider: React.FC<IProps> = ({
   isSmoothSlider = false,
   direction = Directions.horizontal,
   thickness,
+  inputStyle,
 }) => {
   const converter = useMemo(
     () => ({
@@ -35,13 +38,6 @@ export const NumberInputWithSlider: React.FC<IProps> = ({
     converter,
   });
 
-  const handleInputChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      onChange(Number(event.target.value));
-    },
-    [onChange]
-  );
-
   return (
     <Space size={20} direction={direction} align="center">
       <SingleSlider
@@ -50,12 +46,12 @@ export const NumberInputWithSlider: React.FC<IProps> = ({
         direction={direction}
         thickness={thickness}
       />
-      <input
-        type="number"
-        onChange={handleInputChange}
+      <InputNumber
+        onChange={onChange}
         value={value}
         min={0}
         max={max}
+        style={inputStyle}
       />
     </Space>
   );
