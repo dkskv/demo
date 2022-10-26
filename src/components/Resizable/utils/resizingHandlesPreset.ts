@@ -1,5 +1,4 @@
 import { xprod } from "ramda";
-import { Point } from "../../../utils/point";
 import { EBoxSide } from "../../../utils/boundingBox";
 import { ResizingHandle } from "./resizingHandle";
 
@@ -16,7 +15,6 @@ class ResizingHandlesPreset {
     this.get = this.get.bind(this);
   }
 
-  // todo: наверное, лучше всегда держать в памяти
   get all() {
     return [...this.edges, ...this.corners] as const;
   }
@@ -39,32 +37,29 @@ class ResizingHandlesPreset {
     return [EBoxSide.left, EBoxSide.right] as const;
   }
 
-  get(key: IResizeHandleKey) {
-    const { x, y } = this.isCorner(key)
-      ? this.getCornerPoint(key)
-      : this.getEdgePoint(key);
+  get(key: IResizeHandleKey): ResizingHandle {
+    return this.isCorner(key)
+      ? this.getCornerHandle(key)
+      : this.getEdgeHandle(key);
+  }
 
+  private getCornerHandle(key: ICornerHandleKey) {
+    const edgeKeys = key.split("-") as [IVerticalBoxSide, IHorizontalBoxSide];
+    const [p1, p2] = edgeKeys.map(this.getEdgeHandle);
+    const { x, y } = p1.mul(p2).map(Math.round);
     return new ResizingHandle(x, y);
   }
 
-  private getCornerPoint(key: ICornerHandleKey): Point {
-    const [p1, p2] = (
-      key.split("-") as [IVerticalBoxSide, IHorizontalBoxSide]
-    ).map(this.getEdgePoint);
-
-    return p1.mul(p2).map(Math.round);
-  }
-
-  private getEdgePoint(key: IEdgeHandleKey): Point {
+  private getEdgeHandle(key: IEdgeHandleKey) {
     switch (key) {
       case EBoxSide.left:
-        return new Point(0, 0.5);
+        return new ResizingHandle(0, 0.5);
       case EBoxSide.right:
-        return new Point(1, 0.5);
+        return new ResizingHandle(1, 0.5);
       case EBoxSide.top:
-        return new Point(0.5, 0);
+        return new ResizingHandle(0.5, 0);
       case EBoxSide.bottom:
-        return new Point(0.5, 1);
+        return new ResizingHandle(0.5, 1);
       default:
         throw new Error("Incorrect handle key");
     }
