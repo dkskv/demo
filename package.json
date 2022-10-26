@@ -3,21 +3,6 @@
   "homepage": "https://dmtrkskv.github.io/demo",
   "version": "0.1.0",
   "private": true,
-  "dependencies": {
-    "@testing-library/jest-dom": "^5.16.1",
-    "@testing-library/react": "^12.1.2",
-    "@testing-library/user-event": "^13.5.0",
-    "@types/jest": "^27.4.0",
-    "@types/node": "^16.11.19",
-    "@types/ramda": "^0.27.64",
-    "@types/react": "^17.0.38",
-    "@types/react-dom": "^17.0.11",
-    "ramda": "^0.28.0",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
-    "react-scripts": "5.0.0",
-    "typescript": "^4.5.4"
-  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -58,7 +43,21 @@
   "resolutions": {
     "mini-css-extract-plugin": "2.4.5"
   },
+  "dependencies": {
+    "ramda": "^0.28.0",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
   "devDependencies": {
+    "react-scripts": "5.0.0",
+    "@testing-library/jest-dom": "^5.16.1",
+    "@testing-library/react": "^12.1.2",
+    "@testing-library/user-event": "^13.5.0",
+    "@types/jest": "^27.4.0",
+    "@types/node": "^16.11.19",
+    "@types/ramda": "^0.27.64",
+    "@types/react": "^17.0.38",
+    "@types/react-dom": "^17.0.11",
     "@storybook/addon-actions": "^6.5.3",
     "@storybook/addon-essentials": "^6.5.3",
     "@storybook/addon-interactions": "^6.5.3",
@@ -70,6 +69,7 @@
     "@storybook/react": "^6.5.3",
     "@storybook/testing-library": "^0.0.11",
     "gh-pages": "^3.2.3",
-    "webpack": "^5.72.0"
+    "webpack": "^5.72.0",
+    "typescript": "^4.5.4"
   }
 }
