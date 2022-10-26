@@ -44,21 +44,6 @@ export const Slider: React.FC<ISliderProps> = ({
   const handleStart = useDirectedCallback(onStart, direction);
   const handleEnd = useDirectedCallback(onEnd, direction);
 
-  function renderExtendedControlArea() {
-    const extensionSize = 20;
-
-    return (
-      <div
-        style={{
-          width: `calc(100% + ${extensionSize}px)`,
-          height: `calc(100% + ${extensionSize}px)`,
-          flexShrink: 0,
-          // background: "rgba(255,255,255,0.1)",
-        }}
-      />
-    );
-  }
-
   const theme = useTheme();
   const { orientation } = direction;
 
@@ -104,9 +89,7 @@ export const Slider: React.FC<ISliderProps> = ({
                   borderRadius: theme.largeBorderRadius,
                   background: theme.primaryColor,
                 }}
-              >
-                {renderExtendedControlArea()}
-              </div>
+              />
             </ResizableControl>
           </div>
         );
