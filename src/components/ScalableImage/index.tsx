@@ -1,6 +1,6 @@
 import { useDrag } from "../Draggable/useDrag";
 import { useBooleanState } from "../../decorators/useBooleanState";
-import { IScaleEvent, useScale } from "../../decorators/useScale";
+import { IScaleEvent, useWheelScaling } from "../../decorators/useWheelScaling";
 import { useCallbackRef } from "../../decorators/useCallbackRef";
 import { BoundingBox } from "../../utils/boundingBox";
 import { noop } from "../../utils/common";
@@ -35,7 +35,7 @@ export const ScalableImage: React.FC<IProps> = ({
     onViewBoxChange({ box: nextViewBox, pressedKeys });
   }
 
-  useScale(element, { onChange: handleScale });
+  useWheelScaling(element, { onChange: handleScale });
 
   const handleDrag = function ({ movement, pressedKeys }: IDragEvent) {
     const scaledDelta = movement.div(

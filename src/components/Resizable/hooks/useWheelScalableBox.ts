@@ -1,17 +1,20 @@
 import { useCallback } from "react";
 import { BoundingBox } from "../../../utils/boundingBox";
-import { useActualRef } from "./../../../decorators/useActualRef";
-import { IScaleEvent, useScale } from "./../../../decorators/useScale";
-import { noop } from "./../../../utils/common";
-import { IResizeCallbacks, IResizeConstraints } from "./../index.types";
-import { constrainResizedBox } from "./../utils/constraints";
+import { useActualRef } from "../../../decorators/useActualRef";
+import {
+  IScaleEvent,
+  useWheelScaling,
+} from "../../../decorators/useWheelScaling";
+import { noop } from "../../../utils/common";
+import { IResizeCallbacks, IResizeConstraints } from "../index.types";
+import { constrainResizedBox } from "../utils/constraints";
 
 interface IParams extends IResizeCallbacks, IResizeConstraints {
   box: BoundingBox;
   element: Element | null;
 }
 
-export function useScalableBox({
+export function useWheelScalableBox({
   element,
   box,
   onChange,
@@ -58,7 +61,7 @@ export function useScalableBox({
     [actualBox, onChange, outerBox, sizeLimits, keepAspectRatio]
   );
 
-  useScale(element, {
+  useWheelScaling(element, {
     onChange: handleScale,
     onStart: handleScaleStart,
     onEnd: handleScaleEnd,

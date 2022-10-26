@@ -21,7 +21,7 @@ interface IParams {
   delayToEnd?: number;
 }
 
-export function useScale(
+export function useWheelScaling(
   element: Element | null,
   { onChange, onStart = noop, onEnd = noop, delayToEnd = 400 }: IParams
 ) {

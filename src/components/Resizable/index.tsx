@@ -9,7 +9,7 @@ import { SizeLimits } from "../../utils/sizeLimits";
 import { Draggable } from "../Draggable";
 import { OutlineHighlighting } from "../OutlineHighlighting";
 import { useActivityFlag } from "../../decorators/useActivityFlag";
-import { useScalableBox } from "./hooks/useScalableBox";
+import { useWheelScalableBox } from "./hooks/useWheelScalableBox";
 import { useHighlightingOnSizeLimit } from "./hooks/useHighlightingOnSizeLimit";
 import { IResizeCallbacks, IResizableSettings } from "./index.types";
 
@@ -44,7 +44,7 @@ export const Resizable: React.FC<IResizableProps> = ({
     ...edgeCallbacks,
   });
 
-  useScalableBox({
+  useWheelScalableBox({
     box: value,
     element: isScalableByWheel ? element : null,
     sizeLimits,
