@@ -1,6 +1,5 @@
 import { CSSProperties } from "react";
-import { BoundingBox } from "./boundingBox";
-import { EBoxSide } from "./boxParams";
+import { BoundingBox, EBoxSide } from "./boundingBox";
 import { NumbersRange } from "./numbersRange";
 import { Point } from "./point";
 import { Size } from "./size";

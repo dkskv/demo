@@ -1,6 +1,6 @@
 import { xprod } from "ramda";
 import { Point } from "../../../utils/point";
-import { EBoxSide } from "../../../utils/boxParams";
+import { EBoxSide } from "../../../utils/boundingBox";
 import { ResizingHandle } from "./resizingHandle";
 
 type IVerticalBoxSide = EBoxSide.left | EBoxSide.right;

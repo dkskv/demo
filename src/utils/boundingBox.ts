@@ -3,6 +3,13 @@ import { NumbersRange } from "./numbersRange";
 import { Point } from "./point";
 import { Size } from "./size";
 
+export const enum EBoxSide {
+  top = "top",
+  bottom = "bottom",
+  left = "left",
+  right = "right",
+}
+
 export class BoundingBox {
   static square(x0: number, y0: number, a: number) {
     return this.byDeltas(x0, y0, a, a);
