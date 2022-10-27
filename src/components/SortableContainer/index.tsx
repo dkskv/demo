@@ -33,11 +33,7 @@ export const SortableContainer: React.FC<IProps> = ({
     () => new SortableItemsState(initialItems)
   );
 
-  const [selfActiveItem, setSelfActiveItem] =
-    useState<ISortableItem | null>(null);
-  const [thirdActivePartyItem, setThirdActivePartyItem] =
-    useState<ISortableItem | null>(null);
-  const activeItem = selfActiveItem ?? thirdActivePartyItem;
+  const [activeItem, setActiveItem] = useState<ISortableItem | null>(null);
 
   const [isActiveHidden, setIsActiveHidden] = useState(false);
   const droppingKeys = useTemporarySet<string>(transitionDuration);
@@ -46,7 +42,7 @@ export const SortableContainer: React.FC<IProps> = ({
 
   const { ref, onDrag, onDrop } = useDndConnection<HTMLDivElement>(id, {
     ...useThirdPartyItemHandlers({
-      setActiveItem: setThirdActivePartyItem,
+      setActiveItem,
       setItemsState,
     }),
     canDrop: useCallback(
@@ -56,7 +52,7 @@ export const SortableContainer: React.FC<IProps> = ({
       [actualItemsState, containerBox]
     ),
     onDropIn: useCallback(() => {
-      setThirdActivePartyItem((item) => {
+      setActiveItem((item) => {
         item && droppingKeys.add(item.key);
         return null;
       });
@@ -68,7 +64,8 @@ export const SortableContainer: React.FC<IProps> = ({
       const { canDrop } = onDrag(id, item);
 
       setIsActiveHidden(canDrop);
-      setSelfActiveItem(item);
+      setActiveItem(item);
+
       setItemsState((state) =>
         containerBox.isIntersect(item.box)
           ? state.moveIndexAccordingToPosition(item).align()
@@ -83,27 +80,16 @@ export const SortableContainer: React.FC<IProps> = ({
       const { canDrop } = onDrop(id, item);
 
       setIsActiveHidden(false);
-      setSelfActiveItem(null);
+      setActiveItem(null);
       droppingKeys.add(item.key);
 
-      if (canDrop) {
-        setItemsState((state) => state.removeByKey(item.key).align());
-        return;
-      }
-
-      if (!containerBox.isIntersect(item.box)) {
-        setItemsState((state) =>
-          state.removeByKey(item.key).insertAccordingToPosition(item)
-        );
-        setTimeout(() => setItemsState((state) => state.align()));
-        return;
-      }
-
       setItemsState((state) =>
-        state.moveIndexAccordingToPosition(item).align()
+        canDrop
+          ? state.removeByKey(item.key).align()
+          : state.moveIndexAccordingToPosition(item).align()
       );
     },
-    [droppingKeys, onDrop, id, containerBox]
+    [droppingKeys, onDrop, id]
   );
 
   /* 
@@ -134,9 +120,7 @@ export const SortableContainer: React.FC<IProps> = ({
               isActive
                 ? {
                     cursor:
-                      activeItem === thirdActivePartyItem ||
-                      (activeItem === selfActiveItem &&
-                        containerBox.isIntersect(selfActiveItem.box))
+                      activeItem && containerBox.isIntersect(activeItem.box)
                         ? "move"
                         : "not-allowed",
                     visibility: isActiveHidden ? "hidden" : "visible",
