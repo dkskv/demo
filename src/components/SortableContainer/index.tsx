@@ -1,5 +1,5 @@
 import { prop, sortBy } from "ramda";
-import { useCallback, useMemo, useState } from "react";
+import { CSSProperties, useCallback, useMemo, useState } from "react";
 import { DndElement, useDndConnection } from "../../decorators/dndConnection";
 import { useActualRef } from "../../decorators/useActualRef";
 import { BoundingBox } from "../../entities/boundingBox";
@@ -33,16 +33,15 @@ export const SortableContainer: React.FC<IProps> = ({
     () => new SortableItemsState(initialItems)
   );
 
-  const [activeItem, setActiveItem] = useState<ISortableItem | null>(null);
-
-  const [isActiveHidden, setIsActiveHidden] = useState(false);
+  const [overlayItem, setOverlayItem] = useState<ISortableItem | null>(null);
+  const [isOverlayHidden, setIsOverlayHidden] = useState(false);
   const droppingKeys = useTemporarySet<string>(transitionDuration);
 
   const actualItemsState = useActualRef(itemsState);
 
   const { ref, onDrag, onDrop } = useDndConnection<HTMLDivElement>(id, {
     ...useThirdPartyItemHandlers({
-      setActiveItem,
+      setOverlayItem,
       setItemsState,
     }),
     canDrop: useCallback(
@@ -52,7 +51,7 @@ export const SortableContainer: React.FC<IProps> = ({
       [actualItemsState, containerBox]
     ),
     onDropIn: useCallback(() => {
-      setActiveItem((item) => {
+      setOverlayItem((item) => {
         item && droppingKeys.add(item.key);
         return null;
       });
@@ -63,8 +62,8 @@ export const SortableContainer: React.FC<IProps> = ({
     (item: DndElement) => {
       const { canDrop } = onDrag(id, item);
 
-      setIsActiveHidden(canDrop);
-      setActiveItem(item);
+      setIsOverlayHidden(canDrop);
+      setOverlayItem(item);
 
       setItemsState((state) =>
         containerBox.isIntersect(item.box)
@@ -79,8 +78,8 @@ export const SortableContainer: React.FC<IProps> = ({
     (item: DndElement) => {
       const { canDrop } = onDrop(id, item);
 
-      setIsActiveHidden(false);
-      setActiveItem(null);
+      setIsOverlayHidden(false);
+      setOverlayItem(null);
       droppingKeys.add(item.key);
 
       setItemsState((state) =>
@@ -108,31 +107,30 @@ export const SortableContainer: React.FC<IProps> = ({
       style={{ ...getBoxStyle(containerBox), position: "relative", ...style }}
     >
       {sortedItems.map((item) => {
-        const isActive = activeItem?.key === item.key;
+        const hasOverlay = overlayItem?.key === item.key;
+
+        const itemStyle: CSSProperties = hasOverlay
+          ? {
+              cursor: containerBox.isIntersect(overlayItem.box)
+                ? "move"
+                : "not-allowed",
+              visibility: isOverlayHidden ? "hidden" : "visible",
+              zIndex: droppingKeys.size + 1,
+            }
+          : {
+              cursor: "move",
+              transitionDuration: `${transitionDuration}ms`,
+              transitionProperty: "top left",
+              zIndex: droppingKeys.getOrder(item.key) + 1,
+            };
 
         return (
           <DraggableBox
             key={item.key}
-            value={isActive ? activeItem.box : item.box}
+            value={hasOverlay ? overlayItem.box : item.box}
             onChange={({ box }) => handleChange(new DndElement(item.key, box))}
             onEnd={({ box }) => handleEnd(new DndElement(item.key, box))}
-            style={
-              isActive
-                ? {
-                    cursor:
-                      activeItem && containerBox.isIntersect(activeItem.box)
-                        ? "move"
-                        : "not-allowed",
-                    visibility: isActiveHidden ? "hidden" : "visible",
-                    zIndex: droppingKeys.size + 1,
-                  }
-                : {
-                    cursor: "move",
-                    transitionDuration: `${transitionDuration}ms`,
-                    transitionProperty: "top left",
-                    zIndex: droppingKeys.getOrder(item.key) + 1,
-                  }
-            }
+            style={itemStyle}
           >
             {renderItem(item)}
           </DraggableBox>

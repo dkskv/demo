@@ -3,38 +3,38 @@ import { SortableItemsState } from "../utils/sortableItemsState";
 import { ISortableItem } from "./../utils/sortable";
 
 interface IParams {
-  setActiveItem(i: ISortableItem | null): void;
+  setOverlayItem(i: ISortableItem | null): void;
   setItemsState(f: (s: SortableItemsState) => SortableItemsState): void;
 }
 
 export function useThirdPartyItemHandlers({
-  setActiveItem,
+  setOverlayItem,
   setItemsState,
 }: IParams) {
   const onDragIn = useCallback(
     (item: ISortableItem) => {
-      setActiveItem(item);
+      setOverlayItem(item);
       setItemsState((state) => state.insertAccordingToPosition(item).align());
     },
-    [setActiveItem, setItemsState]
+    [setOverlayItem, setItemsState]
   );
 
   const onDragOut = useCallback(
     (key: string) => {
-      setActiveItem(null);
+      setOverlayItem(null);
       setItemsState((state) => state.removeByKey(key).align());
     },
-    [setActiveItem, setItemsState]
+    [setOverlayItem, setItemsState]
   );
 
   const onDragOn = useCallback(
     (item: ISortableItem) => {
-      setActiveItem(item);
+      setOverlayItem(item);
       setItemsState((state) =>
         state.moveIndexAccordingToPosition(item).align()
       );
     },
-    [setActiveItem, setItemsState]
+    [setOverlayItem, setItemsState]
   );
 
   return { onDragIn, onDragOn, onDragOut } as const;
