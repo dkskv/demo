@@ -1,6 +1,5 @@
 import { prop, sortBy } from "ramda";
 import { CSSProperties, useCallback, useMemo, useState } from "react";
-import { DndElement, useDndConnection } from "../../decorators/dndConnection";
 import { useActualRef } from "../../decorators/useActualRef";
 import { BoundingBox } from "../../entities/boundingBox";
 import { ISortableItem } from "./utils/sortable";
@@ -9,6 +8,9 @@ import { DraggableBox } from "../DraggableBox";
 import { SortableItemsState } from "./utils/sortableItemsState";
 import { useTemporarySet } from "./hooks/useTemporarySet";
 import { useThirdPartyItemHandlers } from "./hooks/useThirdPartyItemHandlers";
+import { useDndConnection } from "../../decorators/dndConnection/useDndConnection";
+import { DndElement } from "../../decorators/dndConnection/entities/dndElement";
+import { IDragBoxEvent } from "../DraggableBox/index.types";
 
 interface IProps {
   id: string;
@@ -59,25 +61,27 @@ export const SortableContainer: React.FC<IProps> = ({
   });
 
   const handleChange = useCallback(
-    (item: DndElement) => {
-      const { canDrop } = onDrag(id, item);
+    (key: string, { box }: IDragBoxEvent) => {
+      const { canDrop } = onDrag(id, new DndElement(key, box));
 
+      const item: ISortableItem = { key, box };
       setIsOverlayHidden(canDrop);
       setOverlayItem(item);
 
       setItemsState((state) =>
-        containerBox.isIntersect(item.box)
+        containerBox.isIntersect(box)
           ? state.moveIndexAccordingToPosition(item).align()
-          : state.placeToBottomByKey(item.key).align()
+          : state.placeToBottomByKey(key).align()
       );
     },
     [id, onDrag, containerBox]
   );
 
   const handleEnd = useCallback(
-    (item: DndElement) => {
-      const { canDrop } = onDrop(id, item);
+    (key: string, { box }: IDragBoxEvent) => {
+      const { canDrop } = onDrop(id, new DndElement(key, box));
 
+      const item: ISortableItem = { key, box };
       setIsOverlayHidden(false);
       setOverlayItem(null);
       droppingKeys.add(item.key);
@@ -128,8 +132,8 @@ export const SortableContainer: React.FC<IProps> = ({
           <DraggableBox
             key={item.key}
             value={hasOverlay ? overlayItem.box : item.box}
-            onChange={({ box }) => handleChange(new DndElement(item.key, box))}
-            onEnd={({ box }) => handleEnd(new DndElement(item.key, box))}
+            onChange={(e) => handleChange(item.key, e)}
+            onEnd={(e) => handleEnd(item.key, e)}
             style={itemStyle}
           >
             {renderItem(item)}

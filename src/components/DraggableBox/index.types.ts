@@ -1,7 +1,7 @@
 import { BoundingBox } from "../../entities/boundingBox";
 import { IDragEvent } from "../../utils/drag";
 
-interface IDragBoxEvent extends IDragEvent {
+export interface IDragBoxEvent extends IDragEvent {
   box: BoundingBox;
 }
 

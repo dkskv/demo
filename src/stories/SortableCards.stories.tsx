@@ -5,7 +5,7 @@ import {
   ISortableItem,
   positionInChain,
 } from "../components/SortableContainer/utils/sortable";
-import { DndConnector } from "../decorators/dndConnection";
+import { DndConnector } from "../decorators/dndConnection/dndConnector";
 import { useTheme } from "../decorators/theme";
 import { BoundingBox } from "../entities/boundingBox";
 import { stretchStyle } from "../utils/styles";
