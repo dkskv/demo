@@ -7,13 +7,7 @@ import { Slider, ISliderProps } from "../Slider";
 export interface ISingleSliderProps
   extends Omit<
     ISliderProps,
-    | "value"
-    | "onChange"
-    | "onStart"
-    | "onEnd"
-    | "bounds"
-    | "sizeLimits"
-    | "isDraggable"
+    "value" | "onChange" | "onStart" | "onEnd" | "sizeLimits" | "isDraggable"
   > {
   value: number;
   onChange(value: number): void;
