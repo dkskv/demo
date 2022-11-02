@@ -6,7 +6,7 @@ import { ISortableItem } from "./utils/sortable";
 import { getBoxStyle } from "../../utils/styles";
 import { DraggableBox } from "../DraggableBox";
 import { SortableItemsState } from "./utils/sortableItemsState";
-import { useTemporarySet } from "./hooks/useTemporarySet";
+import { useTemporaryQueue } from "./hooks/useTemporaryQueue";
 import { useThirdPartyItemHandlers } from "./hooks/useThirdPartyItemHandlers";
 import { useDndConnection } from "../../decorators/dndConnection/useDndConnection";
 import { DndElement } from "../../decorators/dndConnection/entities/dndElement";
@@ -35,9 +35,9 @@ export const SortableContainer: React.FC<IProps> = ({
     () => new SortableItemsState(initialItems)
   );
 
+  const [isOverlayAccepted, setIsOverlayAccepted] = useState(false);
   const [overlayItem, setOverlayItem] = useState<ISortableItem | null>(null);
-  const [isOverlayHidden, setIsOverlayHidden] = useState(false);
-  const droppingKeys = useTemporarySet<string>(transitionDuration);
+  const droppingKeys = useTemporaryQueue<string>(transitionDuration);
 
   const actualItemsState = useActualRef(itemsState);
 
@@ -54,7 +54,7 @@ export const SortableContainer: React.FC<IProps> = ({
     ),
     onDropIn: useCallback(() => {
       setOverlayItem((item) => {
-        item && droppingKeys.add(item.key);
+        item && droppingKeys.push(item.key);
         return null;
       });
     }, [droppingKeys]),
@@ -63,9 +63,9 @@ export const SortableContainer: React.FC<IProps> = ({
   const handleChange = useCallback(
     (key: string, { box }: IDragBoxEvent) => {
       const { canDrop } = onDrag(id, new DndElement(key, box));
+      setIsOverlayAccepted(canDrop);
 
       const item: ISortableItem = { key, box };
-      setIsOverlayHidden(canDrop);
       setOverlayItem(item);
 
       setItemsState((state) =>
@@ -80,16 +80,15 @@ export const SortableContainer: React.FC<IProps> = ({
   const handleEnd = useCallback(
     (key: string, { box }: IDragBoxEvent) => {
       const { canDrop } = onDrop(id, new DndElement(key, box));
+      setIsOverlayAccepted(false);
 
-      const item: ISortableItem = { key, box };
-      setIsOverlayHidden(false);
       setOverlayItem(null);
-      droppingKeys.add(item.key);
+      droppingKeys.push(key);
 
       setItemsState((state) =>
         canDrop
-          ? state.removeByKey(item.key).align()
-          : state.moveIndexAccordingToPosition(item).align()
+          ? state.removeByKey(key).align()
+          : state.moveIndexAccordingToPosition({ key, box }).align()
       );
     },
     [droppingKeys, onDrop, id]
@@ -118,8 +117,8 @@ export const SortableContainer: React.FC<IProps> = ({
               cursor: containerBox.isIntersect(overlayItem.box)
                 ? "move"
                 : "not-allowed",
-              visibility: isOverlayHidden ? "hidden" : "visible",
-              zIndex: droppingKeys.size + 1,
+              visibility: isOverlayAccepted ? "hidden" : "visible",
+              zIndex: Number.MAX_SAFE_INTEGER,
             }
           : {
               cursor: "move",
