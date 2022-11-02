@@ -48,7 +48,7 @@ export const SortableCards: ComponentStory<any> = () => {
           ...stretchStyle,
           background: key,
           borderRadius: theme.largeBorderRadius,
-          opacity: 0.5,
+          opacity: 0.7,
         }}
       />
     );
