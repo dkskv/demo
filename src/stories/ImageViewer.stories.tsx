@@ -58,7 +58,7 @@ export const ImageViewer: ComponentStory<any> = () => {
     "https://upload.wikimedia.org/wikipedia/commons/f/f9/Phoenicopterus_ruber_in_S%C3%A3o_Paulo_Zoo.jpg";
 
   return (
-    <Space size={20}>
+    <Space size={theme.mediumIndent}>
       <ScalableImage
         viewBox={controlValue}
         onViewBoxChange={handleControlChange}

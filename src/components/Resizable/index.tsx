@@ -23,6 +23,7 @@ export interface IResizableProps
   children: React.ReactNode;
   /** Ключи отображаемых кнопок, за которые производится resize  */
   handlesKeys?: readonly IResizeHandleKey[];
+  renderHandle?(): React.ReactNode;
 }
 
 export const Resizable: React.FC<IResizableProps> = ({
@@ -37,6 +38,7 @@ export const Resizable: React.FC<IResizableProps> = ({
   isDraggable = true,
   isScalableByWheel = true,
   children,
+  renderHandle = () => <Thumb />,
 }) => {
   const [element, setElement] = useState<HTMLElement | null>(null);
   const callbacks = { onChange, onStart, onEnd };
@@ -94,9 +96,7 @@ export const Resizable: React.FC<IResizableProps> = ({
       </div>
       <div>
         {handlesProps.map((handleProps) => (
-          <Draggable {...handleProps}>
-            <Thumb />
-          </Draggable>
+          <Draggable {...handleProps}>{renderHandle()}</Draggable>
         ))}
       </div>
     </>

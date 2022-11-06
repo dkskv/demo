@@ -17,8 +17,6 @@ import { stretchStyle } from "../utils/styles";
 
 export default {};
 
-const width = 200;
-
 const generateItems = (colors: string[], sizes: number[]) =>
   positionInChain(
     zipWith(
@@ -67,8 +65,12 @@ export const SortableCards: ComponentStory<any> = () => {
   };
 
   return (
-    <Space size={50} direction={Directions.vertical}>
-      <Space size={4} direction={Directions.vertical} style={{ width: 400 }}>
+    <Space size={theme.largeIndent} direction={Directions.vertical}>
+      <Space
+        size={theme.smallIndent}
+        direction={Directions.vertical}
+        style={{ width: 400 }}
+      >
         Duration, ms
         <NumberInputWithSlider
           value={transitionDuration}
@@ -77,13 +79,13 @@ export const SortableCards: ComponentStory<any> = () => {
           bounds={new NumbersRange(100, 2000)}
         />
       </Space>
-      <Space size={350} style={{ position: "relative" }}>
+      <Space size={theme.largeIndent * 10} style={{ position: "relative" }}>
         <DndConnector>
           <SortableContainer
             id="first"
             items={items}
             transitionDuration={transitionDuration}
-            box={BoundingBox.byDeltas(0, 0, width, 600)}
+            box={BoundingBox.byDeltas(0, 0, 200, 600)}
             style={containerStyle}
             renderItem={renderItem}
           />
@@ -91,7 +93,7 @@ export const SortableCards: ComponentStory<any> = () => {
             id="second"
             items={items2}
             transitionDuration={transitionDuration}
-            box={BoundingBox.byDeltas(0, 0, width, 600)}
+            box={BoundingBox.byDeltas(0, 0, 200, 600)}
             style={containerStyle}
             renderItem={renderItem}
           />

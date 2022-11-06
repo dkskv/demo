@@ -8,6 +8,7 @@ import { NumberInputWithSlider } from "../components/NumberInputWithSlider";
 import { NumberRangeInputWithSlider } from "../components/NumberRangeInputWithSlider";
 import { makeStateful } from "../decorators/makeStateful";
 import { stretchStyle } from "../utils/styles";
+import { useTheme } from "../decorators/theme";
 
 const NumberInputWithSliderStateful = makeStateful(NumberInputWithSlider);
 const NumberRangeInputWithSliderStateful = makeStateful(
@@ -31,9 +32,11 @@ export const Sliders: ComponentStory<any> = () => {
     inputStyle: { width: 50, flexShrink: 0 } as const,
   };
 
+  const theme = useTheme();
+
   return (
-    <Space size={40} direction={Directions.vertical}>
-      <Space size={20}>
+    <Space size={theme.largeIndent} direction={Directions.vertical}>
+      <Space size={theme.mediumIndent}>
         <button onClick={handleRotate}>Rotate</button>
         <Checkbox value={isSmooth} onChange={setIsSmooth} label="Smooth" />
       </Space>
@@ -46,7 +49,7 @@ export const Sliders: ComponentStory<any> = () => {
         }}
       >
         <Space
-          size={40}
+          size={theme.largeIndent}
           direction={direction.opposite.regular}
           style={stretchStyle}
         >

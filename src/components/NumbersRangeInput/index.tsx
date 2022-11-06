@@ -3,6 +3,7 @@ import { NumbersRange } from "../../entities/numbersRange";
 import { IDirection } from "../../entities/direction";
 import { Space } from "../Space";
 import { InputNumber } from "../InputNumber";
+import { useTheme } from "../../decorators/theme";
 
 export interface INumbersRangeInputProps {
   value: NumbersRange;
@@ -46,8 +47,10 @@ export const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({
     [range, sizeLimits, onChange]
   );
 
+  const theme = useTheme();
+
   return (
-    <Space direction={direction} size={20} align="center">
+    <Space direction={direction} size={theme.mediumIndent} align="center">
       <InputNumber
         onChange={handleChangeMinValue}
         value={range.min}

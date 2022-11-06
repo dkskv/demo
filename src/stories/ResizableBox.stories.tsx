@@ -71,8 +71,8 @@ export const ResizableBox: ComponentStory<typeof Resizable> = () => {
   const theme = useTheme();
 
   return (
-    <Space size={40} direction={Directions.vertical}>
-      <Space size={20}>
+    <Space size={theme.largeIndent} direction={Directions.vertical}>
+      <Space size={theme.mediumIndent}>
         <Checkbox
           value={isGridEnabled}
           onChange={setIsGridEnabled}

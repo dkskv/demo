@@ -35,7 +35,7 @@ export const SwipeCards: ComponentStory<any> = () => {
   const theme = useTheme();
 
   return (
-    <Space direction={Directions.vertical} size={20}>
+    <Space direction={Directions.vertical} size={theme.largeIndent}>
       <div>
         <button onClick={handleRotate}>Rotate</button>
       </div>

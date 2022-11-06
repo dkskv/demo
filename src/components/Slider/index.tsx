@@ -8,6 +8,7 @@ import { centererStyle, getBoxStyle, stretchStyle } from "../../utils/styles";
 import { useTheme } from "../../decorators/theme";
 import { AutoSizer } from "../../decorators/autosizer";
 import { IResizeEvent } from "../Resizable/index.types";
+import { Thumb } from "../Thumb";
 
 interface ISliderCallback {
   (value: NumbersRange): void;
@@ -47,6 +48,8 @@ export const Slider: React.FC<ISliderProps> = ({
   const theme = useTheme();
   const { orientation } = direction;
 
+  const renderHandle = useCallback(() => <Thumb size={14} />, []);
+
   return (
     <AutoSizer
       disableHeight={orientation === EOrientation.horizontal}
@@ -81,6 +84,7 @@ export const Slider: React.FC<ISliderProps> = ({
                 (handlesKeys as number[]).includes(i)
               )}
               isScalableByWheel={false}
+              renderHandle={renderHandle}
             >
               <div
                 style={{
