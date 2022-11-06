@@ -1,21 +1,28 @@
 import { useCallback, useRef } from "react";
 import { ResizingHandle } from "../utils/resizingHandle";
-import { resizingHandlesPreset } from "../utils/resizingHandlesPreset";
+import {
+  IResizeHandleKey,
+  resizingHandlesPreset,
+} from "../utils/resizingHandlesPreset";
 import { constrainResizedBox } from "../utils/constraints";
 import { useActualRef } from "../../../decorators/useActualRef";
 import { IDragCallback, IDragEvent } from "../../../utils/drag";
-import { IResizeCallbacks, IResizableSettings } from "../index.types";
+import { IResizeCallbacks, IResizeConstraints } from "../index.types";
 import { BoundingBox } from "../../../entities/boundingBox";
+import { noop } from "../../../utils/common";
 
-interface IParams extends IResizeCallbacks, IResizableSettings {
+interface IParams extends IResizeCallbacks {
   box: BoundingBox;
+  constraints: IResizeConstraints;
+  /** Ключи отображаемых кнопок, за которые производится resize  */
+  handlesKeys?: readonly IResizeHandleKey[];
 }
 
 export function useResizeWithHandles(params: IParams) {
   const {
     onChange,
-    onStart,
-    onEnd,
+    onStart = noop,
+    onEnd = noop,
     handlesKeys = resizingHandlesPreset.all,
   } = params;
   const aspectRatioRef = useRef<number | null>(null);
@@ -25,7 +32,7 @@ export function useResizeWithHandles(params: IParams) {
     ({ pressedKeys }) => {
       const { box } = paramsRef.current;
       aspectRatioRef.current = box.aspectRatio;
-      onStart?.({ pressedKeys, box });
+      onStart({ pressedKeys, box });
     },
     [paramsRef, onStart]
   );
@@ -33,30 +40,29 @@ export function useResizeWithHandles(params: IParams) {
   const handleItemEnd: IDragCallback = useCallback(
     ({ pressedKeys }) => {
       const { box } = paramsRef.current;
-      onEnd?.({ pressedKeys, box });
+      onEnd({ pressedKeys, box });
     },
     [paramsRef, onEnd]
   );
 
   const handleItemDrag = useCallback(
     (handle: ResizingHandle, event: IDragEvent) => {
-      const { box, keepAspectRatio, sizeLimits, outerBox } = paramsRef.current;
+      const { box, constraints } = paramsRef.current;
       const { point, pressedKeys } = event;
       const resizedBox = handle.resizeBox(box, point);
 
-      const constraints = {
+      const preparedConstraints = {
+        ...constraints,
         aspectRatio:
-          keepAspectRatio || pressedKeys.shiftKey
+          constraints.keepAspectRatio || pressedKeys.shiftKey
             ? aspectRatioRef.current
             : null,
-        sizeLimits,
-        outerBox,
       } as const;
 
       const constrainedBox = constrainResizedBox(
         resizedBox,
         { sourceBox: box, transformOrigin: handle.mirroredPoint },
-        constraints
+        preparedConstraints
       );
 
       onChange({ pressedKeys, box: constrainedBox });

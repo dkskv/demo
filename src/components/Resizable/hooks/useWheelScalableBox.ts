@@ -9,9 +9,10 @@ import { noop } from "../../../utils/common";
 import { IResizeCallbacks, IResizeConstraints } from "../index.types";
 import { constrainResizedBox } from "../utils/constraints";
 
-interface IParams extends IResizeCallbacks, IResizeConstraints {
+interface IParams extends IResizeCallbacks {
   box: BoundingBox;
   element: Element | null;
+  constraints: IResizeConstraints;
 }
 
 export function useWheelScalableBox({
@@ -20,11 +21,10 @@ export function useWheelScalableBox({
   onChange,
   onStart = noop,
   onEnd = noop,
-  outerBox,
-  sizeLimits,
-  keepAspectRatio,
+  constraints,
 }: IParams) {
   const actualBox = useActualRef(box);
+  const actualConstraints = useActualRef(constraints);
 
   const handleScaleStart = useCallback(
     ({ pressedKeys }: IScaleEvent) => {
@@ -42,23 +42,24 @@ export function useWheelScalableBox({
 
   const handleScale = useCallback(
     ({ pressedKeys, scalingK, origin }: IScaleEvent) => {
-      const value = actualBox.current;
-      const scaledBox = value.scale(scalingK);
-      const constraints = {
-        aspectRatio: keepAspectRatio ? scaledBox.aspectRatio : null,
-        outerBox,
-        sizeLimits,
+      const box = actualBox.current;
+      const scaledBox = box.scale(scalingK);
+
+      const constraints = actualConstraints.current;
+      const preparedConstraints = {
+        ...constraints,
+        aspectRatio: constraints.keepAspectRatio ? scaledBox.aspectRatio : null,
       };
 
       const nextBox = constrainResizedBox(
         scaledBox,
-        { sourceBox: value, transformOrigin: origin },
-        constraints
+        { sourceBox: box, transformOrigin: origin },
+        preparedConstraints
       );
 
       onChange({ box: nextBox, pressedKeys });
     },
-    [actualBox, onChange, outerBox, sizeLimits, keepAspectRatio]
+    [actualBox, onChange, actualConstraints]
   );
 
   useWheelScaling(element, {

@@ -10,20 +10,19 @@ import { Draggable } from "../Draggable";
 import { OutlineHighlighting } from "../OutlineHighlighting";
 import { useWheelScalableBox } from "./hooks/useWheelScalableBox";
 import { useHighlightingOnSizeLimit } from "./hooks/useHighlightingOnSizeLimit";
-import {
-  IResizeCallbacks,
-  IResizableSettings,
-  IResizeConstraints,
-} from "./index.types";
+import { IResizeCallbacks, IResizeConstraints } from "./index.types";
 import { useResizeFlag } from "./hooks/useResizeFlag";
+import { IResizeHandleKey } from "./utils/resizingHandlesPreset";
 
 export interface IResizableProps
   extends IResizeCallbacks,
-    Partial<IResizableSettings> {
+    Partial<IResizeConstraints> {
   value: BoundingBox;
   isDraggable?: boolean;
   isScalableByWheel?: boolean;
   children: React.ReactNode;
+  /** Ключи отображаемых кнопок, за которые производится resize  */
+  handlesKeys?: readonly IResizeHandleKey[];
 }
 
 export const Resizable: React.FC<IResizableProps> = ({
@@ -48,7 +47,7 @@ export const Resizable: React.FC<IResizableProps> = ({
     ...callbacks,
   });
 
-  const resizeConstrains: IResizeConstraints = {
+  const constraints: IResizeConstraints = {
     sizeLimits,
     outerBox,
     keepAspectRatio,
@@ -57,14 +56,14 @@ export const Resizable: React.FC<IResizableProps> = ({
   useWheelScalableBox({
     box: value,
     element: isScalableByWheel ? element : null,
-    ...resizeConstrains,
+    constraints,
     ...callbacks,
   });
 
   const handlesProps = useResizeWithHandles({
     box: value,
     handlesKeys,
-    ...resizeConstrains,
+    constraints,
     ...callbacks,
   });
 
