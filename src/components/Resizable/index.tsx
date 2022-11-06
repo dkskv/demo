@@ -8,10 +8,14 @@ import { noop } from "../../utils/common";
 import { SizeLimits } from "../../entities/sizeLimits";
 import { Draggable } from "../Draggable";
 import { OutlineHighlighting } from "../OutlineHighlighting";
-import { useActivityFlag } from "../../decorators/useActivityFlag";
 import { useWheelScalableBox } from "./hooks/useWheelScalableBox";
 import { useHighlightingOnSizeLimit } from "./hooks/useHighlightingOnSizeLimit";
-import { IResizeCallbacks, IResizableSettings } from "./index.types";
+import {
+  IResizeCallbacks,
+  IResizableSettings,
+  IResizeConstraints,
+} from "./index.types";
+import { useResizeFlag } from "./hooks/useResizeFlag";
 
 export interface IResizableProps
   extends IResizeCallbacks,
@@ -36,37 +40,38 @@ export const Resizable: React.FC<IResizableProps> = ({
   children,
 }) => {
   const [element, setElement] = useState<HTMLElement | null>(null);
-  const [isActive, edgeCallbacks] = useActivityFlag(onStart, onEnd);
+  const callbacks = { onChange, onStart, onEnd };
 
   useDragBox({
     element: isDraggable ? element : null,
     outerBox,
-    onChange,
-    ...edgeCallbacks,
+    ...callbacks,
   });
+
+  const resizeConstrains: IResizeConstraints = {
+    sizeLimits,
+    outerBox,
+    keepAspectRatio,
+  };
 
   useWheelScalableBox({
     box: value,
     element: isScalableByWheel ? element : null,
-    sizeLimits,
-    outerBox,
-    onChange,
-    keepAspectRatio,
-    ...edgeCallbacks,
+    ...resizeConstrains,
+    ...callbacks,
   });
 
   const handlesProps = useResizeWithHandles({
     box: value,
-    onChange,
-    sizeLimits,
-    keepAspectRatio,
     handlesKeys,
-    outerBox,
-    ...edgeCallbacks,
+    ...resizeConstrains,
+    ...callbacks,
   });
 
+  const isOuterBoxResized = useResizeFlag(outerBox);
+
   const highlightingStage = useHighlightingOnSizeLimit(
-    isActive ? value : null,
+    isOuterBoxResized ? null : value,
     sizeLimits
   );
 
