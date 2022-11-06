@@ -14,8 +14,12 @@ import { DndContainer } from "./entities/dndContainer";
 import { IDndHandler, IPreparedDndEvent } from "./index.types";
 import { useDndNotifier } from "./useDndNotifier";
 
+interface IProps {
+  children: React.ReactNode;
+}
+
 /** Выступает в роли сервера между контейнерами, которые хотят обменяться элементами */
-export const DndConnector: React.FC = ({ children }) => {
+export const DndConnector: React.FC<IProps> = ({ children }) => {
   const [containers, setContainers] = useState<DndContainer[]>([]);
 
   const register = useCallback((item: DndContainer) => {

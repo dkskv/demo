@@ -8,7 +8,7 @@ interface IProps extends IPattern {
   color: string;
 }
 
-export const Grid: React.VFC<IProps> = ({ step, thickness, color, id }) => {
+export const Grid: React.FC<IProps> = ({ step, thickness, color, id }) => {
   function getPatternKey(direction: IDirection) {
     return `${id}_${direction.orientation}`;
   }

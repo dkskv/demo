@@ -12,6 +12,7 @@ export interface INumbersRangeInputProps {
   direction?: IDirection;
   sizeLimits?: NumbersRange;
   inputStyle?: CSSProperties;
+  children?: React.ReactNode;
 }
 
 export const NumbersRangeInput: React.FC<INumbersRangeInputProps> = ({

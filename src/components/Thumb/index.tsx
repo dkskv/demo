@@ -1,6 +1,6 @@
 import { useTheme } from "../../decorators/theme";
 
-export const Thumb: React.VFC<{}> = () => {
+export const Thumb: React.FC<{}> = () => {
   const theme = useTheme();
 
   return (

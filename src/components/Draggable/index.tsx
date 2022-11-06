@@ -10,6 +10,7 @@ interface IProps extends IDragCallbacks {
   /** Относительная точка начала координат элемента*/
   origin?: Point;
   style?: React.CSSProperties;
+  children: React.ReactNode;
 }
 
 export const Draggable: React.FC<IProps> = ({

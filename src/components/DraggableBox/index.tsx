@@ -8,6 +8,7 @@ import { useDragBox } from "./useDragBox";
 interface IProps extends IDragBoxCallbacks {
   value: BoundingBox;
   style?: React.CSSProperties;
+  children: React.ReactNode;
 }
 
 export const DraggableBox: React.FC<IProps> = ({

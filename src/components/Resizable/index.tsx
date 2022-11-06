@@ -19,6 +19,7 @@ export interface IResizableProps
   value: BoundingBox;
   isDraggable?: boolean;
   isScalableByWheel?: boolean;
+  children: React.ReactNode;
 }
 
 export const Resizable: React.FC<IResizableProps> = ({

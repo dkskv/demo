@@ -6,7 +6,7 @@ interface IProps {
   size: number;
   align?: CSSProperties["alignItems"];
   style?: CSSProperties;
-  children?: ReactNode;
+  children: ReactNode;
 }
 
 export const Space = forwardRef<HTMLDivElement, IProps>(
