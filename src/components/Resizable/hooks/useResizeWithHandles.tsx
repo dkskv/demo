@@ -71,6 +71,7 @@ export function useResizeWithHandles(params: IParams) {
     return {
       key: String(key),
       value: params.box.denormalizePoint(handle),
+      origin: handle.mirroredPoint,
       onChange(event: IDragEvent) {
         handleItemDrag(handle, event);
       },

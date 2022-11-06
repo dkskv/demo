@@ -89,7 +89,7 @@ export const Resizable: React.FC<IResizableProps> = ({
       </div>
       <div>
         {handlesProps.map((handleProps) => (
-          <Draggable isCentered={true} {...handleProps}>
+          <Draggable {...handleProps}>
             <Thumb />
           </Draggable>
         ))}

@@ -7,8 +7,8 @@ import { useDrag } from "./useDrag";
 
 interface IProps extends IDragCallbacks {
   value: Point;
-  /** Установить origin элемента в центр */
-  isCentered?: boolean;
+  /** Относительная точка начала координат элемента*/
+  origin?: Point;
   style?: React.CSSProperties;
 }
 
@@ -17,7 +17,7 @@ export const Draggable: React.FC<IProps> = ({
   onStart,
   onChange,
   onEnd,
-  isCentered = false,
+  origin = Point.nullish,
   children,
   style,
 }) => {
@@ -25,7 +25,7 @@ export const Draggable: React.FC<IProps> = ({
 
   useDrag({ element, onStart, onChange, onEnd });
 
-  const transform = isCentered ? "translate(-50%, -50%)" : undefined;
+  const transform = `translate(-${origin.x * 100}%, -${origin.y * 100}%)`;
 
   return (
     <div
