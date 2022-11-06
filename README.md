@@ -1,4 +1,4 @@
-## UI kit for portfolio
+## Mixed UI kit
 
 ### This repository contains a set of UI components implemented without the use of third-party special libraries.
 
